@@ -157,7 +157,9 @@ public class GoalServiceImpl implements GoalService {
                 throw new GoalException(GoalExceptionType.GOAL_NOT_FOUND);
             }
 
-            goalRepositoryFacade.deleteGoal(goalId);
+            Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
+            goal.delete();
+
         } catch (GoalException e) {
             throw e;
         } catch (Exception e) {

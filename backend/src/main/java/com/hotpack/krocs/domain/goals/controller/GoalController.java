@@ -101,7 +101,6 @@ public class GoalController {
         return ApiResponse.success(response);
     }
 
-    // TODO
     @Operation(summary = "대목표 목록 조회", description = "사용자의 대목표 목록을 조회합니다."
     )
     @GetMapping
@@ -122,7 +121,6 @@ public class GoalController {
         }
     }
 
-    // TODO
     @Operation(summary = "특정 목표 상세 조회", description = "특정 목표의 상세 정보를 조회합니다."
     )
     @GetMapping("/{goalId}")
@@ -159,7 +157,6 @@ public class GoalController {
         }
     }
 
-    // TODO
     @Operation(summary = "목표 삭제", description = "기존 목표를 삭제합니다."
     )
     @DeleteMapping("/{goalId}")
