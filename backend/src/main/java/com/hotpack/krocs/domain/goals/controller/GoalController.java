@@ -2,13 +2,13 @@ package com.hotpack.krocs.domain.goals.controller;
 
 import com.hotpack.krocs.domain.auth.dto.UserSession;
 import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.SubGoalCreateRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
+import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
-import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
 import com.hotpack.krocs.domain.goals.exception.GoalException;
 import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
 import com.hotpack.krocs.domain.goals.exception.SubGoalException;
@@ -20,12 +20,19 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
@@ -39,8 +46,8 @@ public class GoalController {
     @Operation(summary = "대목표 생성", description = "새로운 대목표를 생성합니다.")
     @PostMapping
     public ApiResponse<GoalCreateResponseDTO> createGoal(
-            @Valid @RequestBody GoalCreateRequestDTO requestDTO,
-            @Login UserSession user
+        @Valid @RequestBody GoalCreateRequestDTO requestDTO,
+        @Login UserSession user
     ) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
@@ -53,53 +60,56 @@ public class GoalController {
         }
     }
 
-  @Operation(summary = "소목표 생성", description = "소목표를 생성합니다.")
-  @PostMapping("/{goalId}/subgoals")
-  public ApiResponse<SubGoalCreateResponseDTO> createSubGoals(
-      @PathVariable @Parameter(description = "Goal ID", example = "1")
-      Long goalId,
-      @RequestBody @Parameter(description = "SubGoals", example = "{\"title\": \"소목표1\"}")
-      SubGoalCreateRequestDTO subGoalCreateRequestDTO) {
-    try {
-      SubGoalCreateResponseDTO responseDTO = goalService.createSubGoals(goalId,
-          subGoalCreateRequestDTO);
+    @Operation(summary = "소목표 생성", description = "소목표를 생성합니다.")
+    @PostMapping("/{goalId}/subgoals")
+    public ApiResponse<SubGoalCreateResponseDTO> createSubGoals(
+        @PathVariable @Parameter(description = "Goal ID", example = "1")
+        Long goalId,
+        @RequestBody @Parameter(description = "SubGoals", example = "{\"title\": \"소목표1\"}")
+        SubGoalCreateRequestDTO subGoalCreateRequestDTO) {
+        try {
+            SubGoalCreateResponseDTO responseDTO = goalService.createSubGoals(goalId,
+                subGoalCreateRequestDTO);
 
-      return ApiResponse.success(responseDTO);
-    } catch (SubGoalException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_CREATE_FAILED);
+            return ApiResponse.success(responseDTO);
+        } catch (SubGoalException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_CREATE_FAILED);
+        }
     }
-  }
 
-  @GetMapping("/{goalId}/subgoals")
-  public ApiResponse<SubGoalListResponseDTO> getSubGoals(
-      @PathVariable @Parameter(description = "Goal ID", example = "1")
-      Long goalId
-  ) {
-    SubGoalListResponseDTO response = goalService.getAllSubGoals(goalId);
-    return ApiResponse.success(response);
-  }
+    // TODO
+    @GetMapping("/{goalId}/subgoals")
+    public ApiResponse<SubGoalListResponseDTO> getSubGoals(
+        @PathVariable @Parameter(description = "Goal ID", example = "1")
+        Long goalId
+    ) {
+        SubGoalListResponseDTO response = goalService.getAllSubGoals(goalId);
+        return ApiResponse.success(response);
+    }
 
-  @GetMapping("/{goalId}/subgoals/{subGoalId}")
-  public ApiResponse<SubGoalResponseDTO> getSubGoal(
-      @PathVariable @Parameter(description = "Goal ID", example = "1")
-      Long goalId,
-      @PathVariable @Parameter(description = "SubGoal ID", example = "23")
-      Long subGoalId
-  ) {
-    SubGoalResponseDTO response = goalService.getSubGoal(goalId, subGoalId);
-    return ApiResponse.success(response);
-  }
+    // TODO
+    @GetMapping("/{goalId}/subgoals/{subGoalId}")
+    public ApiResponse<SubGoalResponseDTO> getSubGoal(
+        @PathVariable @Parameter(description = "Goal ID", example = "1")
+        Long goalId,
+        @PathVariable @Parameter(description = "SubGoal ID", example = "23")
+        Long subGoalId
+    ) {
+        SubGoalResponseDTO response = goalService.getSubGoal(goalId, subGoalId);
+        return ApiResponse.success(response);
+    }
 
+    // TODO
     @Operation(summary = "대목표 목록 조회", description = "사용자의 대목표 목록을 조회합니다."
     )
     @GetMapping
     public ApiResponse<List<GoalResponseDTO>> getGoal(
-            @Login UserSession user, @RequestParam(required = false) LocalDate date
-    ){
-        try{
-            if(date == null) {
+        @Login UserSession user, @RequestParam(required = false) LocalDate date
+    ) {
+        try {
+            if (date == null) {
                 date = LocalDate.now();
             }
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
@@ -112,13 +122,14 @@ public class GoalController {
         }
     }
 
+    // TODO
     @Operation(summary = "특정 목표 상세 조회", description = "특정 목표의 상세 정보를 조회합니다."
     )
     @GetMapping("/{goalId}")
     public ApiResponse<GoalResponseDTO> getGoalById(
-            @PathVariable Long goalId,
-            @Login UserSession user) {
-        try{
+        @PathVariable Long goalId,
+        @Login UserSession user) {
+        try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
             GoalResponseDTO responseDTO = goalService.getGoalByGoalId(userId, goalId);
             return ApiResponse.success(responseDTO);
@@ -133,10 +144,10 @@ public class GoalController {
     )
     @PatchMapping("/{goalId}")
     public ApiResponse<GoalResponseDTO> updateGoalById(
-            @PathVariable Long goalId,
-            @Valid @RequestBody GoalUpdateRequestDTO request,
-            @Login UserSession user) {
-        try{
+        @PathVariable Long goalId,
+        @Valid @RequestBody GoalUpdateRequestDTO request,
+        @Login UserSession user) {
+        try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
             GoalResponseDTO responseDTO = goalService.updateGoalById(goalId, request, userId);
 
@@ -148,13 +159,14 @@ public class GoalController {
         }
     }
 
+    // TODO
     @Operation(summary = "목표 삭제", description = "기존 목표를 삭제합니다."
     )
     @DeleteMapping("/{goalId}")
     public ApiResponse<Void> deleteGoal(
-            @PathVariable Long goalId,
-            @Login UserSession user) {
-        try{
+        @PathVariable Long goalId,
+        @Login UserSession user) {
+        try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
             goalService.deleteGoal(userId, goalId);
             return ApiResponse.success();

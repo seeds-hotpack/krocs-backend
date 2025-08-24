@@ -23,30 +23,30 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class SubGoal extends BaseTimeEntity {
-  
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "sub_goal_id")
-  private Long subGoalId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "goal_id", nullable = false)
-  private Goal goal;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "sub_goal_id")
+    private Long subGoalId;
 
-  @Column(name = "title", nullable = false, length = 200)
-  private String title;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "goal_id", nullable = false)
+    private Goal goal;
 
-  @Column(name = "is_completed", nullable = false)
-  @Builder.Default
-  private Boolean isCompleted = false;
+    @Column(name = "title", nullable = false, length = 200)
+    private String title;
 
-  public void updateFrom(SubGoalUpdateRequestDTO requestDTO) {
-    if (requestDTO.getTitle() != null) {
-      this.title = requestDTO.getTitle();
+    @Column(name = "is_completed", nullable = false)
+    @Builder.Default
+    private Boolean isCompleted = false;
+
+    public void updateFrom(SubGoalUpdateRequestDTO requestDTO) {
+        if (requestDTO.getTitle() != null) {
+            this.title = requestDTO.getTitle();
+        }
+
+        if (requestDTO.getIsCompleted() != null) {
+            this.isCompleted = requestDTO.getIsCompleted();
+        }
     }
-
-    if (requestDTO.getIsCompleted() != null) {
-      this.isCompleted = requestDTO.getIsCompleted();
-    }
-  }
 }
