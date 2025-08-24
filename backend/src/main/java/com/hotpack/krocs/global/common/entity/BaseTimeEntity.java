@@ -2,12 +2,9 @@ package com.hotpack.krocs.global.common.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -29,7 +26,4 @@ public abstract class BaseTimeEntity {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    private Status status = Status.ACTIVE;
 }
