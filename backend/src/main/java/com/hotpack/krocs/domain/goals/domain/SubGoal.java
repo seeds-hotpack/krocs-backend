@@ -2,8 +2,11 @@ package com.hotpack.krocs.domain.goals.domain;
 
 import com.hotpack.krocs.domain.goals.dto.request.SubGoalUpdateRequestDTO;
 import com.hotpack.krocs.global.common.entity.BaseTimeEntity;
+import com.hotpack.krocs.global.common.entity.Status;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -40,6 +43,10 @@ public class SubGoal extends BaseTimeEntity {
     @Builder.Default
     private Boolean isCompleted = false;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.ACTIVE;
+
     public void updateFrom(SubGoalUpdateRequestDTO requestDTO) {
         if (requestDTO.getTitle() != null) {
             this.title = requestDTO.getTitle();
@@ -47,6 +54,12 @@ public class SubGoal extends BaseTimeEntity {
 
         if (requestDTO.getIsCompleted() != null) {
             this.isCompleted = requestDTO.getIsCompleted();
+        }
+    }
+
+    public void delete() {
+        if (this.status == Status.ACTIVE) {
+            this.status = Status.INACTIVE;
         }
     }
 }

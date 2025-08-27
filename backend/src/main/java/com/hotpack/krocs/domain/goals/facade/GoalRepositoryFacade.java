@@ -1,8 +1,6 @@
 package com.hotpack.krocs.domain.goals.facade;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
-import com.hotpack.krocs.domain.goals.exception.SubGoalException;
-import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.repository.GoalRepository;
 import java.time.LocalDate;
 import java.util.List;
@@ -24,46 +22,21 @@ public class GoalRepositoryFacade {
         return goalRepository.save(goal);
     }
 
-    public Goal findGoalById(Long id) {
-        return goalRepository.findById(id)
-            .orElseThrow(() -> new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_NOT_FOUND));
-    }
-
-    public List<Goal> findGoalByDate(LocalDate date) {
-        return goalRepository.findByDate(date);
-    }
-
     public List<Goal> findActiveGoalByDate(LocalDate date) {
         return goalRepository.findGoalByDateAndStatus(date, Status.ACTIVE);
-    }
-
-    public List<Goal> findAllGoals() {
-        return goalRepository.findAll();
     }
 
     public List<Goal> findAllActiveGoals() {
         return goalRepository.findAllGoalsByStatus(Status.ACTIVE);
     }
 
-    public Goal findGoalByGoalId(Long goalId) {
-        return goalRepository.findGoalByGoalId(goalId);
-    }
-
     public Goal findActiveGoalById(Long goalId) {
         return goalRepository.findGoalByGoalIdAndStatus(goalId, Status.ACTIVE);
-    }
-
-    public Goal findById(Long goalId) {
-        return goalRepository.findGoalByGoalId(goalId);
     }
 
     @Transactional
     public void deleteActiveGoal(Long goalId) {
         goalRepository.deleteById(goalId);
-    }
-
-    public boolean existsById(Long goalId) {
-        return goalRepository.existsById(goalId);
     }
 
     public boolean existsActiveGoalById(Long goalId) {
@@ -72,10 +45,6 @@ public class GoalRepositoryFacade {
 
     public boolean existsActiveGoalByTitle(String title) {
         return goalRepository.existsGoalByTitleAndStatus(title, Status.ACTIVE);
-    }
-
-    public boolean existsByTitleAndGoalIdNot(String title, Long goalId) {
-        return goalRepository.existsByTitleAndGoalIdNot(title, goalId);
     }
 
     public boolean existsActiveGoalByTitleAndGoalIdNot(String title, Long goalId) {

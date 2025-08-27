@@ -224,7 +224,7 @@ public class GoalServiceImpl implements GoalService {
 
             Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
 
-            List<SubGoal> subGoals = subGoalRepositoryFacade.findSubGoalsByGoal(goal);
+            List<SubGoal> subGoals = subGoalRepositoryFacade.findActiveSubGoalsByGoal(goal);
             if (subGoals.isEmpty()) {
                 throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
             }
@@ -254,8 +254,8 @@ public class GoalServiceImpl implements GoalService {
             }
 
             Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
-            List<SubGoal> subGoals = subGoalRepositoryFacade.findSubGoalsByGoal(goal);
-            SubGoal subGoal = subGoalRepositoryFacade.findSubGoalBySubGoalId(subGoalId);
+            List<SubGoal> subGoals = subGoalRepositoryFacade.findActiveSubGoalsByGoal(goal);
+            SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subGoalId);
             if (!subGoals.contains(subGoal)) {
                 throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_BELONG_TO_GOAL);
             }

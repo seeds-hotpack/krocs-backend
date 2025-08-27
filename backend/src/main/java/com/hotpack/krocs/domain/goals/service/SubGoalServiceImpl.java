@@ -17,56 +17,56 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class SubGoalServiceImpl implements SubGoalService {
 
-  private final SubGoalRepositoryFacade subGoalRepositoryFacade;
-  private final SubGoalConverter subGoalConverter;
+    private final SubGoalRepositoryFacade subGoalRepositoryFacade;
+    private final SubGoalConverter subGoalConverter;
 
-  @Override
-  @Transactional
-  public SubGoalUpdateResponseDTO updateSubGoal(Long subGoalId,
-      SubGoalUpdateRequestDTO requestDTO) {
-    try {
-      validateBusinessRules(requestDTO);
-      if (subGoalId == null) {
-        throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_ID_IS_NULL);
-      }
+    @Override
+    @Transactional
+    public SubGoalUpdateResponseDTO updateSubGoal(Long subGoalId,
+        SubGoalUpdateRequestDTO requestDTO) {
+        try {
+            validateBusinessRules(requestDTO);
+            if (subGoalId == null) {
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_ID_IS_NULL);
+            }
 
-      SubGoal subGoal = subGoalRepositoryFacade.findSubGoalBySubGoalId(subGoalId);
-      subGoal.updateFrom(requestDTO);
+            SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subGoalId);
+            subGoal.updateFrom(requestDTO);
 
-      return SubGoalConverter.toSubGoalUpdateResponseDTO(
-          subGoalRepositoryFacade.findSubGoalBySubGoalId(subGoalId));
-    } catch (SubGoalException e) {
-      throw e;
-    } catch (Exception e) {
-      log.error("소목표 수정 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
-      throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_UPDATE_FAILED);
-    }
-  }
-
-  private void validateBusinessRules(SubGoalUpdateRequestDTO requestDTO) {
-    if (requestDTO.getTitle() == null) {
-      return;
+            return SubGoalConverter.toSubGoalUpdateResponseDTO(
+                subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subGoalId));
+        } catch (SubGoalException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("소목표 수정 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_UPDATE_FAILED);
+        }
     }
 
-    if (requestDTO.getTitle().length() > 200) {
-      throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_TITLE_TOO_LONG);
-    }
-  }
+    private void validateBusinessRules(SubGoalUpdateRequestDTO requestDTO) {
+        if (requestDTO.getTitle() == null) {
+            return;
+        }
 
-  @Override
-  @Transactional
-  public void deleteSubGoal(Long subGoalId) {
-    try {
-      if (subGoalId == null) {
-        throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_ID_IS_NULL);
-      }
-      subGoalRepositoryFacade.deleteSubGoalBySubGoalId(subGoalId);
-    } catch (SubGoalException e) {
-      throw e;
-    } catch (Exception e) {
-      log.error("소목표 삭제 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
-      throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_DELETE_FAILED);
+        if (requestDTO.getTitle().length() > 200) {
+            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_TITLE_TOO_LONG);
+        }
     }
-  }
+
+    @Override
+    @Transactional
+    public void deleteSubGoal(Long subGoalId) {
+        try {
+            if (subGoalId == null) {
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_ID_IS_NULL);
+            }
+            subGoalRepositoryFacade.deleteActiveSubGoalBySubGoalId(subGoalId);
+        } catch (SubGoalException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("소목표 삭제 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_DELETE_FAILED);
+        }
+    }
 
 }

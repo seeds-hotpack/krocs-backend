@@ -5,6 +5,7 @@ import com.hotpack.krocs.domain.goals.domain.SubGoal;
 import com.hotpack.krocs.domain.goals.exception.SubGoalException;
 import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.repository.SubGoalRepository;
+import com.hotpack.krocs.global.common.entity.Status;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,44 +18,49 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class SubGoalRepositoryFacade {
 
-  private final SubGoalRepository subGoalRepository;
+    private final SubGoalRepository subGoalRepository;
 
-  @Transactional
-  public List<SubGoal> saveSubGoals(List<SubGoal> subGoals) {
-    return subGoalRepository.saveAll(subGoals);
-  }
-
-  @Transactional
-  public SubGoal saveSubGoal(SubGoal subGoal) {
-    return subGoalRepository.save(subGoal);
-  }
-
-  public List<SubGoal> findSubGoalsByGoal(Goal goal) {
-    List<SubGoal> subGoals = subGoalRepository.findSubGoalsByGoal(goal);
-    if (subGoals.isEmpty()) {
-      throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
+    @Transactional
+    public List<SubGoal> saveSubGoals(List<SubGoal> subGoals) {
+        return subGoalRepository.saveAll(subGoals);
     }
 
-    return subGoals;
-  }
-
-  public SubGoal findSubGoalBySubGoalId(Long subGoalId) {
-    SubGoal subGoal = subGoalRepository.findSubGoalsBySubGoalId(subGoalId);
-    if (subGoal == null) {
-      throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
+    @Transactional
+    public SubGoal saveSubGoal(SubGoal subGoal) {
+        return subGoalRepository.save(subGoal);
     }
 
-    return subGoal;
-  }
+    public List<SubGoal> findActiveSubGoalsByGoal(Goal goal) {
+        List<SubGoal> subGoals = subGoalRepository.findSubGoalsByGoalAndStatus(goal, Status.ACTIVE);
+        if (subGoals.isEmpty()) {
+            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
+        }
 
-  @Transactional
-  public void deleteSubGoalBySubGoalId(Long subGoalId) {
-    findSubGoalBySubGoalId(subGoalId);
-    subGoalRepository.deleteSubGoalBySubGoalId(subGoalId);
-  }
+        return subGoals;
+    }
 
-  public Goal findGoalBySubGoalId(Long subGoalId) {
-    SubGoal subGoal = subGoalRepository.findSubGoalsBySubGoalId(subGoalId);
-    return subGoal.getGoal();
-  }
+    public SubGoal findActiveSubGoalBySubGoalId(Long subGoalId) {
+        SubGoal subGoal = subGoalRepository.findSubGoalsBySubGoalIdAndStatus(subGoalId,
+            Status.ACTIVE);
+        if (subGoal == null) {
+            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
+        }
+
+        return subGoal;
+    }
+
+    @Transactional
+    public void deleteActiveSubGoalBySubGoalId(Long subGoalId) {
+        SubGoal subGoal = findActiveSubGoalBySubGoalId(subGoalId);
+        if (subGoal == null) {
+            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
+        }
+        subGoal.delete();
+    }
+
+    public Goal findActiveGoalBySubGoalId(Long subGoalId) {
+        SubGoal subGoal = subGoalRepository.findSubGoalsBySubGoalIdAndStatus(subGoalId,
+            Status.ACTIVE);
+        return subGoal.getGoal();
+    }
 }
