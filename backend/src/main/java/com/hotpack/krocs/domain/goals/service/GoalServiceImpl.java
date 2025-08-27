@@ -150,7 +150,7 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     @Transactional
-    public void deleteGoal(Long userId, Long goalId) {
+    public void deleteActiveGoal(Long userId, Long goalId) {
         try {
             goalValidator.validateGoalIdParameter(goalId);
             if (!goalRepositoryFacade.existsActiveGoalById(goalId)) {

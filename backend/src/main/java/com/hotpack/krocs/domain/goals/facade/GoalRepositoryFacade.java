@@ -58,7 +58,7 @@ public class GoalRepositoryFacade {
     }
 
     @Transactional
-    public void deleteGoal(Long goalId) {
+    public void deleteActiveGoal(Long goalId) {
         goalRepository.deleteById(goalId);
     }
 

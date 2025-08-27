@@ -165,7 +165,7 @@ public class GoalController {
         @Login UserSession user) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
-            goalService.deleteGoal(userId, goalId);
+            goalService.deleteActiveGoal(userId, goalId);
             return ApiResponse.success();
         } catch (GoalException e) {
             throw e;
