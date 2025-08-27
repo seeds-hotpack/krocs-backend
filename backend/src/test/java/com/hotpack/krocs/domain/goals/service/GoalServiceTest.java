@@ -594,7 +594,7 @@ class GoalServiceTest {
 
     @Test
     @DisplayName("단일 목표 조회 - Repository에서 예외 발생")
-    void getFindById_RepositoryException() {
+    void getfindPlanById_RepositoryException() {
         // given
         Long goalId = 1L;
         Long userId = 1L;
