@@ -6,6 +6,7 @@ import com.hotpack.krocs.domain.templates.dto.request.SubTemplateUpdateRequestDT
 import com.hotpack.krocs.domain.templates.exception.SubTemplateException;
 import com.hotpack.krocs.domain.templates.exception.SubTemplateExceptionType;
 import com.hotpack.krocs.domain.templates.repository.SubTemplateRepository;
+import com.hotpack.krocs.global.common.entity.Status;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,26 +26,28 @@ public class SubTemplateRepositoryFacade {
         return subTemplateRepository.saveAll(subTemplates);
     }
 
-    public List<SubTemplate> findBySubTemplate(Template template) {
-        return subTemplateRepository.findByTemplate(template);
+    public List<SubTemplate> findActiveSubTemplatesByTemplate(Template template) {
+        return subTemplateRepository.findSubTemplatesByTemplateAndStatus(template, Status.ACTIVE);
     }
 
     @Transactional
-    public Long deleteBySubTemplateId(Long subTemplateId) {
-        SubTemplate subTemplate = subTemplateRepository.findBySubTemplateId(subTemplateId);
+    public Long deleteActiveSubTemplateBySubTemplateId(Long subTemplateId) {
+        SubTemplate subTemplate = subTemplateRepository.findSubTemplateBySubTemplateIdAndStatus(
+            subTemplateId, Status.ACTIVE);
         if (subTemplate == null) {
             throw new SubTemplateException(SubTemplateExceptionType.SUB_TEMPLATE_NOT_FOUND);
         }
 
-        subTemplateRepository.delete(subTemplate);
+        subTemplate.delete();
 
         return subTemplateId;
     }
 
     @Transactional
-    public SubTemplate updateBySubTemplateId(Long subTemplateId,
+    public SubTemplate updateActiveSubTemplateBySubTemplateId(Long subTemplateId,
         SubTemplateUpdateRequestDTO requestDTO) {
-        SubTemplate subTemplate = subTemplateRepository.findBySubTemplateId(subTemplateId);
+        SubTemplate subTemplate = subTemplateRepository.findSubTemplateBySubTemplateIdAndStatus(
+            subTemplateId, Status.ACTIVE);
         if (subTemplate == null) {
             throw new SubTemplateException(SubTemplateExceptionType.SUB_TEMPLATE_NOT_FOUND);
         }

@@ -67,7 +67,7 @@ public class SubTemplateServiceImpl implements SubTemplateService {
 
             Template template = templateRepositoryFacade.findActiveTemplateByTemplateId(templateId);
 
-            List<SubTemplate> subTemplates = subTemplateRepositoryFacade.findBySubTemplate(
+            List<SubTemplate> subTemplates = subTemplateRepositoryFacade.findActiveSubTemplatesByTemplate(
                 template);
 
             return subTemplateConverter.toListResponseDTO(subTemplates);
@@ -88,7 +88,7 @@ public class SubTemplateServiceImpl implements SubTemplateService {
                     SubTemplateExceptionType.SUB_TEMPLATE_SUB_TEMPLATE_ID_IS_NULL);
             }
 
-            Long deletedSubTemplateId = subTemplateRepositoryFacade.deleteBySubTemplateId(
+            Long deletedSubTemplateId = subTemplateRepositoryFacade.deleteActiveSubTemplateBySubTemplateId(
                 subTemplateId);
 
             return SubTemplateDeleteResponseDTO.builder()
@@ -112,7 +112,7 @@ public class SubTemplateServiceImpl implements SubTemplateService {
                     SubTemplateExceptionType.SUB_TEMPLATE_SUB_TEMPLATE_ID_IS_NULL);
             }
 
-            SubTemplate updatedSubTemplate = subTemplateRepositoryFacade.updateBySubTemplateId(
+            SubTemplate updatedSubTemplate = subTemplateRepositoryFacade.updateActiveSubTemplateBySubTemplateId(
                 subTemplateId, requestDTO);
 
             return subTemplateConverter.toResponseDTO(updatedSubTemplate);

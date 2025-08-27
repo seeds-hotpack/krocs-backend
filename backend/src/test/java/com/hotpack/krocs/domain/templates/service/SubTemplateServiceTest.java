@@ -145,7 +145,8 @@ class SubTemplateServiceTest {
     void getSubTemplates_Success() {
         // when
         when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenReturn(validTemplate);
-        when(subTemplateRepositoryFacade.findBySubTemplate(validTemplate)).thenReturn(
+        when(
+            subTemplateRepositoryFacade.findActiveSubTemplatesByTemplate(validTemplate)).thenReturn(
             List.of(validSubTemplate));
         List<SubTemplateResponseDTO> subTemplateResponseDTOs = subTemplateService.getSubTemplates(
             1L);
@@ -175,7 +176,9 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 전체 조회 - subTemplate을 찾지 못한 경우")
     void getSubTemplates_SubTemplateNotFound() {
         when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenReturn(validTemplate);
-        when(subTemplateRepositoryFacade.findBySubTemplate(validTemplate)).thenReturn(null);
+        when(
+            subTemplateRepositoryFacade.findActiveSubTemplatesByTemplate(validTemplate)).thenReturn(
+            null);
         // when & then
         assertThatThrownBy(() -> subTemplateService.getSubTemplates(1L))
             .isInstanceOf(SubTemplateException.class)
@@ -192,7 +195,7 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 삭제 - 성공")
     void deleteSubTemplate_Success() {
         // when
-        when(subTemplateRepositoryFacade.deleteBySubTemplateId(1L)).thenReturn(1L);
+        when(subTemplateRepositoryFacade.deleteActiveSubTemplateBySubTemplateId(1L)).thenReturn(1L);
         SubTemplateDeleteResponseDTO responseDTO = subTemplateService.deleteSubTemplate(1L);
 
         // then
@@ -203,7 +206,7 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 삭제 - subTemplate이 null인 경우")
     void deleteSubTemplate_subTemplateIsNull() {
         // given
-        when(subTemplateRepositoryFacade.deleteBySubTemplateId(1L)).thenThrow(
+        when(subTemplateRepositoryFacade.deleteActiveSubTemplateBySubTemplateId(1L)).thenThrow(
             new SubTemplateException(SubTemplateExceptionType.SUB_TEMPLATE_NOT_FOUND));
 
         // when & then
@@ -241,7 +244,7 @@ class SubTemplateServiceTest {
             .template(validTemplate)
             .build();
 
-        when(subTemplateRepositoryFacade.updateBySubTemplateId(1L,
+        when(subTemplateRepositoryFacade.updateActiveSubTemplateBySubTemplateId(1L,
             validSubTemplateUpdateRequestDTO)).thenReturn(updatedSubTemplate);
 
         // when
@@ -272,7 +275,7 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 수정 - 예상치 못한 예외")
     void updateSubTemplate_unknownException() {
         // given
-        when(subTemplateRepositoryFacade.updateBySubTemplateId(1L,
+        when(subTemplateRepositoryFacade.updateActiveSubTemplateBySubTemplateId(1L,
             validSubTemplateUpdateRequestDTO)).thenThrow(new RuntimeException());
 
         // when & then
