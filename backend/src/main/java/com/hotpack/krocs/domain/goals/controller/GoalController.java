@@ -79,7 +79,6 @@ public class GoalController {
         }
     }
 
-    // TODO
     @GetMapping("/{goalId}/subgoals")
     public ApiResponse<SubGoalListResponseDTO> getSubGoals(
         @PathVariable @Parameter(description = "Goal ID", example = "1")
@@ -88,8 +87,7 @@ public class GoalController {
         SubGoalListResponseDTO response = goalService.getAllSubGoals(goalId);
         return ApiResponse.success(response);
     }
-
-    // TODO
+    
     @GetMapping("/{goalId}/subgoals/{subGoalId}")
     public ApiResponse<SubGoalResponseDTO> getSubGoal(
         @PathVariable @Parameter(description = "Goal ID", example = "1")
