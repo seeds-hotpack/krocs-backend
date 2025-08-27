@@ -42,7 +42,7 @@ public class SubPlanServiceImpl implements SubPlanService {
             }
             validateSubPlanCreation(requestDTO);
 
-            Plan plan = planRepositoryFacade.findPlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanById(planId);
 
             List<SubPlan> subPlans = subPlanConverter.toSubPlanEntityList(plan, requestDTO);
             List<SubPlan> createdSubPlans = subPlanRepositoryFacade.saveSubPlans(subPlans);
@@ -84,7 +84,7 @@ public class SubPlanServiceImpl implements SubPlanService {
                 throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_ID_IS_NULL);
             }
 
-            Plan plan = planRepositoryFacade.findPlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanById(planId);
 
             List<SubPlan> subPlans = subPlanRepositoryFacade.findSubPlansByPlan(plan);
 
@@ -113,7 +113,7 @@ public class SubPlanServiceImpl implements SubPlanService {
                 throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_ID_IS_NULL);
             }
 
-            Plan plan = planRepositoryFacade.findPlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanById(planId);
             List<SubPlan> subPlans = subPlanRepositoryFacade.findSubPlansByPlan(plan);
             SubPlan subPlan = subPlanRepositoryFacade.findSubPlanBySubPlanId(subPlanId);
 

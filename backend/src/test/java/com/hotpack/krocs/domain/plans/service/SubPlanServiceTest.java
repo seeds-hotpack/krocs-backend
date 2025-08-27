@@ -102,7 +102,7 @@ class SubPlanServiceTest {
             .completedAt(null)
             .build();
 
-        when(planRepositoryFacade.findPlanById(1L)).thenReturn(validPlan);
+        when(planRepositoryFacade.findActivePlanById(1L)).thenReturn(validPlan);
         when(subPlanRepositoryFacade.saveSubPlans(List.of(validSubPlan))).thenReturn(
             List.of(validSubPlan));
         when(subPlanConverter.toSubPlanEntityList(any(), any())).thenReturn(List.of(validSubPlan));
@@ -131,7 +131,8 @@ class SubPlanServiceTest {
     @DisplayName("소계획 생성 - PlanRepository에서 예외 발생")
     void createSubPlan_PlanRepositoryException() {
         // given
-        when(planRepositoryFacade.findPlanById(any())).thenThrow(new RuntimeException("데이터베이스 오류"));
+        when(planRepositoryFacade.findActivePlanById(any())).thenThrow(
+            new RuntimeException("데이터베이스 오류"));
 
         // when & then
         assertThatThrownBy(() -> subPlanService.createSubPlans(1L, validSubPlanCreateRequestDTO))
@@ -144,7 +145,7 @@ class SubPlanServiceTest {
     @DisplayName("소계획 생성 - Plan 조회 실패")
     void createSubPlan_PlanRepositoryNotFound() {
         // given
-        when(planRepositoryFacade.findPlanById(any())).thenThrow(
+        when(planRepositoryFacade.findActivePlanById(any())).thenThrow(
             new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_NOT_FOUND));
 
         // when & then
@@ -206,7 +207,7 @@ class SubPlanServiceTest {
         // given
         when(subPlanRepositoryFacade.saveSubPlans(any())).thenThrow(
             new RuntimeException("데이터베이스 오류"));
-        when(planRepositoryFacade.findPlanById(1L)).thenReturn(validPlan);
+        when(planRepositoryFacade.findActivePlanById(1L)).thenReturn(validPlan);
 
         // when & then
         assertThatThrownBy(() -> subPlanService.createSubPlans(1L, validSubPlanCreateRequestDTO))
@@ -229,7 +230,7 @@ class SubPlanServiceTest {
     @DisplayName("소계획 전체 조회 - SubPlanRepository에서 조회 중 예상치 못한 오류가 발생하는 경우")
     void getAllSubPlans_SubPlanRepositoryException() {
         // given
-        when(planRepositoryFacade.findPlanById(1L)).thenReturn(validPlan);
+        when(planRepositoryFacade.findActivePlanById(1L)).thenReturn(validPlan);
         when(subPlanRepositoryFacade.findSubPlansByPlan(any())).thenThrow(new RuntimeException());
 
         // when & then
@@ -243,7 +244,7 @@ class SubPlanServiceTest {
     @DisplayName("소계획 전체 조회 - 조회된 SubPlan이 한 건도 없는 경우")
     void getAllSubPlans_EmptySubPlanList() {
         // given
-        when(planRepositoryFacade.findPlanById(1L)).thenReturn(validPlan);
+        when(planRepositoryFacade.findActivePlanById(1L)).thenReturn(validPlan);
         when(subPlanRepositoryFacade.findSubPlansByPlan(any())).thenReturn(new ArrayList<>());
         when(subPlanConverter.toSubPlanResponseListDTO(anyList())).thenReturn(new ArrayList<>());
 
@@ -281,7 +282,7 @@ class SubPlanServiceTest {
         // given
         SubPlan otherSubPlan = SubPlan.builder().subPlanId(2L).title("다른 소계획").build();
 
-        when(planRepositoryFacade.findPlanById(1L)).thenReturn(validPlan);
+        when(planRepositoryFacade.findActivePlanById(1L)).thenReturn(validPlan);
         when(subPlanRepositoryFacade.findSubPlansByPlan(validPlan)).thenReturn(
             List.of(validSubPlan));
         when(subPlanRepositoryFacade.findSubPlanBySubPlanId(2L)).thenReturn(otherSubPlan);
@@ -297,7 +298,8 @@ class SubPlanServiceTest {
     @DisplayName("소계획 단건 조회 - 예기치 못한 예외 발생 시")
     void getSubPlan_UnexpectedException() {
         // given
-        when(planRepositoryFacade.findPlanById(1L)).thenThrow(new RuntimeException("DB error"));
+        when(planRepositoryFacade.findActivePlanById(1L)).thenThrow(
+            new RuntimeException("DB error"));
 
         // when & then
         assertThatThrownBy(() -> subPlanService.getSubPlan(1L, 1L))

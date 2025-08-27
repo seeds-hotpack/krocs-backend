@@ -86,7 +86,7 @@ public class PlanServiceImpl implements PlanService {
             LocalDateTime startOfDay = date.atStartOfDay();
             LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
-            List<Plan> plans = planRepositoryFacade.findPlansByDateRange(startOfDay, endOfDay,
+            List<Plan> plans = planRepositoryFacade.findActivePlansByDateRange(startOfDay, endOfDay,
                 userId);
             List<PlanResponseDTO> planResponseDTOs = planConverter.toListPlanResponseDTO(plans);
 
@@ -105,7 +105,7 @@ public class PlanServiceImpl implements PlanService {
     public PlanResponseDTO getPlanById(Long planId, Long userId) {
         try {
             planValidator.validateGetPlan(planId);
-            Plan plan = planRepositoryFacade.findPlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanById(planId);
             if (plan == null) {
                 throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
             }
@@ -125,7 +125,7 @@ public class PlanServiceImpl implements PlanService {
         try {
             planValidator.validateUpdatePlan(planId);
 
-            Plan plan = planRepositoryFacade.findPlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanById(planId);
             if (plan == null) {
                 throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
             }
@@ -194,11 +194,11 @@ public class PlanServiceImpl implements PlanService {
     public void deletePlan(Long planId, Long userId) {
         try {
             planValidator.validateDeletePlan(planId);
-            if (planRepositoryFacade.findPlanById(planId) == null) {
+            if (planRepositoryFacade.findActivePlanById(planId) == null) {
                 throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
             }
 
-            planRepositoryFacade.deletePlanByPlanId(planId);
+            planRepositoryFacade.deleteActivePlanByPlanId(planId);
         } catch (PlanException e) {
             throw e;
         } catch (Exception e) {
