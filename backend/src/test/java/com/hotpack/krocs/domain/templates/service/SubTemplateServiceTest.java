@@ -84,7 +84,7 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 생성 성공")
     void createSubTemplates_Success() {
         // when
-        when(templateRepositoryFacade.findByTemplateId(1L)).thenReturn(validTemplate);
+        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenReturn(validTemplate);
         when(subTemplateRepositoryFacade.saveAll(any())).thenReturn(List.of(validSubTemplate));
 
         SubTemplateCreateResponseDTO responseDTO = subTemplateService.createSubTemplates(1L,
@@ -113,7 +113,7 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 생성 실패 - template가 null인 경우")
     void createSubTemplates_templateIsNull() {
         // when
-        when(templateRepositoryFacade.findByTemplateId(1L)).thenReturn(null);
+        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenReturn(null);
 
         SubTemplateException exception = assertThrows(SubTemplateException.class,
             () -> subTemplateService.createSubTemplates(1L, validCreateRequestDTO, 1L));
@@ -127,7 +127,8 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 생성 실패 - 예상치 못한 오류 발생")
     void createSubTemplates_UnknownException() {
         // when
-        when(templateRepositoryFacade.findByTemplateId(1L)).thenThrow(new RuntimeException());
+        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenThrow(
+            new RuntimeException());
 
         SubTemplateException exception = assertThrows(SubTemplateException.class,
             () -> subTemplateService.createSubTemplates(1L, validCreateRequestDTO, 1L));
@@ -143,7 +144,7 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 전체 조회 - 성공")
     void getSubTemplates_Success() {
         // when
-        when(templateRepositoryFacade.findByTemplateId(1L)).thenReturn(validTemplate);
+        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenReturn(validTemplate);
         when(subTemplateRepositoryFacade.findBySubTemplate(validTemplate)).thenReturn(
             List.of(validSubTemplate));
         List<SubTemplateResponseDTO> subTemplateResponseDTOs = subTemplateService.getSubTemplates(
@@ -173,7 +174,7 @@ class SubTemplateServiceTest {
     @Test
     @DisplayName("서브 템플릿 전체 조회 - subTemplate을 찾지 못한 경우")
     void getSubTemplates_SubTemplateNotFound() {
-        when(templateRepositoryFacade.findByTemplateId(1L)).thenReturn(validTemplate);
+        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenReturn(validTemplate);
         when(subTemplateRepositoryFacade.findBySubTemplate(validTemplate)).thenReturn(null);
         // when & then
         assertThatThrownBy(() -> subTemplateService.getSubTemplates(1L))
@@ -252,7 +253,7 @@ class SubTemplateServiceTest {
         assertThat(responseDTO.getSubTemplateId()).isEqualTo(1L);
         assertThat(responseDTO.getTemplateId()).isEqualTo(validTemplate.getTemplateId());
     }
-    
+
     @Test
     @DisplayName("서브 템플릿 수정 - subTemplateId가 null인 경우")
     void updateSubTemplate_subTemplateIdIsNull() {

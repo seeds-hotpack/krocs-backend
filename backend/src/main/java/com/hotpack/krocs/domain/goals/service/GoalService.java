@@ -21,7 +21,7 @@ public interface GoalService {
 
     GoalResponseDTO updateGoalById(Long goalId, GoalUpdateRequestDTO request, Long userId);
 
-    void deleteActiveGoal(Long userId, Long goalId);
+    void deleteGoal(Long userId, Long goalId);
 
     SubGoalCreateResponseDTO createSubGoals(Long goalId, SubGoalCreateRequestDTO requestDTO);
 

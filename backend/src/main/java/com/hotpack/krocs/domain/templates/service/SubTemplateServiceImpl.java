@@ -38,7 +38,7 @@ public class SubTemplateServiceImpl implements SubTemplateService {
                 throw new SubTemplateException(
                     SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_ID_IS_NULL);
             }
-            Template template = templateRepositoryFacade.findByTemplateId(templateId);
+            Template template = templateRepositoryFacade.findActiveTemplateByTemplateId(templateId);
             if (template == null) {
                 throw new SubTemplateException(
                     SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_NOT_FOUND);
@@ -65,7 +65,7 @@ public class SubTemplateServiceImpl implements SubTemplateService {
                     SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_ID_IS_NULL);
             }
 
-            Template template = templateRepositoryFacade.findByTemplateId(templateId);
+            Template template = templateRepositoryFacade.findActiveTemplateByTemplateId(templateId);
 
             List<SubTemplate> subTemplates = subTemplateRepositoryFacade.findBySubTemplate(
                 template);
@@ -111,7 +111,7 @@ public class SubTemplateServiceImpl implements SubTemplateService {
                 throw new SubTemplateException(
                     SubTemplateExceptionType.SUB_TEMPLATE_SUB_TEMPLATE_ID_IS_NULL);
             }
-            
+
             SubTemplate updatedSubTemplate = subTemplateRepositoryFacade.updateBySubTemplateId(
                 subTemplateId, requestDTO);
 

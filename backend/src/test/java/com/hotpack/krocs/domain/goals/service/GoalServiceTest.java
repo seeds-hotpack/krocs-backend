@@ -479,7 +479,7 @@ class GoalServiceTest {
 
     @Test
     @DisplayName("목표 삭제 성공")
-    void deleteActiveGoal_Success() {
+    void deleteGoal_Success() {
         // given
         Long goalId = 1L;
         Long userId = 1L;
@@ -488,7 +488,7 @@ class GoalServiceTest {
         when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal);
 
         // when & then
-        assertThatCode(() -> goalService.deleteActiveGoal(userId, goalId))
+        assertThatCode(() -> goalService.deleteGoal(userId, goalId))
             .doesNotThrowAnyException();
 
         verify(goalRepositoryFacade).existsActiveGoalById(goalId);
@@ -504,7 +504,7 @@ class GoalServiceTest {
         when(goalRepositoryFacade.existsActiveGoalById(goalId)).thenReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> goalService.deleteActiveGoal(userId, goalId))
+        assertThatThrownBy(() -> goalService.deleteGoal(userId, goalId))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_NOT_FOUND);
 
@@ -514,7 +514,7 @@ class GoalServiceTest {
 
     @Test
     @DisplayName("목표 삭제 - Repository에서 예외 발생")
-    void deleteActiveGoal_RepositoryException() {
+    void deleteGoal_RepositoryException() {
         // given
         Long goalId = 1L;
         Long userId = 1L;
@@ -523,7 +523,7 @@ class GoalServiceTest {
             .existsActiveGoalById(goalId);
 
         // when & then
-        assertThatThrownBy(() -> goalService.deleteActiveGoal(userId, goalId))
+        assertThatThrownBy(() -> goalService.deleteGoal(userId, goalId))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_DELETE_FAILED);
     }

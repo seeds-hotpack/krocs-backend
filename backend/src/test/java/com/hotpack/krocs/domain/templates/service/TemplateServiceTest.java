@@ -1,8 +1,5 @@
 package com.hotpack.krocs.domain.templates.service;
 
-import com.hotpack.krocs.domain.user.domain.User;
-
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
@@ -23,6 +20,7 @@ import com.hotpack.krocs.domain.templates.exception.TemplateException;
 import com.hotpack.krocs.domain.templates.exception.TemplateExceptionType;
 import com.hotpack.krocs.domain.templates.facade.TemplateRepositoryFacade;
 import com.hotpack.krocs.domain.templates.validator.TemplateValidator;
+import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.global.common.entity.Priority;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -106,7 +104,8 @@ class TemplateServiceTest {
     @DisplayName("템플릿 생성 성공 테스트")
     void createTemplate_Success() {
         // given
-        when(templateConverter.toEntity(eq(validCreateRequestDTO), any(User.class))).thenReturn(validTemplate);
+        when(templateConverter.toEntity(eq(validCreateRequestDTO), any(User.class))).thenReturn(
+            validTemplate);
         when(templateRepositoryFacade.save(validTemplate)).thenReturn(validTemplate);
         when(templateConverter.toCreateResponseDTO(validTemplate)).thenReturn(
             validCreateResponseDTO);
@@ -183,7 +182,7 @@ class TemplateServiceTest {
     void getTemplates_Success_WithoutTitle() {
         // given
 
-        when(templateRepositoryFacade.findAll())
+        when(templateRepositoryFacade.findAllActiveTemplates())
             .thenReturn(List.of(validTemplate));
 
         when(templateConverter.toTemplateResponseDTO(validTemplate))
@@ -201,7 +200,7 @@ class TemplateServiceTest {
     @DisplayName("템플릿 검색 조회 성공 - 제목 키워드 포함")
     void getTemplates_Success_WithKeyword() {
         // when
-        when(templateRepositoryFacade.findByTitle("공부"))
+        when(templateRepositoryFacade.findActiveTemplatesByTitle("공부"))
             .thenReturn(List.of(validTemplate));
 
         when(templateConverter.toTemplateResponseDTO(validTemplate))
@@ -252,7 +251,7 @@ class TemplateServiceTest {
         when(templateConverter.toTemplateResponseDTO(updatedEntity))
             .thenReturn(validResponseDTO);
 
-        when(templateRepositoryFacade.findByTemplateId(1L))
+        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L))
             .thenReturn(existed).thenReturn(updatedEntity);
 
         // when
@@ -299,7 +298,7 @@ class TemplateServiceTest {
     @DisplayName("템플릿 수정 실패 - 존재하지 않는 템플릿")
     void updateTemplate_Fail_TemplateNotFound() {
         // when
-        when(templateRepositoryFacade.findByTemplateId(1L))
+        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L))
             .thenThrow(new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND));
 
         TemplateException exception = catchThrowableOfType(
@@ -319,14 +318,14 @@ class TemplateServiceTest {
     @DisplayName("템플릿 삭제 성공")
     void deleteTemplate_Success() {
         // when
-        when(templateRepositoryFacade.findByTemplateId(1L))
+        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L))
             .thenReturn(validTemplate);
 
         // then
         assertThatCode(() -> templateService.deleteTemplate(1L, 1L))
             .doesNotThrowAnyException();
 
-        verify(templateRepositoryFacade).delete(validTemplate);
+        verify(templateRepositoryFacade).deleteActiveTemplate(validTemplate);
     }
 
     @Test
@@ -334,7 +333,7 @@ class TemplateServiceTest {
     void deleteTemplate_Fail_TemplateNotFound() {
         // when
 
-        when(templateRepositoryFacade.findByTemplateId(1L))
+        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L))
             .thenThrow(new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND));
 
         TemplateException exception = catchThrowableOfType(
