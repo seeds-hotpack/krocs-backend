@@ -846,7 +846,7 @@ class GoalServiceTest {
             validSubGoalResponseDTO
         );
 
-        when(subGoalRepositoryFacade.findSubGoalsByGoal(validGoal)).thenReturn(subGoals);
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(subGoals);
         when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
         when(subGoalConverter.toSubGoalResponseListDTO(any())).thenReturn(subGoalResponseDTOs);
         // when
@@ -876,7 +876,8 @@ class GoalServiceTest {
     void getAllSubGoals_SubGoalRepositoryException() {
         // given
         when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findSubGoalsByGoal(any())).thenThrow(new RuntimeException());
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(any())).thenThrow(
+            new RuntimeException());
 
         // when & then
         assertThatThrownBy(() -> goalService.getAllSubGoals(1L))
@@ -890,7 +891,7 @@ class GoalServiceTest {
     void getAllSubGoals_SubGoalIsNull() {
         // given
         when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findSubGoalsByGoal(any())).thenReturn(new ArrayList<>());
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(any())).thenReturn(new ArrayList<>());
 
         // when & then
         assertThatThrownBy(() -> goalService.getAllSubGoals(1L))
@@ -904,9 +905,9 @@ class GoalServiceTest {
     void getSubGoal_Success() {
         // given
         when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findSubGoalsByGoal(validGoal)).thenReturn(
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(
             List.of(validSubGoal));
-        when(subGoalRepositoryFacade.findSubGoalBySubGoalId(1L)).thenReturn(validSubGoal);
+        when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(1L)).thenReturn(validSubGoal);
 
         // when
         SubGoalResponseDTO response = goalService.getSubGoal(1L, 1L);
@@ -930,9 +931,9 @@ class GoalServiceTest {
     void getSubGoal_subGoalRepositoryResultIsNull() {
         // given
         when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findSubGoalsByGoal(validGoal)).thenReturn(
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(
             List.of(validSubGoal));
-        when(subGoalRepositoryFacade.findSubGoalBySubGoalId(1L)).thenThrow(
+        when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(1L)).thenThrow(
             new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND));
 
         // when & then
@@ -947,8 +948,9 @@ class GoalServiceTest {
     void getSubGoal_SubGoalNotBelongToGoal() {
         // given
         when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findSubGoalsByGoal(validGoal)).thenReturn(new ArrayList<>());
-        when(subGoalRepositoryFacade.findSubGoalBySubGoalId(1L)).thenReturn(validSubGoal);
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(
+            new ArrayList<>());
+        when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(1L)).thenReturn(validSubGoal);
 
         // when & then
         assertThatThrownBy(() -> goalService.getSubGoal(1L, 1L))
