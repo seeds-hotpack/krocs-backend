@@ -5,6 +5,7 @@ import com.hotpack.krocs.domain.plans.domain.SubPlan;
 import com.hotpack.krocs.domain.plans.exception.SubPlanException;
 import com.hotpack.krocs.domain.plans.exception.SubPlanExceptionType;
 import com.hotpack.krocs.domain.plans.repository.SubPlanRepository;
+import com.hotpack.krocs.global.common.entity.Status;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,19 +25,15 @@ public class SubPlanRepositoryFacade {
         return subPlanRepository.saveAll(subPlans);
     }
 
-    @Transactional
-    public SubPlan saveSubPlan(SubPlan subPlan) {
-        return subPlanRepository.save(subPlan);
-    }
-
     // 빈 리스트는 정상 응답으로 간주하고 그대로 반환
-    public List<SubPlan> findSubPlansByPlan(Plan plan) {
-        List<SubPlan> subPlans = subPlanRepository.findSubPlansByPlan(plan);
+    public List<SubPlan> findActiveSubPlansByPlan(Plan plan) {
+        List<SubPlan> subPlans = subPlanRepository.findSubPlansByPlanAndStatus(plan, Status.ACTIVE);
         return subPlans;
     }
 
-    public SubPlan findSubPlanBySubPlanId(Long subPlanId) {
-        SubPlan subPlan = subPlanRepository.findSubPlansBySubPlanId(subPlanId);
+    public SubPlan findActiveSubPlanBySubPlanId(Long subPlanId) {
+        SubPlan subPlan = subPlanRepository.findSubPlansBySubPlanIdAndStatus(subPlanId,
+            Status.ACTIVE);
         if (subPlan == null) {
             throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_NOT_FOUND);
         }
@@ -44,9 +41,13 @@ public class SubPlanRepositoryFacade {
     }
 
     @Transactional
-    public void deleteSubPlanBySubPlanId(Long subPlanId) {
-        findSubPlanBySubPlanId(subPlanId);
-        subPlanRepository.deleteSubPlanBySubPlanId(subPlanId);
+    public void deleteActiveSubPlanBySubPlanId(Long subPlanId) {
+        SubPlan subPlan = findActiveSubPlanBySubPlanId(subPlanId);
+        if (subPlan == null) {
+            throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_NOT_FOUND);
+        }
+
+        subPlan.delete();
     }
 
 
