@@ -335,7 +335,6 @@ class GoalServiceTest {
             .build();
 
         when(goalRepositoryFacade.findById(goalId)).thenReturn(existingGoal);
-        when(goalRepositoryFacade.existsByTitleAndGoalIdNot("수정된 제목", goalId)).thenReturn(false);
         when(goalConverter.toGoalResponseDTO((Goal) any())).thenReturn(expectedResponse);
 
         // when
@@ -379,7 +378,6 @@ class GoalServiceTest {
 
         when(goalRepositoryFacade.findById(goalId)).thenReturn(existingGoal)
             .thenReturn(updatedGoal);
-        when(goalRepositoryFacade.existsByTitleAndGoalIdNot("수정된 제목", goalId)).thenReturn(false);
         when(goalConverter.toGoalResponseDTO(updatedGoal)).thenReturn(expectedResponse);
 
         // when
@@ -446,30 +444,6 @@ class GoalServiceTest {
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType",
                 GoalExceptionType.INVALID_GOAL_DATE_RANGE);
-    }
-
-    @Test
-    @DisplayName("목표 수정 - Repository에서 예외 발생")
-    void updateGoalById_RepositoryException() {
-        // given
-        Long goalId = 1L;
-        GoalUpdateRequestDTO updateRequest = GoalUpdateRequestDTO.builder()
-            .title("수정된 제목")
-            .build();
-
-        Goal existingGoal = Goal.builder()
-            .goalId(1L)
-            .title("기존 제목")
-            .build();
-
-        when(goalRepositoryFacade.findById(goalId)).thenReturn(existingGoal);
-        when(goalRepositoryFacade.existsByTitleAndGoalIdNot(any(), any())).thenThrow(
-            new RuntimeException("데이터베이스 오류"));
-
-        // when & then
-        assertThatThrownBy(() -> goalService.updateGoalById(goalId, updateRequest, 1L))
-            .isInstanceOf(GoalException.class)
-            .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_UPDATE_FAILED);
     }
 
     // ========== DELETE 테스트 ==========
