@@ -83,6 +83,10 @@ public class Goal extends BaseTimeEntity {
     if (requestDTO.getEndDate() != null) {
       this.endDate = requestDTO.getEndDate();
     }
+
+    if (requestDTO.getIsCompleted() != null) {
+      this.isCompleted = requestDTO.getIsCompleted();
+    }
   }
 
 }
