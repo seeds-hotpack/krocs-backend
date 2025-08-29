@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Setting up submodules for development..."
+echo "Setting up submodules for development..." 
 
 # 서브모듈 초기화 및 업데이트
 echo "Initializing submodules..."
