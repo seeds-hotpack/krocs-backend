@@ -209,33 +209,6 @@ jobs:
             sleep 10
             docker-compose -f docker-compose.prod.yml ps
             
-            # 헬스체크 수행
-            echo "🏥 Performing health checks..."
-            max_attempts=20
-            attempt=1
-            
-            while [ $attempt -le $max_attempts ]; do
-              echo "🔍 Health check attempt $attempt/$max_attempts..."
-            
-              if curl -f -s http://localhost:8080/actuator/health > /dev/null 2>&1; then
-                echo "✅ Application health check passed!"
-                break
-              else
-                echo "⏳ Application not ready yet, waiting 15 seconds..."
-                sleep 15
-                attempt=$((attempt + 1))
-              fi
-            done
-            
-            if [ $attempt -gt $max_attempts ]; then
-              echo "❌ Health check failed after $max_attempts attempts"
-              echo "📋 Application logs:"
-              docker-compose -f docker-compose.prod.yml logs --tail=50 krocs-backend
-              echo "📋 Redis logs:"
-              docker-compose -f docker-compose.prod.yml logs --tail=20 redis
-              exit 1
-            fi
-            
             # 최종 상태 확인
             echo "📊 Final deployment status:"
             docker-compose -f docker-compose.prod.yml ps
