@@ -45,6 +45,7 @@ public class SubGoal extends BaseTimeEntity {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
     public void updateFrom(SubGoalUpdateRequestDTO requestDTO) {

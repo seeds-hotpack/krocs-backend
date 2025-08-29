@@ -76,6 +76,7 @@ public class User extends BaseTimeEntity {
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
     public void delete() {
