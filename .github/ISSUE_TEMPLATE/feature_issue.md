@@ -1,3 +1,12 @@
+---
+name: Feature request
+about: feat
+title: "[feat]"
+labels: "✨feat"
+assignees: ''
+
+---
+
 ## ✨ 기능 개요 
 
 ## 🛠️ 작업 상세 

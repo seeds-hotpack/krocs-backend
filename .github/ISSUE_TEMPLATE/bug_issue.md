@@ -1,3 +1,13 @@
+---
+name: BUG
+about: bug
+title: "[bug]"
+labels: "\U0001F41B fix"
+assignees: ''
+
+---
+
+
 ## 🐞 버그 설명
 <!-- 어떤 버그인지 간결하게 설명해주세요 -->
 
