@@ -18,6 +18,4 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     Goal findGoalByGoalId(Long goalId);
 
     boolean existsByTitle(String title);
-
-    boolean existsByTitleAndGoalIdNot(String title, Long goalId);
 }

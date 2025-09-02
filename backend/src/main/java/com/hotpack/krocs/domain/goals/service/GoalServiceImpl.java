@@ -120,9 +120,6 @@ public class GoalServiceImpl implements GoalService {
       if (requestDTO.getTitle() != null) {
         goalValidator.validateTitle(requestDTO.getTitle());
       }
-      if (goalRepositoryFacade.existsByTitleAndGoalIdNot(requestDTO.getTitle(), goalId)) {
-        throw new GoalException(GoalExceptionType.GOAL_DUPLICATE_TITLE);
-      }
       if (requestDTO.getStartDate() != null && requestDTO.getEndDate() != null) {
         goalValidator.validateDateRange(requestDTO.getStartDate(), requestDTO.getEndDate());
       } else if (requestDTO.getStartDate() != null) {

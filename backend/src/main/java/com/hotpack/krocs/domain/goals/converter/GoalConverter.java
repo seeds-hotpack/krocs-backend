@@ -89,6 +89,7 @@ public class GoalConverter {
         .startDate(goal.getStartDate())
         .endDate(goal.getEndDate())
         .isCompleted(goal.getIsCompleted())
+        .completedAt(goal.getCompletedAt())
         .subGoals(subGoalResponseDTOs)
         .completionPercentage(completionPercentage)
         .createdAt(goal.getCreatedAt())

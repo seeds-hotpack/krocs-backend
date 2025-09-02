@@ -19,6 +19,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -64,6 +65,9 @@ public class Goal extends BaseTimeEntity {
   @Builder.Default
   private Boolean isCompleted = false;
 
+  @Column(name = "completed_at")
+  private LocalDateTime completedAt;
+
   @OneToMany(mappedBy = "goal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<SubGoal> subGoals;
 
@@ -82,6 +86,15 @@ public class Goal extends BaseTimeEntity {
 
     if (requestDTO.getEndDate() != null) {
       this.endDate = requestDTO.getEndDate();
+    }
+
+    if (requestDTO.getIsCompleted() != null) {
+      this.isCompleted = requestDTO.getIsCompleted();
+      if (requestDTO.getIsCompleted()) {
+        this.completedAt = LocalDateTime.now();
+      } else {
+        this.completedAt = null;
+      }
     }
   }
 

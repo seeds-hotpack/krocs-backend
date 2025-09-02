@@ -37,10 +37,6 @@ public class GoalRepositoryFacade {
     return goalRepository.findAll();
   }
 
-  public Goal findGoalByGoalId(Long goalId) {
-    return goalRepository.findGoalByGoalId(goalId);
-  }
-
   public Goal findById(Long goalId) {
     return goalRepository.findGoalByGoalId(goalId);
   }
@@ -56,9 +52,5 @@ public class GoalRepositoryFacade {
 
   public boolean existsByTitle(String title) {
     return goalRepository.existsByTitle(title);
-  }
-
-  public boolean existsByTitleAndGoalIdNot(String title, Long goalId) {
-    return goalRepository.existsByTitleAndGoalIdNot(title, goalId);
   }
 }

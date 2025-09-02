@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-add-goals-completed-at
+      author: system
+      changes:
+        - addColumn:
+            tableName: goals
+            columns:
+              - column:
+                  name: completed_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: true
