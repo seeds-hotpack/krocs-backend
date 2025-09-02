@@ -5,7 +5,6 @@ import com.hotpack.krocs.domain.goals.domain.SubGoal;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.plans.converter.PlanConverter;
 import com.hotpack.krocs.domain.plans.domain.Plan;
-import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.plans.dto.request.PlanCreateRequestDTO;
 import com.hotpack.krocs.domain.plans.dto.request.PlanUpdateRequestDTO;
 import com.hotpack.krocs.domain.plans.dto.response.PlanListResponseDTO;
@@ -14,6 +13,7 @@ import com.hotpack.krocs.domain.plans.exception.PlanException;
 import com.hotpack.krocs.domain.plans.exception.PlanExceptionType;
 import com.hotpack.krocs.domain.plans.facade.PlanRepositoryFacade;
 import com.hotpack.krocs.domain.plans.validator.PlanValidator;
+import com.hotpack.krocs.domain.user.domain.User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class PlanServiceImpl implements PlanService{
+public class PlanServiceImpl implements PlanService {
 
     private final PlanRepositoryFacade planRepositoryFacade;
     private final PlanConverter planConverter;
@@ -36,7 +36,8 @@ public class PlanServiceImpl implements PlanService{
 
     @Override
     @Transactional
-    public PlanResponseDTO createPlan(PlanCreateRequestDTO requestDTO, Long userId, Long subGoalId) {
+    public PlanResponseDTO createPlan(PlanCreateRequestDTO requestDTO, Long userId,
+        Long subGoalId) {
         try {
             planValidator.validatePlanCreation(requestDTO, subGoalId);
 
@@ -44,12 +45,12 @@ public class PlanServiceImpl implements PlanService{
             Goal goal = null;
 
             if (subGoalId != null) {
-                subGoal = subGoalRepositoryFacade.findSubGoalBySubGoalId(subGoalId);
+                subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subGoalId);
                 if (subGoal == null) {
                     throw new PlanException(PlanExceptionType.PLAN_SUB_GOAL_NOT_FOUND);
                 }
 
-                goal = subGoalRepositoryFacade.findGoalBySubGoalId(subGoalId);
+                goal = subGoalRepositoryFacade.findActiveGoalBySubGoalId(subGoalId);
                 if (goal == null) {
                     throw new PlanException(PlanExceptionType.PLAN_GOAL_NOT_FOUND);
                 }
@@ -78,12 +79,15 @@ public class PlanServiceImpl implements PlanService{
     @Override
     public PlanListResponseDTO getPlans(LocalDate date, Long userId) {
         try {
-            if(date == null) { date = LocalDate.now(); }
+            if (date == null) {
+                date = LocalDate.now();
+            }
 
             LocalDateTime startOfDay = date.atStartOfDay();
             LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
-            List<Plan> plans = planRepositoryFacade.findPlansByDateRange(startOfDay, endOfDay, userId);
+            List<Plan> plans = planRepositoryFacade.findActivePlansByDateRange(startOfDay, endOfDay,
+                userId);
             List<PlanResponseDTO> planResponseDTOs = planConverter.toListPlanResponseDTO(plans);
 
             return PlanListResponseDTO.builder()
@@ -101,7 +105,7 @@ public class PlanServiceImpl implements PlanService{
     public PlanResponseDTO getPlanById(Long planId, Long userId) {
         try {
             planValidator.validateGetPlan(planId);
-            Plan plan = planRepositoryFacade.findPlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanById(planId);
             if (plan == null) {
                 throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
             }
@@ -116,11 +120,12 @@ public class PlanServiceImpl implements PlanService{
 
     @Override
     @Transactional
-    public PlanResponseDTO updatePlanById(Long planId, Long subGoalId, PlanUpdateRequestDTO request, Long userId) {
+    public PlanResponseDTO updatePlanById(Long planId, Long subGoalId, PlanUpdateRequestDTO request,
+        Long userId) {
         try {
             planValidator.validateUpdatePlan(planId);
 
-            Plan plan = planRepositoryFacade.findPlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanById(planId);
             if (plan == null) {
                 throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
             }
@@ -128,11 +133,11 @@ public class PlanServiceImpl implements PlanService{
             SubGoal subGoal = plan.getSubGoal();
             Goal goal = plan.getGoal();
             if (subGoalId != null) {
-                subGoal = subGoalRepositoryFacade.findSubGoalBySubGoalId(subGoalId);
-                if(subGoal == null) {
+                subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subGoalId);
+                if (subGoal == null) {
                     throw new PlanException(PlanExceptionType.PLAN_SUB_GOAL_NOT_FOUND);
                 }
-                goal = subGoalRepositoryFacade.findGoalBySubGoalId(subGoalId);
+                goal = subGoalRepositoryFacade.findActiveGoalBySubGoalId(subGoalId);
             }
 
             if (request.getTitle() != null) {
@@ -142,9 +147,15 @@ public class PlanServiceImpl implements PlanService{
             Boolean allDay = plan.getAllDay();
             LocalDateTime startDateTime = plan.getStartDateTime();
             LocalDateTime endDateTime = plan.getEndDateTime();
-            if (request.getAllDay() != null) { allDay = request.getAllDay(); }
-            if (request.getStartDateTime() != null) { startDateTime = request.getStartDateTime(); }
-            if (request.getEndDateTime() != null) { endDateTime = request.getEndDateTime(); }
+            if (request.getAllDay() != null) {
+                allDay = request.getAllDay();
+            }
+            if (request.getStartDateTime() != null) {
+                startDateTime = request.getStartDateTime();
+            }
+            if (request.getEndDateTime() != null) {
+                endDateTime = request.getEndDateTime();
+            }
 
             if (request.getStartDateTime() != null || request.getEndDateTime() != null) {
                 planValidator.validateDateRange(startDateTime, endDateTime);
@@ -159,7 +170,8 @@ public class PlanServiceImpl implements PlanService{
                 }
             }
 
-            if (request.getAllDay() != null || request.getStartDateTime() != null || request.getEndDateTime() != null) {
+            if (request.getAllDay() != null || request.getStartDateTime() != null
+                || request.getEndDateTime() != null) {
                 planValidator.validateAllDayDateTime(allDay, startDateTime, endDateTime);
             }
 
@@ -182,11 +194,11 @@ public class PlanServiceImpl implements PlanService{
     public void deletePlan(Long planId, Long userId) {
         try {
             planValidator.validateDeletePlan(planId);
-            if (planRepositoryFacade.findPlanById(planId) == null) {
+            if (planRepositoryFacade.findActivePlanById(planId) == null) {
                 throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
             }
 
-            planRepositoryFacade.deletePlanByPlanId(planId);
+            planRepositoryFacade.deleteActivePlanByPlanId(planId);
         } catch (PlanException e) {
             throw e;
         } catch (Exception e) {

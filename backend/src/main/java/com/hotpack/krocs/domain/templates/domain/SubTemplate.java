@@ -2,8 +2,11 @@ package com.hotpack.krocs.domain.templates.domain;
 
 import com.hotpack.krocs.domain.templates.dto.request.SubTemplateUpdateRequestDTO;
 import com.hotpack.krocs.global.common.entity.BaseTimeEntity;
+import com.hotpack.krocs.global.common.entity.Status;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -36,9 +39,20 @@ public class SubTemplate extends BaseTimeEntity {
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.ACTIVE;
+
     public void updateFrom(SubTemplateUpdateRequestDTO requestDTO) {
         if (requestDTO.getTitle() != null) {
             this.title = requestDTO.getTitle();
+        }
+    }
+
+    public void delete() {
+        if (this.status == Status.ACTIVE) {
+            this.status = Status.INACTIVE;
         }
     }
 }

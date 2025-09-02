@@ -5,6 +5,7 @@ import com.hotpack.krocs.domain.goals.domain.SubGoal;
 import com.hotpack.krocs.domain.plans.dto.request.PlanUpdateRequestDTO;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.global.common.entity.BaseTimeEntity;
+import com.hotpack.krocs.global.common.entity.Status;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -97,6 +98,11 @@ public class Plan extends BaseTimeEntity {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.ACTIVE;
+
     public void updateFrom(PlanUpdateRequestDTO request, Goal goal, SubGoal subGoal) {
         if (request.getTitle() != null) {
             this.title = request.getTitle();
@@ -137,6 +143,12 @@ public class Plan extends BaseTimeEntity {
 
         if (subGoal != null) {
             this.subGoal = subGoal;
+        }
+    }
+
+    public void delete() {
+        if (this.status == Status.ACTIVE) {
+            this.status = Status.INACTIVE;
         }
     }
 

@@ -42,7 +42,7 @@ public class SubPlanServiceImpl implements SubPlanService {
             }
             validateSubPlanCreation(requestDTO);
 
-            Plan plan = planRepositoryFacade.findPlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanById(planId);
 
             List<SubPlan> subPlans = subPlanConverter.toSubPlanEntityList(plan, requestDTO);
             List<SubPlan> createdSubPlans = subPlanRepositoryFacade.saveSubPlans(subPlans);
@@ -84,9 +84,9 @@ public class SubPlanServiceImpl implements SubPlanService {
                 throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_ID_IS_NULL);
             }
 
-            Plan plan = planRepositoryFacade.findPlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanById(planId);
 
-            List<SubPlan> subPlans = subPlanRepositoryFacade.findSubPlansByPlan(plan);
+            List<SubPlan> subPlans = subPlanRepositoryFacade.findActiveSubPlansByPlan(plan);
 
             // 빈 리스트는 정상 응답으로 간주하고 그대로 반환
             List<SubPlanResponseDTO> subPlanResponseDTOs = subPlanConverter.toSubPlanResponseListDTO(
@@ -113,9 +113,9 @@ public class SubPlanServiceImpl implements SubPlanService {
                 throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_ID_IS_NULL);
             }
 
-            Plan plan = planRepositoryFacade.findPlanById(planId);
-            List<SubPlan> subPlans = subPlanRepositoryFacade.findSubPlansByPlan(plan);
-            SubPlan subPlan = subPlanRepositoryFacade.findSubPlanBySubPlanId(subPlanId);
+            Plan plan = planRepositoryFacade.findActivePlanById(planId);
+            List<SubPlan> subPlans = subPlanRepositoryFacade.findActiveSubPlansByPlan(plan);
+            SubPlan subPlan = subPlanRepositoryFacade.findActiveSubPlanBySubPlanId(subPlanId);
 
             if (!subPlans.contains(subPlan)) {
                 throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_NOT_BELONG_TO_PLAN);
@@ -142,7 +142,7 @@ public class SubPlanServiceImpl implements SubPlanService {
 
             validateBusinessRules(requestDTO);
 
-            SubPlan subPlan = subPlanRepositoryFacade.findSubPlanBySubPlanId(subPlanId);
+            SubPlan subPlan = subPlanRepositoryFacade.findActiveSubPlanBySubPlanId(subPlanId);
 
             boolean wasCompleted = Boolean.TRUE.equals(subPlan.getIsCompleted());
             subPlan.updateFrom(requestDTO, wasCompleted);
@@ -174,7 +174,7 @@ public class SubPlanServiceImpl implements SubPlanService {
             if (subPlanId == null) {
                 throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_ID_IS_NULL);
             }
-            subPlanRepositoryFacade.deleteSubPlanBySubPlanId(subPlanId);
+            subPlanRepositoryFacade.deleteActiveSubPlanBySubPlanId(subPlanId);
         } catch (SubPlanException e) {
             throw e;
         } catch (Exception e) {

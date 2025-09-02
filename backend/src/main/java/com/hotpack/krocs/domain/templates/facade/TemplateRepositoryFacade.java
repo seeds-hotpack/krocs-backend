@@ -4,6 +4,7 @@ import com.hotpack.krocs.domain.templates.domain.Template;
 import com.hotpack.krocs.domain.templates.exception.TemplateException;
 import com.hotpack.krocs.domain.templates.exception.TemplateExceptionType;
 import com.hotpack.krocs.domain.templates.repository.TemplateRepository;
+import com.hotpack.krocs.global.common.entity.Status;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,35 +25,32 @@ public class TemplateRepositoryFacade {
         return templateRepository.save(template);
     }
 
-    @Transactional
-    public Template update(Template template) {
-        return templateRepository.save(template);
+    public List<Template> findActiveTemplatesByTitle(String title) {
+        return templateRepository.findTemplatesByTitleContainingIgnoreCaseAndStatus(title,
+            Status.ACTIVE);
     }
 
-    public List<Template> findByTitle(String title) {
-        return templateRepository.findByTitleContainingIgnoreCase(title);
+    public List<Template> findAllActiveTemplates() {
+        return templateRepository.findAllTemplatesByStatus(Status.ACTIVE);
     }
 
-    public List<Template> findAll() {
-        return templateRepository.findAll();
-    }
-
-    public Template findByTemplateId(Long templateId) {
-        Template template = templateRepository.findByTemplateId(templateId);
+    public Template findActiveTemplateByTemplateId(Long templateId) {
+        Template template = templateRepository.findTemplateByTemplateIdAndStatus(templateId,
+            Status.ACTIVE);
         if (template == null) {
             throw new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND);
         }
         return template;
     }
 
-    public void existsByTemplateTitle(String title) {
-        if (templateRepository.existsByTitle(title)) {
+    public void existsActiveTemplateByTemplateTitle(String title) {
+        if (templateRepository.existsTemplateByTitleAndStatus(title, Status.ACTIVE)) {
             throw new TemplateException(TemplateExceptionType.TEMPLATE_DUPLICATE_TITLE);
         }
     }
 
     @Transactional
-    public void delete(Template template) {
-        templateRepository.delete(template);
+    public void deleteActiveTemplate(Template template) {
+        template.delete();
     }
 }

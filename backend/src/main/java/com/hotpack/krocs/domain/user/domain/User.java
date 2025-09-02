@@ -3,10 +3,11 @@ package com.hotpack.krocs.domain.user.domain;
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.domain.templates.domain.Template;
-import com.hotpack.krocs.domain.user.domain.enums.UserRole;
-import com.hotpack.krocs.domain.user.domain.enums.NotificationType;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
+import com.hotpack.krocs.domain.user.domain.enums.NotificationType;
+import com.hotpack.krocs.domain.user.domain.enums.UserRole;
 import com.hotpack.krocs.global.common.entity.BaseTimeEntity;
+import com.hotpack.krocs.global.common.entity.Status;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -36,6 +37,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class User extends BaseTimeEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -71,4 +73,15 @@ public class User extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Template> userTemplates = new HashSet<>();
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.ACTIVE;
+
+    public void delete() {
+        if (this.status == Status.ACTIVE) {
+            this.status = Status.INACTIVE;
+        }
+    }
 }

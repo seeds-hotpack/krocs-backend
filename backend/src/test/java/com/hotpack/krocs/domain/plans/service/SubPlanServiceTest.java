@@ -102,7 +102,7 @@ class SubPlanServiceTest {
             .completedAt(null)
             .build();
 
-        when(planRepositoryFacade.findPlanById(1L)).thenReturn(validPlan);
+        when(planRepositoryFacade.findActivePlanById(1L)).thenReturn(validPlan);
         when(subPlanRepositoryFacade.saveSubPlans(List.of(validSubPlan))).thenReturn(
             List.of(validSubPlan));
         when(subPlanConverter.toSubPlanEntityList(any(), any())).thenReturn(List.of(validSubPlan));
@@ -131,7 +131,8 @@ class SubPlanServiceTest {
     @DisplayName("소계획 생성 - PlanRepository에서 예외 발생")
     void createSubPlan_PlanRepositoryException() {
         // given
-        when(planRepositoryFacade.findPlanById(any())).thenThrow(new RuntimeException("데이터베이스 오류"));
+        when(planRepositoryFacade.findActivePlanById(any())).thenThrow(
+            new RuntimeException("데이터베이스 오류"));
 
         // when & then
         assertThatThrownBy(() -> subPlanService.createSubPlans(1L, validSubPlanCreateRequestDTO))
@@ -144,7 +145,7 @@ class SubPlanServiceTest {
     @DisplayName("소계획 생성 - Plan 조회 실패")
     void createSubPlan_PlanRepositoryNotFound() {
         // given
-        when(planRepositoryFacade.findPlanById(any())).thenThrow(
+        when(planRepositoryFacade.findActivePlanById(any())).thenThrow(
             new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_NOT_FOUND));
 
         // when & then
@@ -206,7 +207,7 @@ class SubPlanServiceTest {
         // given
         when(subPlanRepositoryFacade.saveSubPlans(any())).thenThrow(
             new RuntimeException("데이터베이스 오류"));
-        when(planRepositoryFacade.findPlanById(1L)).thenReturn(validPlan);
+        when(planRepositoryFacade.findActivePlanById(1L)).thenReturn(validPlan);
 
         // when & then
         assertThatThrownBy(() -> subPlanService.createSubPlans(1L, validSubPlanCreateRequestDTO))
@@ -229,8 +230,9 @@ class SubPlanServiceTest {
     @DisplayName("소계획 전체 조회 - SubPlanRepository에서 조회 중 예상치 못한 오류가 발생하는 경우")
     void getAllSubPlans_SubPlanRepositoryException() {
         // given
-        when(planRepositoryFacade.findPlanById(1L)).thenReturn(validPlan);
-        when(subPlanRepositoryFacade.findSubPlansByPlan(any())).thenThrow(new RuntimeException());
+        when(planRepositoryFacade.findActivePlanById(1L)).thenReturn(validPlan);
+        when(subPlanRepositoryFacade.findActiveSubPlansByPlan(any())).thenThrow(
+            new RuntimeException());
 
         // when & then
         assertThatThrownBy(() -> subPlanService.getAllSubPlans(1L))
@@ -243,8 +245,8 @@ class SubPlanServiceTest {
     @DisplayName("소계획 전체 조회 - 조회된 SubPlan이 한 건도 없는 경우")
     void getAllSubPlans_EmptySubPlanList() {
         // given
-        when(planRepositoryFacade.findPlanById(1L)).thenReturn(validPlan);
-        when(subPlanRepositoryFacade.findSubPlansByPlan(any())).thenReturn(new ArrayList<>());
+        when(planRepositoryFacade.findActivePlanById(1L)).thenReturn(validPlan);
+        when(subPlanRepositoryFacade.findActiveSubPlansByPlan(any())).thenReturn(new ArrayList<>());
         when(subPlanConverter.toSubPlanResponseListDTO(anyList())).thenReturn(new ArrayList<>());
 
         // when
@@ -281,10 +283,10 @@ class SubPlanServiceTest {
         // given
         SubPlan otherSubPlan = SubPlan.builder().subPlanId(2L).title("다른 소계획").build();
 
-        when(planRepositoryFacade.findPlanById(1L)).thenReturn(validPlan);
-        when(subPlanRepositoryFacade.findSubPlansByPlan(validPlan)).thenReturn(
+        when(planRepositoryFacade.findActivePlanById(1L)).thenReturn(validPlan);
+        when(subPlanRepositoryFacade.findActiveSubPlansByPlan(validPlan)).thenReturn(
             List.of(validSubPlan));
-        when(subPlanRepositoryFacade.findSubPlanBySubPlanId(2L)).thenReturn(otherSubPlan);
+        when(subPlanRepositoryFacade.findActiveSubPlanBySubPlanId(2L)).thenReturn(otherSubPlan);
 
         // when & then
         assertThatThrownBy(() -> subPlanService.getSubPlan(1L, 2L))
@@ -297,7 +299,8 @@ class SubPlanServiceTest {
     @DisplayName("소계획 단건 조회 - 예기치 못한 예외 발생 시")
     void getSubPlan_UnexpectedException() {
         // given
-        when(planRepositoryFacade.findPlanById(1L)).thenThrow(new RuntimeException("DB error"));
+        when(planRepositoryFacade.findActivePlanById(1L)).thenThrow(
+            new RuntimeException("DB error"));
 
         // when & then
         assertThatThrownBy(() -> subPlanService.getSubPlan(1L, 1L))
@@ -320,7 +323,7 @@ class SubPlanServiceTest {
             .updatedAt(LocalDateTime.now())
             .build();
 
-        given(subPlanRepositoryFacade.findSubPlanBySubPlanId(1L)).willReturn(validSubPlan);
+        given(subPlanRepositoryFacade.findActiveSubPlanBySubPlanId(1L)).willReturn(validSubPlan);
 
         given(subPlanConverter.toSubPlanUpdateResponseDTO(any(SubPlan.class))).willReturn(
             expectedResponse);
@@ -368,7 +371,7 @@ class SubPlanServiceTest {
     @DisplayName("SubPlan 수정 실패 - 존재하지 않는 subPlan")
     void updateSubPlan_Fail_NotFound() {
         // given
-        given(subPlanRepositoryFacade.findSubPlanBySubPlanId(999L))
+        given(subPlanRepositoryFacade.findActiveSubPlanBySubPlanId(999L))
             .willThrow(new SubPlanException(SubPlanExceptionType.SUB_PLAN_NOT_FOUND));
 
         // when & then
@@ -389,7 +392,7 @@ class SubPlanServiceTest {
         subPlanService.deleteSubPlan(subPlanId);
 
         // then
-        verify(subPlanRepositoryFacade).deleteSubPlanBySubPlanId(subPlanId);
+        verify(subPlanRepositoryFacade).deleteActiveSubPlanBySubPlanId(subPlanId);
     }
 
     @Test
@@ -398,7 +401,7 @@ class SubPlanServiceTest {
         // given
         doThrow(new SubPlanException(SubPlanExceptionType.SUB_PLAN_NOT_FOUND))
             .when(subPlanRepositoryFacade)
-            .deleteSubPlanBySubPlanId(any());
+            .deleteActiveSubPlanBySubPlanId(any());
 
         assertThatThrownBy(() -> subPlanService.deleteSubPlan(1L))
             // when & then
@@ -413,7 +416,7 @@ class SubPlanServiceTest {
     void deleteSubPlan_Fail_InternalError() {
         doThrow(new RuntimeException())
             .when(subPlanRepositoryFacade)
-            .deleteSubPlanBySubPlanId(any());
+            .deleteActiveSubPlanBySubPlanId(any());
 
         // when & then
         assertThatThrownBy(() -> subPlanService.deleteSubPlan(1L))

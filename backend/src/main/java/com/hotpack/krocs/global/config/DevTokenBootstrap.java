@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hotpack.krocs.domain.auth.dto.UserSession;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
-import com.hotpack.krocs.domain.user.repository.UserRepository;
 import com.hotpack.krocs.domain.user.domain.enums.UserRole;
+import com.hotpack.krocs.domain.user.repository.UserRepository;
+import com.hotpack.krocs.global.common.entity.Status;
 import jakarta.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.Set;
@@ -42,7 +43,7 @@ public class DevTokenBootstrap {
 
     @PostConstruct
     public void init() {
-    
+
         UserRole role;
         try {
             role = UserRole.valueOf(bootstrapUserRole.toUpperCase());
@@ -51,7 +52,7 @@ public class DevTokenBootstrap {
         }
         final UserRole resolvedRole = role;
 
-        User user = userRepository.findByEmail(bootstrapUserEmail)
+        User user = userRepository.findUsersByEmailAndStatus(bootstrapUserEmail, Status.ACTIVE)
             .orElseGet(() -> userRepository.save(User.builder()
                 .name(bootstrapUserName)
                 .email(bootstrapUserEmail)
@@ -60,10 +61,12 @@ public class DevTokenBootstrap {
                 .accountType(AccountType.LOCAL)
                 .build()));
 
-        UserSession session = UserSession.of(String.valueOf(user.getUserId()), bootstrapUserName, Set.of(role));
+        UserSession session = UserSession.of(String.valueOf(user.getUserId()), bootstrapUserName,
+            Set.of(role));
         try {
             String json = objectMapper.writeValueAsString(session);
-            stringRedisTemplate.opsForValue().set("auth:token:" + bootstrapToken, json, Duration.ofDays(7));
+            stringRedisTemplate.opsForValue()
+                .set("auth:token:" + bootstrapToken, json, Duration.ofDays(7));
         } catch (JsonProcessingException e) {
             // ignore
         }

@@ -1,9 +1,12 @@
 package com.hotpack.krocs.domain.plans.facade;
 
 import com.hotpack.krocs.domain.plans.domain.Plan;
+import com.hotpack.krocs.domain.plans.exception.PlanException;
+import com.hotpack.krocs.domain.plans.exception.PlanExceptionType;
 import com.hotpack.krocs.domain.plans.exception.SubPlanException;
 import com.hotpack.krocs.domain.plans.exception.SubPlanExceptionType;
 import com.hotpack.krocs.domain.plans.repository.PlanRepository;
+import com.hotpack.krocs.global.common.entity.Status;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -24,21 +27,29 @@ public class PlanRepositoryFacade {
         return planRepository.save(plan);
     }
 
-    public Plan findPlanById(Long id) {
-        return planRepository.findById(id)
-            .orElseThrow(() -> new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_NOT_FOUND));
-    }
+    public Plan findActivePlanById(Long id) {
+        Plan plan = planRepository.findPlanByPlanIdAndStatus(id, Status.ACTIVE);
+        if (plan == null) {
+            throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_NOT_FOUND);
+        }
 
-    public List<Plan> findPlansByDateRange(LocalDateTime startOfDay, LocalDateTime endOfDay, Long userId) {
-        return planRepository.findPlansByDateRange(startOfDay, endOfDay, userId);
+        return plan;
+    }
+    
+    public List<Plan> findActivePlansByDateRange(LocalDateTime startOfDay, LocalDateTime endOfDay,
+        Long userId) {
+        return planRepository.findPlansByDateRangeAndStatus(startOfDay, endOfDay, userId,
+            Status.ACTIVE);
     }
 
     @Transactional
-    public void deletePlanByPlanId(Long planId) {
-        planRepository.deleteById(planId);
+    public void deleteActivePlanByPlanId(Long planId) {
+        Plan plan = findActivePlanById(planId);
+        if (plan == null) {
+            throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
+        }
+
+        plan.delete();
     }
 
-    public List<Plan> findAllPlans() {
-        return planRepository.findAll();
-    }
 }
