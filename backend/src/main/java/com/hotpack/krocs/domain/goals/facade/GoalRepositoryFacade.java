@@ -2,6 +2,7 @@ package com.hotpack.krocs.domain.goals.facade;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.repository.GoalRepository;
+import com.hotpack.krocs.global.common.entity.Status;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,4 @@ public class GoalRepositoryFacade {
         return goalRepository.existsByTitleAndGoalIdNotAndStatus(title, goalId, Status.ACTIVE);
     }
 
-  public boolean existsByTitle(String title) {
-    return goalRepository.existsByTitle(title);
-  }
 }
