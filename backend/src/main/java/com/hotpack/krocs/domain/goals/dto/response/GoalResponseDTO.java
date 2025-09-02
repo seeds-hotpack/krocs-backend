@@ -18,13 +18,16 @@ public class GoalResponseDTO {
 
   private final String title;
 
-  private Priority priority;
+  private final Priority priority;
 
-  private LocalDate startDate;
+  private final LocalDate startDate;
 
-  private LocalDate endDate;
+  private final LocalDate endDate;
 
-  private Boolean isCompleted;
+  private final Boolean isCompleted;
+
+  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+  private final LocalDateTime completedAt;
 
   private final List<SubGoalResponseDTO> subGoals;
 

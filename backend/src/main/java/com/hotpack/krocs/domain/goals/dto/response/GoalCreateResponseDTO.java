@@ -28,6 +28,9 @@ public class GoalCreateResponseDTO {
 
     private final boolean isCompleted;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private final LocalDateTime completedAt;
+
     private final List<SubGoalResponseDTO> subGoals;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
@@ -35,5 +38,4 @@ public class GoalCreateResponseDTO {
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private final LocalDateTime updatedAt;
-
 }
