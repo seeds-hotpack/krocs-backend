@@ -9,8 +9,8 @@ services:
       - "80:80"    # HTTP (Let's Encrypt 챌린지 + 리다이렉트용)
       - "443:443"  # HTTPS (실제 서비스용)
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/nginx.config:/etc/nginx/nginx.config:ro
+      - ./nginx/config.d:/etc/nginx/config.d:ro
       - ./certbot/www:/var/www/certbot/:ro
       - ./certbot/conf:/etc/nginx/ssl/:ro
     depends_on:
