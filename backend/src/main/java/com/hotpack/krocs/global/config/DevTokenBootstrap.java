@@ -43,32 +43,44 @@ public class DevTokenBootstrap {
 
     @PostConstruct
     public void init() {
-
-        UserRole role;
         try {
-            role = UserRole.valueOf(bootstrapUserRole.toUpperCase());
+            UserRole role;
+            try {
+                role = UserRole.valueOf(bootstrapUserRole.toUpperCase());
+            } catch (Exception e) {
+                role = UserRole.USER;
+            }
+            final UserRole resolvedRole = role;
+
+            User user;
+            try {
+                user = userRepository.findUsersByEmailAndStatus(bootstrapUserEmail, Status.ACTIVE)
+                    .orElseGet(() -> userRepository.save(User.builder()
+                        .name(bootstrapUserName)
+                        .email(bootstrapUserEmail)
+                        .password("{noop}dev")
+                        .role(resolvedRole)
+                        .accountType(AccountType.LOCAL)
+                        .build()));
+            } catch (Exception e) {
+                user = userRepository.findUsersByEmailAndStatus(bootstrapUserEmail, Status.ACTIVE)
+                    .orElse(null);
+                if (user == null) {
+                    System.err.println("Failed to create or find user: " + bootstrapUserEmail);
+                    return;
+                }
+            }
+
+            UserSession session = UserSession.of(String.valueOf(user.getUserId()), bootstrapUserName,
+                Set.of(resolvedRole));
+            try {
+                String json = objectMapper.writeValueAsString(session);
+                stringRedisTemplate.opsForValue()
+                    .set("auth:token:" + bootstrapToken, json, Duration.ofDays(7));
+            } catch (JsonProcessingException e) {
+            }
         } catch (Exception e) {
-            role = UserRole.USER;
-        }
-        final UserRole resolvedRole = role;
-
-        User user = userRepository.findUsersByEmailAndStatus(bootstrapUserEmail, Status.ACTIVE)
-            .orElseGet(() -> userRepository.save(User.builder()
-                .name(bootstrapUserName)
-                .email(bootstrapUserEmail)
-                .password("{noop}dev")
-                .role(resolvedRole)
-                .accountType(AccountType.LOCAL)
-                .build()));
-
-        UserSession session = UserSession.of(String.valueOf(user.getUserId()), bootstrapUserName,
-            Set.of(role));
-        try {
-            String json = objectMapper.writeValueAsString(session);
-            stringRedisTemplate.opsForValue()
-                .set("auth:token:" + bootstrapToken, json, Duration.ofDays(7));
-        } catch (JsonProcessingException e) {
-            // ignore
+            System.err.println("DevTokenBootstrap initialization failed: " + e.getMessage());
         }
     }
 }
