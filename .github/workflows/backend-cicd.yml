@@ -108,6 +108,17 @@ jobs:
           echo "✅ Image pushed to ECR successfully!"
           echo "📍 Image URI: $ECR_REGISTRY/$ECR_REPOSITORY:latest"
 
+      # 8-1. 배포 파일들을 EC2로 복사
+      - name: 📁 Copy deployment files to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "deploy/*"
+          target: "/home/ubuntu/krocs-deploy/"
+          strip_components: 1
+
       # 9. EC2 배포 (Docker Compose + Nginx + HTTPS)
       - name: 🚀 Deploy to EC2 with Docker Compose and HTTPS
         uses: appleboy/ssh-action@v1.0.3
