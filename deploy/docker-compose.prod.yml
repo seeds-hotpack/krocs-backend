@@ -24,16 +24,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # SSL 인증서 관리 (Let's Encrypt)
-  certbot:
-    image: certbot/certbot:latest
-    container_name: krocs-certbot
-    volumes:
-      - ./certbot/www:/var/www/certbot/:rw
-      - ./certbot/conf:/etc/letsencrypt/:rw
-    networks:
-      - krocs-network
-
   # Spring Boot Application (from ECR)
   krocs-backend:
     image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
@@ -69,9 +59,10 @@ services:
     command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 3s
-      retries: 30
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     restart: unless-stopped
     networks:
       - krocs-network
