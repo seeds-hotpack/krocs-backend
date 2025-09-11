@@ -36,13 +36,13 @@ docker-compose -f docker-compose.prod.yml up -d nginx krocs-backend redis
 
 # SSL 인증서 발급
 echo "📜 SSL 인증서를 발급받습니다..."
-docker-compose run --rm certbot certonly \
-    --webroot \
-    --webroot-path=/var/www/certbot \
-    --email $EMAIL \
-    --agree-tos \
-    --no-eff-email \
-    -d $DOMAIN
+docker run --rm \
+  -v /home/ubuntu/krocs-deploy/certbot/www:/var/www/certbot \
+  -v /home/ubuntu/krocs-deploy/certbot/conf:/etc/letsencrypt \
+  certbot/certbot:latest \
+  certonly --webroot --webroot-path=/var/www/certbot \
+  --email $EMAIL --agree-tos --no-eff-email \
+  -d $DOMAIN
 
 # SSL 설정이 포함된 nginx 설정으로 교체
 echo "🔄 SSL 설정을 적용합니다..."
