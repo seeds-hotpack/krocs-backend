@@ -153,7 +153,7 @@ jobs:
             # 오래된 이미지 정리
             docker image prune -f || true
             # 기존 서비스 중지
-            docker-compose down || true
+            docker compose down || true
             
             # 최신 이미지 풀
             echo "📥 Pulling latest image from ECR..."
@@ -161,7 +161,7 @@ jobs:
             
             # 서비스 시작
             echo "🚀 Starting services with HTTPS..."
-            docker-compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml up -d
             
             echo "🎉 HTTPS 배포가 완료되었습니다!"
             echo "🔒 HTTPS URL: https://${{ secrets.DOMAIN_NAME }}"
