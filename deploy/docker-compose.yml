@@ -1,39 +1,31 @@
 version: "3.8"
 
 services:
-  # Spring Boot Application (from ECR)
+  # Spring Boot 애플리케이션
   krocs-backend:
-    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
     container_name: krocs-backend
     ports:
-      - "8080:8080"
-      - "80:8080"
+      - "${SERVER_PORT:-8080}:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - DB_URL=${DB_URL}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
     depends_on:
       redis:
         condition: service_healthy
     restart: unless-stopped
     networks:
       - krocs-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
 
-  # Redis for caching and token storage
+  # Redis
   redis:
     image: redis:7-alpine
     container_name: krocs-redis
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - krocs-redis-data:/data
     command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
@@ -48,7 +40,6 @@ services:
 
 volumes:
   krocs-redis-data:
-    driver: local
 
 networks:
   krocs-network:
