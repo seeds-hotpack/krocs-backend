@@ -4,10 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.hotpack.krocs.domain.auth.dto.UserSession;
-import com.hotpack.krocs.domain.user.domain.enums.UserRole;
 import java.time.Duration;
-import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
+@SpringBootTest(properties = "spring.profiles.active=dev")
 @AutoConfigureMockMvc
 class AuthE2ETest {
 
@@ -32,22 +29,23 @@ class AuthE2ETest {
     void setup() {
         // 단순 문자열 JSON 저장으로 직렬화 이슈 제거
         String json = "{\"userId\":\"u-123\",\"displayName\":\"Dev User\",\"roles\":[\"USER\"]}";
-        stringRedisTemplate.opsForValue().set("auth:token:" + TEST_TOKEN, json, Duration.ofHours(1));
+        stringRedisTemplate.opsForValue()
+            .set("auth:token:" + TEST_TOKEN, json, Duration.ofHours(1));
     }
 
     @Test
     void 인증_성공시_me_조회() throws Exception {
         mockMvc.perform(get("/auth/me").header("Authorization", "Bearer " + TEST_TOKEN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isSuccess").value(true))
-                .andExpect(jsonPath("$.result.userId").value("u-123"));
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.isSuccess").value(true))
+            .andExpect(jsonPath("$.result.userId").value("u-123"));
     }
 
     @Test
     void 토큰_없으면_401() throws Exception {
         mockMvc.perform(get("/auth/me"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("GLOBAL401"));
+            .andExpect(status().isUnauthorized())
+            .andExpect(jsonPath("$.code").value("GLOBAL401"));
     }
 }
 

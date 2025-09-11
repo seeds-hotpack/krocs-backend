@@ -23,12 +23,19 @@ public class RedisTokenService {
             return Optional.empty();
         }
         String json = stringRedisTemplate.opsForValue().get(TOKEN_KEY_PREFIX + token);
-        if (json == null) return Optional.empty();
+        if (json == null) {
+            return Optional.empty();
+        }
         try {
             return Optional.of(objectMapper.readValue(json, UserSession.class));
         } catch (JsonProcessingException e) {
             return Optional.empty();
         }
+    }
+
+    public boolean existsToken(String token) {
+        String json = stringRedisTemplate.opsForValue().get(TOKEN_KEY_PREFIX + token);
+        return json != null;
     }
 
     public void storeToken(String token, UserSession session, Duration ttl) {
