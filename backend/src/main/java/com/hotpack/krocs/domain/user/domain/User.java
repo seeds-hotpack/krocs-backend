@@ -5,7 +5,6 @@ import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.domain.templates.domain.Template;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
 import com.hotpack.krocs.domain.user.domain.enums.NotificationType;
-import com.hotpack.krocs.domain.user.domain.enums.UserRole;
 import com.hotpack.krocs.global.common.entity.BaseTimeEntity;
 import com.hotpack.krocs.global.common.entity.Status;
 import jakarta.persistence.CascadeType;
@@ -46,24 +45,25 @@ public class User extends BaseTimeEntity {
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 
-    @Column(name = "email", nullable = false, unique = true, length = 255)
+    @Column(name = "email", unique = true, length = 255)
     private String email;
-
-    @Column(name = "password", nullable = false, length = 255)
-    private String password;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private UserRole role;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "account_type", nullable = false)
     private AccountType accountType;
+    
+    @Column(name = "account_id", nullable = false, length = 100)
+    private String accountId;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @Enumerated(EnumType.STRING)
     @Column(name = "notification_types", length = 20)
     private Set<NotificationType> notificationTypes = new HashSet<>();
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status status = Status.ACTIVE;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Goal> userGoals = new HashSet<>();
@@ -73,11 +73,6 @@ public class User extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Template> userTemplates = new HashSet<>();
-
-    @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status = Status.ACTIVE;
 
     public void delete() {
         if (this.status == Status.ACTIVE) {

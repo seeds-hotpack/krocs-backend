@@ -15,12 +15,12 @@ public class TokenAuthentication extends AbstractAuthenticationToken {
     }
 
     public static TokenAuthentication authenticated(UserSession session,
-                                                    Collection<? extends GrantedAuthority> authorities) {
+        Collection<? extends GrantedAuthority> authorities) {
         return new TokenAuthentication(session, null, authorities);
     }
 
     private TokenAuthentication(Object principal, String credentials,
-                                Collection<? extends GrantedAuthority> authorities) {
+        Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.principal = principal;
         this.credentials = credentials;

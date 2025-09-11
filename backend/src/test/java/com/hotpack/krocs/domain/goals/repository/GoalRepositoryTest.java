@@ -5,7 +5,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
-import com.hotpack.krocs.domain.user.domain.enums.UserRole;
 import com.hotpack.krocs.global.common.entity.Priority;
 import java.time.LocalDate;
 import java.util.List;
@@ -45,8 +44,6 @@ class GoalRepositoryTest {
             .name("박성열")
             .email("qkrtjdduf@example.com")
             .accountType(AccountType.LOCAL)
-            .role(UserRole.USER)
-            .password("암호화된비밀번호")
             .build();
         entityManager.persistAndFlush(user);
 
