@@ -32,7 +32,7 @@ EOF
 
 # Docker Compose로 서비스 시작 (SSL 없이)
 echo "📦 임시로 서비스를 시작합니다..."
-docker-compose up -d nginx krocs-backend redis
+docker-compose -f docker-compose.prod.yml up -d nginx krocs-backend redis
 
 # SSL 인증서 발급
 echo "📜 SSL 인증서를 발급받습니다..."
