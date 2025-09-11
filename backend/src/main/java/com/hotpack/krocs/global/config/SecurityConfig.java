@@ -4,6 +4,8 @@ import com.hotpack.krocs.global.security.auth.TokenAuthenticationProvider;
 import com.hotpack.krocs.global.security.filter.TokenAuthFilter;
 import com.hotpack.krocs.global.security.handler.RestAccessDeniedHandler;
 import com.hotpack.krocs.global.security.handler.RestAuthenticationEntryPoint;
+
+import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -67,7 +69,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // 개발 단계에서는 모든 오리진 허용
+        config.setAllowedOrigins(Arrays.asList(
+                "https://www.krocs.life",
+                "http://localhost:3000"
+        ));
         config.addAllowedOriginPattern("*");
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*") );
