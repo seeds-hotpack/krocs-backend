@@ -111,7 +111,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         if (name != null) {
             user = userRepository.findUserByAccountIdAndStatus(providerId, Status.ACTIVE)
                 .orElse(null);
-        } else {
+        }
+
+        if (user == null) {
             user = User.builder()
                 .accountId(providerId)
                 .name(name != null ? name : "user")
