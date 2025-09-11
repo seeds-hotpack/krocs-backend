@@ -31,7 +31,6 @@ import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
-import com.hotpack.krocs.domain.user.domain.enums.UserRole;
 import com.hotpack.krocs.global.common.entity.Priority;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -86,8 +85,6 @@ class GoalServiceTest {
             .name("박성열")
             .email("qkrtjdduf@example.com")
             .accountType(AccountType.LOCAL)
-            .role(UserRole.USER)
-            .password("암호화된비밀번호")
             .build();
 
         goalService = new GoalServiceImpl(subGoalRepositoryFacade, subGoalConverter,
@@ -147,6 +144,7 @@ class GoalServiceTest {
             .title("기존 제목")  // 원래 제목
             .priority(Priority.HIGH)
             .isCompleted(false)
+            .subGoals(new ArrayList<>())
             .build();
     }
 
