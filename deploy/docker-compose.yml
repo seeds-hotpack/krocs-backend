@@ -4,7 +4,7 @@ services:
   # Spring Boot 애플리케이션
   krocs-backend:
     build:
-      context: .
+      context: ../backend
       dockerfile: Dockerfile
     container_name: krocs-backend
     ports:

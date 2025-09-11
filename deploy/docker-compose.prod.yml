@@ -41,7 +41,7 @@ services:
     ports:
       - "8080:8080"  # 내부 통신용
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=prod
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - DB_URL=${DB_URL}
@@ -64,8 +64,6 @@ services:
   redis:
     image: redis:7-alpine
     container_name: krocs-redis
-    ports:
-      - "6379:6379"
     volumes:
       - krocs-redis-data:/data
     command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]

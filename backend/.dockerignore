@@ -30,7 +30,7 @@ build
 # Docker 관련
 Dockerfile
 .dockerignore
-docker-compose.yml
+../deploy/docker-compose.yml
 docker/
 
 # 문서
