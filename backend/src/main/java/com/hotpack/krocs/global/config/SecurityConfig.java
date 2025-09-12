@@ -6,12 +6,11 @@ import com.hotpack.krocs.global.security.handler.RestAccessDeniedHandler;
 import com.hotpack.krocs.global.security.handler.RestAuthenticationEntryPoint;
 import com.hotpack.krocs.global.security.oauth2.handler.OAuth2LoginSuccessHandler;
 import com.hotpack.krocs.global.security.oauth2.service.CompositeOAuth2UserService;
-
-import java.util.Arrays;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.Customizer;
@@ -65,6 +64,7 @@ public class SecurityConfig {
                     "/actuator/health",
                     "/health", "/error"
                 ).permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/auth/me").authenticated()
                 .anyRequest().authenticated()
             )
@@ -83,13 +83,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList(
-                "*"
-        ));
         config.addAllowedOriginPattern("*");
+        config.setAllowCredentials(false);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+        config.setExposedHeaders(List.of("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
