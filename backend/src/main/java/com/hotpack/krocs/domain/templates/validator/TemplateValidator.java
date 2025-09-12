@@ -5,7 +5,6 @@ import com.hotpack.krocs.domain.templates.dto.request.TemplateCreateRequestDTO;
 import com.hotpack.krocs.domain.templates.dto.request.TemplateUpdateRequestDTO;
 import com.hotpack.krocs.domain.templates.exception.TemplateException;
 import com.hotpack.krocs.domain.templates.exception.TemplateExceptionType;
-import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import com.hotpack.krocs.global.common.entity.Priority;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -19,7 +18,7 @@ public class TemplateValidator {
         if (!StringUtils.hasText(title)) {
             throw new TemplateException(TemplateExceptionType.TEMPLATE_TITLE_EMPTY);
         }
-        if (title.length() > ValidationConstants.TITLE_MAX) {
+        if (title.length() > 200) {
             throw new TemplateException(TemplateExceptionType.TEMPLATE_TITLE_TOO_LONG);
         }
     }

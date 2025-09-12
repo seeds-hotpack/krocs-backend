@@ -4,7 +4,6 @@ import com.hotpack.krocs.domain.plans.domain.PlanCategory;
 import com.hotpack.krocs.domain.plans.dto.request.PlanCreateRequestDTO;
 import com.hotpack.krocs.domain.plans.exception.PlanException;
 import com.hotpack.krocs.domain.plans.exception.PlanExceptionType;
-import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +57,7 @@ public class PlanValidator {
         if (!StringUtils.hasText(title)) {
             throw new PlanException(PlanExceptionType.PLAN_TITLE_EMPTY);
         }
-        if (title.length() > ValidationConstants.TITLE_MAX) {
+        if (title.length() > 200) {
             throw new PlanException(PlanExceptionType.PLAN_TITLE_TOO_LONG);
         }
     }

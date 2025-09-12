@@ -12,7 +12,6 @@ import com.hotpack.krocs.domain.templates.exception.TemplateExceptionType;
 import com.hotpack.krocs.domain.templates.facade.TemplateRepositoryFacade;
 import com.hotpack.krocs.domain.templates.validator.TemplateValidator;
 import com.hotpack.krocs.domain.user.domain.User;
-import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -64,7 +63,7 @@ public class TemplateServiceImpl implements TemplateService {
         try {
             List<Template> templates;
 
-            if (StringUtils.hasText(title) && title.length() <= ValidationConstants.TITLE_MAX) {
+            if (StringUtils.hasText(title) && title.length() <= 200) {
                 templates = templateRepositoryFacade.findActiveTemplatesByTitle(title);
             } else {
                 templates = templateRepositoryFacade.findAllActiveTemplates();

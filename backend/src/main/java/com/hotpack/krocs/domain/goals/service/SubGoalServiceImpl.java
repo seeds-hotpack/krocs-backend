@@ -7,7 +7,6 @@ import com.hotpack.krocs.domain.goals.dto.response.SubGoalUpdateResponseDTO;
 import com.hotpack.krocs.domain.goals.exception.SubGoalException;
 import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
-import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,7 +48,7 @@ public class SubGoalServiceImpl implements SubGoalService {
             return;
         }
 
-        if (requestDTO.getTitle().length() > ValidationConstants.SUB_TITLE_MAX) {
+        if (requestDTO.getTitle().length() > 200) {
             throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_TITLE_TOO_LONG);
         }
     }
