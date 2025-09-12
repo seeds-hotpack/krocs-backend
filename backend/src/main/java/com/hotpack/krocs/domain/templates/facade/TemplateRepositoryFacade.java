@@ -35,12 +35,8 @@ public class TemplateRepositoryFacade {
     }
 
     public Template findActiveTemplateByTemplateId(Long templateId) {
-        Template template = templateRepository.findTemplateByTemplateIdAndStatus(templateId,
+        return templateRepository.findTemplateByTemplateIdAndStatus(templateId,
             Status.ACTIVE);
-        if (template == null) {
-            throw new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND);
-        }
-        return template;
     }
 
     public void existsActiveTemplateByTemplateTitle(String title) {

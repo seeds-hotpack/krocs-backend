@@ -87,6 +87,9 @@ public class TemplateServiceImpl implements TemplateService {
             templateValidator.validateTemplateUpdateDTO(requestDTO);
 
             Template template = templateRepositoryFacade.findActiveTemplateByTemplateId(templateId);
+            if (template == null) {
+                throw new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND);
+            }
 
             if (requestDTO.getTitle() != null) {
                 templateRepositoryFacade.existsActiveTemplateByTemplateTitle(requestDTO.getTitle());
@@ -109,6 +112,10 @@ public class TemplateServiceImpl implements TemplateService {
     public void deleteTemplate(Long templateId, Long userId) {
         try {
             Template template = templateRepositoryFacade.findActiveTemplateByTemplateId(templateId);
+            if (template == null) {
+                throw new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND);
+            }
+
             templateRepositoryFacade.deleteActiveTemplate(template);
         } catch (TemplateException e) {
             throw e;

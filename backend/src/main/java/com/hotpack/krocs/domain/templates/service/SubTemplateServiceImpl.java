@@ -66,6 +66,10 @@ public class SubTemplateServiceImpl implements SubTemplateService {
             }
 
             Template template = templateRepositoryFacade.findActiveTemplateByTemplateId(templateId);
+            if (template == null) {
+                throw new SubTemplateException(
+                    SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_NOT_FOUND);
+            }
 
             List<SubTemplate> subTemplates = subTemplateRepositoryFacade.findActiveSubTemplatesByTemplate(
                 template);
