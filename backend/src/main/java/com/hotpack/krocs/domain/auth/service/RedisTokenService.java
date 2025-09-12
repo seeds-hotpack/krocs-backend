@@ -34,6 +34,9 @@ public class RedisTokenService {
     }
 
     public boolean existsToken(String token) {
+        if (token == null) {
+            return false;
+        }
         String json = stringRedisTemplate.opsForValue().get(TOKEN_KEY_PREFIX + token);
         return json != null;
     }
