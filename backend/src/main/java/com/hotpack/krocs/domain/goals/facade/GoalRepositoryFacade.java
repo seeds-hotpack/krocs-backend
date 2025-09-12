@@ -1,7 +1,11 @@
 package com.hotpack.krocs.domain.goals.facade;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
+import com.hotpack.krocs.domain.goals.exception.SubGoalException;
+import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.repository.GoalRepository;
+import com.hotpack.krocs.domain.plans.exception.SubPlanException;
+import com.hotpack.krocs.domain.plans.exception.SubPlanExceptionType;
 import com.hotpack.krocs.global.common.entity.Status;
 import java.time.LocalDate;
 import java.util.List;

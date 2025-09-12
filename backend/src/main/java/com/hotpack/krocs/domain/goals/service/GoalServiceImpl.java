@@ -179,6 +179,9 @@ public class GoalServiceImpl implements GoalService {
             validateSubGoalCreation(requestDTO);
 
             Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
+            if (goal == null) {
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_NOT_FOUND);
+            }
 
             List<SubGoal> subGoals = subGoalConverter.toSubGoalEntityList(goal, requestDTO);
             List<SubGoal> createdSubGoals = subGoalRepositoryFacade.saveSubGoals(subGoals);
