@@ -2,6 +2,7 @@ package com.hotpack.krocs.domain.plans.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import lombok.AccessLevel;
@@ -16,8 +17,9 @@ import lombok.NoArgsConstructor;
 @Getter
 public class SubPlanCreateRequestDTO {
 
-    @NotEmpty
     @JsonProperty("sub_plans")
     @Schema(description = "SubPlan 리스트")
+    @NotEmpty(message = "{subplan.list.notEmpty}")
+    @Valid
     private List<SubPlanRequestDTO> subPlans;
 }

@@ -14,10 +14,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/plans")
 @Tag(name = "Plan", description = "Plan 관련 API")
+@Validated
 public class PlanController {
 
     private final PlanService planService;
@@ -32,9 +35,9 @@ public class PlanController {
     @Operation(summary = "일정 생성", description = "새로운 일정을 생성합니다.")
     @PostMapping
     public ApiResponse<PlanResponseDTO> createPlan(
-            @Valid @RequestBody PlanCreateRequestDTO requestDTO,
-            @Login UserSession user,
-            @RequestParam(value = "sub_goal_id", required = false) Long subGoalId
+        @Valid @RequestBody PlanCreateRequestDTO requestDTO,
+        @Login UserSession user,
+        @RequestParam(value = "sub_goal_id", required = false) Long subGoalId
     ) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
@@ -50,8 +53,8 @@ public class PlanController {
     @Operation(summary = "범위로 일정 조회", description = "범위로 일정을 조회합니다.")
     @GetMapping
     public ApiResponse<PlanListResponseDTO> getPlans(
-            @Login UserSession user,
-            @RequestParam(required = false) LocalDate date
+        @Login UserSession user,
+        @RequestParam(required = false) LocalDate date
     ) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
@@ -68,9 +71,9 @@ public class PlanController {
     @Operation(summary = "특정 일정 조회", description = "특정 일정을 조회합니다.")
     @GetMapping("/{planId}")
     public ApiResponse<PlanResponseDTO> getPlanById(
-            @PathVariable @Parameter(description = "Plan ID", example = "1")
-            Long planId,
-            @Login UserSession user
+        @PathVariable @Parameter(description = "Plan ID", example = "1") @Positive(message = "{common.id.positive}")
+        Long planId,
+        @Login UserSession user
     ) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
@@ -87,13 +90,15 @@ public class PlanController {
     )
     @PatchMapping("/{planId}")
     public ApiResponse<PlanResponseDTO> updatePlanById(
-            @PathVariable Long planId,
-            @Valid @RequestBody PlanUpdateRequestDTO request,
-            @Login UserSession user,
-            @RequestParam(value = "sub_goal_id", required = false) Long subGoalId) {
+        @PathVariable @Positive(message = "{common.id.positive}") Long planId,
+        @Valid @RequestBody PlanUpdateRequestDTO request,
+        @Login UserSession user,
+        @RequestParam(value = "sub_goal_id", required = false) @Positive(message = "{common.id.positive}") Long subGoalId) {
+
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
-            PlanResponseDTO responseDTO = planService.updatePlanById(planId, subGoalId, request, userId);
+            PlanResponseDTO responseDTO = planService.updatePlanById(planId, subGoalId, request,
+                userId);
 
             return ApiResponse.success(responseDTO);
         } catch (PlanException e) {
@@ -106,8 +111,8 @@ public class PlanController {
     @Operation(summary = "일정 삭제", description = "일정을 삭제합니다")
     @DeleteMapping("/{planId}")
     public ApiResponse<Void> deletePlan(
-            @PathVariable @Parameter(description = "Plan ID", example = "1") Long planId,
-            @Login UserSession user
+        @PathVariable @Positive(message = "{common.id.positive}") @Parameter(description = "Plan ID", example = "1") Long planId,
+        @Login UserSession user
     ) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
