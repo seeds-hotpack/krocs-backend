@@ -8,6 +8,7 @@ import com.hotpack.krocs.global.security.oauth2.handler.OAuth2LoginSuccessHandle
 import com.hotpack.krocs.global.security.oauth2.service.CompositeOAuth2UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -35,6 +36,9 @@ public class SecurityConfig {
 
     private final CompositeOAuth2UserService compositeOAuth2UserService;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
+    @Value("${frontOrigin}")
+    private String frontOrigin;
 
     @Bean
     public AuthenticationManager authenticationManager() {
@@ -83,8 +87,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOriginPattern("*");
-        config.setAllowCredentials(false);
+        config.setAllowedOrigins(List.of(frontOrigin));
+        config.setAllowCredentials(true);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setExposedHeaders(List.of("*"));
