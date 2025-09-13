@@ -21,20 +21,26 @@ public class KakaoOAuth2UserService implements OAuth2UserService<OAuth2UserReque
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
         Map<String, Object> attrs = oAuth2User.getAttributes();
-        Long id = ((Number) attrs.get("id")).longValue();
+        Object idObj = attrs.get("id");
+        String accountId = null;
+        if (idObj instanceof Number num) {
+            accountId = String.valueOf(num.longValue());
+        } else if (idObj instanceof String str) {
+            accountId = str;
+        }
 
         Map<String, Object> kakaoAccount = (Map<String, Object>) attrs.get("kakao_account");
         Map<String, Object> profile =
             kakaoAccount != null ? (Map<String, Object>) kakaoAccount.get("profile") : null;
-        String nickname = profile != null ? (String) profile.get("nickname") : null;
+        String name = profile != null ? (String) profile.get("nickname") : null;
 
         return new DefaultOAuth2User(
             oAuth2User.getAuthorities(),
             Map.of(
-                "id", id,
-                "name", nickname
+                "accountId", accountId,
+                "name", name
             ),
-            "id"
+            "accountId"
         );
     }
 }

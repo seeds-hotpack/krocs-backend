@@ -95,6 +95,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             String registrationId = oauthToken.getAuthorizedClientRegistrationId();
             if (registrationId.equals("kakao")) {
                 return AccountType.KAKAO;
+            } else if (registrationId.equals("naver")) {
+                return AccountType.NAVER;
             }
         }
 
@@ -103,7 +105,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private User findOrCreateUser(Authentication authentication) {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String providerId = ((Number) oAuth2User.getAttribute("id")).toString();
+        String providerId = oAuth2User.getAttribute("accountId");
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
 

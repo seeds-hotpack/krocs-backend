@@ -15,14 +15,15 @@ public class CompositeOAuth2UserService implements
     OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final KakaoOAuth2UserService kakaoOAuth2UserService;
-
+    private final NaverOAuth2UserService naverOAuth2UserService;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest req) throws OAuth2AuthenticationException {
         String registrationId = req.getClientRegistration().getRegistrationId();
 
         Map<String, OAuth2UserService<OAuth2UserRequest, OAuth2User>> delegates = Map.of(
-            "kakao", kakaoOAuth2UserService
+            "kakao", kakaoOAuth2UserService,
+            "naver", naverOAuth2UserService
         );
 
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = delegates.get(registrationId);
