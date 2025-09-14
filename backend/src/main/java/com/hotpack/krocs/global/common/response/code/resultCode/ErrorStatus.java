@@ -19,7 +19,7 @@ public enum ErrorStatus implements BaseCode {
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "GLOBAL405", "허용되지 않는 메서드"),
     CONFLICT(HttpStatus.CONFLICT, "GLOBAL409", "리소스 충돌"),
     UNSUPPORTED_MEDIA_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "GLOBAL415", "지원하지 않는 미디어 타입"),
-    
+
     // 검증 에러
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "VALIDATION400", "입력값 검증 실패"),
     BAD_REQUEST_BODY(HttpStatus.BAD_REQUEST, "BAD_REQUEST_BODY400", "잘못된 데이터 타입"),
@@ -36,21 +36,21 @@ public enum ErrorStatus implements BaseCode {
     @Override
     public Reason getReason() {
         return Reason.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .data("")
-                .build();
+            .message(message)
+            .code(code)
+            .isSuccess(false)
+            .data("")
+            .build();
     }
 
     @Override
     public Reason getReasonHttpStatus() {
         return Reason.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .httpStatus(httpStatus)
-                .data("")
-                .build();
+            .message(message)
+            .code(code)
+            .isSuccess(false)
+            .httpStatus(httpStatus)
+            .data("")
+            .build();
     }
 }
