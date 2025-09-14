@@ -97,6 +97,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 return AccountType.KAKAO;
             } else if (registrationId.equals("naver")) {
                 return AccountType.NAVER;
+            } else if (registrationId.equals("google")) {
+                return AccountType.GOOGLE;
             }
         }
 
