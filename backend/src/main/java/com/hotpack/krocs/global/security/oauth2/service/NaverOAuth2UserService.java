@@ -28,6 +28,8 @@ public class NaverOAuth2UserService implements OAuth2UserService<OAuth2UserReque
 
         String accountId = (String) response.get("id");
         String name = (String) response.get("name");
+        String email = (String) response.get("email");
+        
         if (accountId == null) {
             throw new OAuth2AuthenticationException("Naver accountId is missing");
         }
@@ -38,6 +40,7 @@ public class NaverOAuth2UserService implements OAuth2UserService<OAuth2UserReque
         Map<String, Object> customAttributes = new HashMap<>();
         customAttributes.put("accountId", accountId);
         customAttributes.put("name", name);
+        customAttributes.put("email", email);
 
         String userNameAttributeName = "accountId";
 

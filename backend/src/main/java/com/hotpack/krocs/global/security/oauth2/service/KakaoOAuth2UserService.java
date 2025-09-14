@@ -1,5 +1,6 @@
 package com.hotpack.krocs.global.security.oauth2.service;
 
+import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -33,13 +34,16 @@ public class KakaoOAuth2UserService implements OAuth2UserService<OAuth2UserReque
         Map<String, Object> profile =
             kakaoAccount != null ? (Map<String, Object>) kakaoAccount.get("profile") : null;
         String name = profile != null ? (String) profile.get("nickname") : null;
+        String email = profile != null ? (String) profile.get("email") : null;
+
+        Map<String, Object> customAttributes = new HashMap<>();
+        customAttributes.put("accountId", accountId);
+        customAttributes.put("name", name);
+        customAttributes.put("email", email);
 
         return new DefaultOAuth2User(
             oAuth2User.getAuthorities(),
-            Map.of(
-                "accountId", accountId,
-                "name", name
-            ),
+            customAttributes,
             "accountId"
         );
     }
