@@ -1,5 +1,6 @@
 package com.hotpack.krocs.global.security.oauth2.service;
 
+import com.hotpack.krocs.global.security.oauth2.exception.OAuth2ErrorType;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -31,8 +32,9 @@ public class CompositeOAuth2UserService implements
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = delegates.get(registrationId);
         if (delegate == null) {
             throw new OAuth2AuthenticationException(
-                new OAuth2Error("provider_unavailable", "지원하지 않는 로그인 방식입니다.",
-                    null)
+                new OAuth2Error(OAuth2ErrorType.PROVIDER_UNAVAILABLE.getCode(),
+                    OAuth2ErrorType.PROVIDER_UNAVAILABLE.getMessage(),
+                    OAuth2ErrorType.PROVIDER_UNAVAILABLE.getUrl())
             );
         }
 

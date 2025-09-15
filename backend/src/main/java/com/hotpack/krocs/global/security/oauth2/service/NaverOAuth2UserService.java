@@ -1,5 +1,6 @@
 package com.hotpack.krocs.global.security.oauth2.service;
 
+import com.hotpack.krocs.global.security.oauth2.exception.OAuth2ErrorType;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +32,9 @@ public class NaverOAuth2UserService implements OAuth2UserService<OAuth2UserReque
         Map<String, Object> response = (Map<String, Object>) attributes.get("response");
         if (response == null) {
             throw new OAuth2AuthenticationException(
-                new OAuth2Error("naver_response_missing", "네이버 로그인 중 필수 정보가 누락되었습니다.(response)",
-                    null)
+                new OAuth2Error(OAuth2ErrorType.NAVER_RESPONSE_MISSING.getCode(),
+                    OAuth2ErrorType.NAVER_RESPONSE_MISSING.getMessage(),
+                    OAuth2ErrorType.NAVER_RESPONSE_MISSING.getUrl())
             );
         }
 
@@ -42,15 +44,17 @@ public class NaverOAuth2UserService implements OAuth2UserService<OAuth2UserReque
 
         if (accountId == null) {
             throw new OAuth2AuthenticationException(
-                new OAuth2Error("naver_account_id_missing", "네이버 로그인 중 필수 정보가 누락되었습니다.(accountId)",
-                    null)
+                new OAuth2Error(OAuth2ErrorType.NAVER_ACCOUNT_ID_MISSING.getCode(),
+                    OAuth2ErrorType.NAVER_ACCOUNT_ID_MISSING.getMessage(),
+                    OAuth2ErrorType.NAVER_ACCOUNT_ID_MISSING.getUrl())
             );
         }
 
         if (name == null) {
             throw new OAuth2AuthenticationException(
-                new OAuth2Error("naver_name_missing", "네이버 로그인 중 필수 정보가 누락되었습니다.(name)",
-                    null)
+                new OAuth2Error(OAuth2ErrorType.NAVER_NAME_MISSING.getCode(),
+                    OAuth2ErrorType.NAVER_NAME_MISSING.getMessage(),
+                    OAuth2ErrorType.NAVER_NAME_MISSING.getUrl())
             );
         }
 

@@ -1,5 +1,6 @@
 package com.hotpack.krocs.global.security.oauth2.service;
 
+import com.hotpack.krocs.global.security.oauth2.exception.OAuth2ErrorType;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +38,9 @@ public class KakaoOAuth2UserService implements OAuth2UserService<OAuth2UserReque
 
         if (accountId == null) {
             throw new OAuth2AuthenticationException(
-                new OAuth2Error("kakao_account_id_missing", "카카오 로그인 중 필수 정보가 누락되었습니다.(accountId)",
-                    null)
+                new OAuth2Error(OAuth2ErrorType.KAKAO_ACCOUNT_ID_MISSING.getCode(),
+                    OAuth2ErrorType.KAKAO_ACCOUNT_ID_MISSING.getMessage(),
+                    OAuth2ErrorType.KAKAO_ACCOUNT_ID_MISSING.getUrl())
             );
         }
 
@@ -48,7 +50,9 @@ public class KakaoOAuth2UserService implements OAuth2UserService<OAuth2UserReque
 
         if (name == null) {
             throw new OAuth2AuthenticationException(
-                new OAuth2Error("kakao_name_missing", "카카오 로그인 중 필수 정보가 누락되었습니다.(name)", null)
+                new OAuth2Error(OAuth2ErrorType.KAKAO_NAME_MISSING.getCode(),
+                    OAuth2ErrorType.KAKAO_NAME_MISSING.getMessage(),
+                    OAuth2ErrorType.KAKAO_NAME_MISSING.getUrl())
             );
         }
 
@@ -69,16 +73,19 @@ public class KakaoOAuth2UserService implements OAuth2UserService<OAuth2UserReque
 
         if (kakaoAccount == null) {
             throw new OAuth2AuthenticationException(
-                new OAuth2Error("kakao_kakao_account_missing",
-                    "카카로 로그인 중 필수 정보가 누락되었습니다.(kakao_account)", null)
+                new OAuth2Error(OAuth2ErrorType.KAKAO_KAKAO_ACCOUNT_MISSING.getCode(),
+                    OAuth2ErrorType.KAKAO_KAKAO_ACCOUNT_MISSING.getMessage(),
+                    OAuth2ErrorType.KAKAO_KAKAO_ACCOUNT_MISSING.getUrl())
             );
         }
 
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-
+        
         if (profile == null) {
             throw new OAuth2AuthenticationException(
-                new OAuth2Error("kakao_profile_missing", "카카오 로그인 중 필수 정보가 누락되었습니다.(profile)", null)
+                new OAuth2Error(OAuth2ErrorType.KAKAO_PROFILE_MISSING.getCode(),
+                    OAuth2ErrorType.KAKAO_PROFILE_MISSING.getMessage(),
+                    OAuth2ErrorType.KAKAO_PROFILE_MISSING.getUrl())
             );
         }
 
