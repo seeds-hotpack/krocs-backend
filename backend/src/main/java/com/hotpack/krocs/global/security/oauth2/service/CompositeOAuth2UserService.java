@@ -31,8 +31,8 @@ public class CompositeOAuth2UserService implements
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = delegates.get(registrationId);
         if (delegate == null) {
             throw new OAuth2AuthenticationException(
-                new OAuth2Error("unsupported_provider"),
-                "unsupported_provider: " + registrationId
+                new OAuth2Error("provider_unavailable", "지원하지 않는 로그인 방식입니다.",
+                    null)
             );
         }
 

@@ -8,6 +8,8 @@ import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
 import com.hotpack.krocs.domain.user.repository.UserRepository;
 import com.hotpack.krocs.global.common.entity.Status;
+import com.hotpack.krocs.global.common.response.code.resultCode.ErrorStatus;
+import com.hotpack.krocs.global.common.response.exception.GeneralException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -43,31 +45,31 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         User user = findOrCreateUser(authentication);
         // 클라이언트에게 AUTH-TOKEN 추출
         Cookie[] cookies = request.getCookies();
-        String token = findToken(cookies);
+        String authToken = findAuthToken(cookies);
 
         // 클라이언트가 토큰을 가지고 있고, Redis에 토큰이 있다면 바로 프론트로 리다이렉트
-        if (token != null && redisTokenService.existsToken(token)) {
+        if (authToken != null && redisTokenService.existsToken(authToken)) {
             response.sendRedirect(successRedirect);
             return;
         }
 
         UserSession session = UserSession.of(String.valueOf(user.getUserId()), user.getName());
-        token = UUID.randomUUID().toString();
+        authToken = UUID.randomUUID().toString();
         try {
             String json = objectMapper.writeValueAsString(session);
             stringRedisTemplate.opsForValue()
-                .set("auth:token:" + token, json, Duration.ofDays(7));
+                .set("auth:token:" + authToken, json, Duration.ofDays(7));
         } catch (JsonProcessingException e) {
-            throw new IllegalStateException("세션 직렬화 실패", e);
+            throw new GeneralException(ErrorStatus.OAUTH2_SESSION_SERIALIZE_FAILED);
         }
 
-        Cookie cookie = createCookie(token);
+        Cookie cookie = createCookie(authToken);
         response.addCookie(cookie);
 
         response.sendRedirect(successRedirect);
     }
 
-    private String findToken(Cookie[] cookies) {
+    private String findAuthToken(Cookie[] cookies) {
         if (cookies != null) {
             for (Cookie c : cookies) {
                 if ("AUTH-TOKEN".equals(c.getName())) {
@@ -105,25 +107,26 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         return null;
     }
 
+    // 추후 회원가입 로직 추가
     private User findOrCreateUser(Authentication authentication) {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String providerId = oAuth2User.getAttribute("accountId");
+        String accountId = oAuth2User.getAttribute("accountId");
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
 
-        User user = null;
-        if (name != null) {
-            user = userRepository.findUserByAccountIdAndStatus(providerId, Status.ACTIVE)
-                .orElse(null);
-        }
+        User user = userRepository.findUserByAccountIdAndStatus(accountId, Status.ACTIVE)
+            .orElse(null);
 
         if (user == null) {
+            AccountType accountType = getAccountType(authentication);
+
             user = User.builder()
-                .accountId(providerId)
-                .name(name != null ? name : "user")
+                .accountId(accountId)
+                .name(name)
                 .email(email)
-                .accountType(getAccountType(authentication))
+                .accountType(accountType)
                 .build();
+
             user = userRepository.save(user);
         }
 
