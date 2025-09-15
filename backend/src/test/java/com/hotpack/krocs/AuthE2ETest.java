@@ -35,7 +35,7 @@ class AuthE2ETest {
 
     @Test
     void 인증_성공시_me_조회() throws Exception {
-        mockMvc.perform(get("/auth/me").header("Authorization", "Bearer " + TEST_TOKEN))
+        mockMvc.perform(get("/api/v1//auth/me").header("Authorization", "Bearer " + TEST_TOKEN))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.isSuccess").value(true))
             .andExpect(jsonPath("$.result.userId").value("u-123"));
@@ -43,7 +43,7 @@ class AuthE2ETest {
 
     @Test
     void 토큰_없으면_401() throws Exception {
-        mockMvc.perform(get("/auth/me"))
+        mockMvc.perform(get("/api/v1//auth/me"))
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.code").value("GLOBAL401"));
     }
