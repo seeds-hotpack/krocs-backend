@@ -27,7 +27,9 @@ public enum ErrorStatus implements BaseCode {
     // 비즈니스 로직 에러
     BUSINESS_LOGIC_ERROR(HttpStatus.BAD_REQUEST, "BUSINESS400", "비즈니스 로직 오류"),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE404", "요청한 리소스를 찾을 수 없습니다"),
-    DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "DUPLICATE409", "중복된 리소스입니다");
+    DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "DUPLICATE409", "중복된 리소스입니다"),
+    OAUTH2_SESSION_SERIALIZE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OAUTH2_500",
+        "세션 직렬화에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
