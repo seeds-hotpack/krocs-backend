@@ -1,5 +1,6 @@
 package com.hotpack.krocs.domain.templates.dto.request;
 
+import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -15,8 +16,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SubTemplateRequestDTO {
 
-  @NotBlank(message = "목표 제목은 필수입니다")
-  @Size(max = 200, message = "목표 제목은 200자를 초과할 수 없습니다")
+  @NotBlank(message = "{subtemplate.title.notBlank}")
+  @Size(max = ValidationConstants.SUB_TITLE_MAX, message = "{subtemplate.title.size}")
   @Schema(description = "SubTemplate 생성 DTO", example = "퇴근하기")
   private String title;
 }

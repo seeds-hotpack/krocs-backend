@@ -20,10 +20,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -39,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/goals")
 @Tag(name = "Goal", description = "Goal 관련 API")
+@Validated
 public class GoalController {
 
     private final GoalService goalService;
@@ -63,9 +66,9 @@ public class GoalController {
     @Operation(summary = "소목표 생성", description = "소목표를 생성합니다.")
     @PostMapping("/{goalId}/subgoals")
     public ApiResponse<SubGoalCreateResponseDTO> createSubGoals(
-        @PathVariable @Parameter(description = "Goal ID", example = "1")
+        @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
         Long goalId,
-        @RequestBody @Parameter(description = "SubGoals", example = "{\"title\": \"소목표1\"}")
+        @Valid @RequestBody @Parameter(description = "SubGoals", example = "{\"title\": \"소목표1\"}")
         SubGoalCreateRequestDTO subGoalCreateRequestDTO) {
         try {
             SubGoalCreateResponseDTO responseDTO = goalService.createSubGoals(goalId,
@@ -81,18 +84,18 @@ public class GoalController {
 
     @GetMapping("/{goalId}/subgoals")
     public ApiResponse<SubGoalListResponseDTO> getSubGoals(
-        @PathVariable @Parameter(description = "Goal ID", example = "1")
+        @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
         Long goalId
     ) {
         SubGoalListResponseDTO response = goalService.getAllSubGoals(goalId);
         return ApiResponse.success(response);
     }
-    
+
     @GetMapping("/{goalId}/subgoals/{subGoalId}")
     public ApiResponse<SubGoalResponseDTO> getSubGoal(
-        @PathVariable @Parameter(description = "Goal ID", example = "1")
+        @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
         Long goalId,
-        @PathVariable @Parameter(description = "SubGoal ID", example = "23")
+        @PathVariable @Parameter(description = "SubGoal ID", example = "23") @Positive(message = "{common.id.positive}")
         Long subGoalId
     ) {
         SubGoalResponseDTO response = goalService.getSubGoal(goalId, subGoalId);
@@ -123,7 +126,7 @@ public class GoalController {
     )
     @GetMapping("/{goalId}")
     public ApiResponse<GoalResponseDTO> getGoalById(
-        @PathVariable Long goalId,
+        @PathVariable @Positive(message = "{common.id.positive}") Long goalId,
         @Login UserSession user) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
@@ -140,7 +143,7 @@ public class GoalController {
     )
     @PatchMapping("/{goalId}")
     public ApiResponse<GoalResponseDTO> updateGoalById(
-        @PathVariable Long goalId,
+        @PathVariable @Positive(message = "{common.id.positive}") Long goalId,
         @Valid @RequestBody GoalUpdateRequestDTO request,
         @Login UserSession user) {
         try {
@@ -159,7 +162,7 @@ public class GoalController {
     )
     @DeleteMapping("/{goalId}")
     public ApiResponse<Void> deleteGoal(
-        @PathVariable Long goalId,
+        @PathVariable @Positive(message = "{common.id.positive}") Long goalId,
         @Login UserSession user) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;

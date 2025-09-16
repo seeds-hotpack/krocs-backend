@@ -84,7 +84,7 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 생성 성공")
     void createSubTemplates_Success() {
         // when
-        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenReturn(validTemplate);
+        when(templateRepositoryFacade.findActiveParentTemplateByTemplateId(1L)).thenReturn(validTemplate);
         when(subTemplateRepositoryFacade.saveAll(any())).thenReturn(List.of(validSubTemplate));
 
         SubTemplateCreateResponseDTO responseDTO = subTemplateService.createSubTemplates(1L,
@@ -110,15 +110,16 @@ class SubTemplateServiceTest {
     }
 
     @Test
-    @DisplayName("서브 템플릿 생성 실패 - template가 null인 경우")
-    void createSubTemplates_templateIsNull() {
-        // when
-        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenReturn(null);
+    @DisplayName("서브 템플릿 생성 실패 - 부모 템플릿이 존재하지 않는 경우")
+    void createSubTemplates_templateNotFound() {
+        // given
+        when(templateRepositoryFacade.findActiveParentTemplateByTemplateId(1L))
+            .thenThrow(new SubTemplateException(SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_NOT_FOUND));
 
+        // when & then
         SubTemplateException exception = assertThrows(SubTemplateException.class,
             () -> subTemplateService.createSubTemplates(1L, validCreateRequestDTO, 1L));
 
-        // then
         assertThat(exception.getSubTemplateExceptionType()).isEqualTo(
             SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_NOT_FOUND);
     }
@@ -127,7 +128,7 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 생성 실패 - 예상치 못한 오류 발생")
     void createSubTemplates_UnknownException() {
         // when
-        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenThrow(
+        when(templateRepositoryFacade.findActiveParentTemplateByTemplateId(1L)).thenThrow(
             new RuntimeException());
 
         SubTemplateException exception = assertThrows(SubTemplateException.class,
@@ -144,7 +145,7 @@ class SubTemplateServiceTest {
     @DisplayName("서브 템플릿 전체 조회 - 성공")
     void getSubTemplates_Success() {
         // when
-        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L)).thenReturn(validTemplate);
+        when(templateRepositoryFacade.findActiveParentTemplateByTemplateId(1L)).thenReturn(validTemplate);
         when(
             subTemplateRepositoryFacade.findActiveSubTemplatesByTemplate(validTemplate)).thenReturn(
             List.of(validSubTemplate));

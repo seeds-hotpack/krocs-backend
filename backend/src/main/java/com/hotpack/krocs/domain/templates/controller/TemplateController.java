@@ -19,9 +19,11 @@ import com.hotpack.krocs.global.common.response.ApiResponse;
 import com.hotpack.krocs.global.security.annotation.Login;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -37,6 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/templates")
+@Validated
 public class TemplateController {
 
     private final TemplateService templateService;
@@ -86,7 +89,7 @@ public class TemplateController {
     @Operation(summary = "템플릿 수정", description = "탬플릿을 id 기준으로 수정합니다.")
     @PatchMapping("/{template_id}")
     public ApiResponse<TemplateResponseDTO> updateTemplates(
-        @PathVariable(value = "template_id") Long templateId,
+        @PathVariable(value = "template_id") @Positive(message = "{common.id.positive}") Long templateId,
         @Login UserSession user,
         @RequestBody TemplateUpdateRequestDTO requestDTO) {
         try {
@@ -106,7 +109,7 @@ public class TemplateController {
     @Operation(summary = "템플릿 삭제", description = "템플릿을 탬플릿ID로 삭제합니다.")
     @DeleteMapping("/{template_id}")
     public ApiResponse<Void> deleteTemplate(
-        @PathVariable(value = "template_id") Long templateId,
+        @PathVariable(value = "template_id") @Positive(message = "{common.id.positive}") Long templateId,
         @Login UserSession user) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
@@ -127,7 +130,7 @@ public class TemplateController {
     @PostMapping("/{templateId}/subtemplates")
     public ApiResponse<SubTemplateCreateResponseDTO> saveSubTemplates(
         @Valid @RequestBody SubTemplateCreateRequestDTO requestDTO,
-        @PathVariable(value = "templateId") Long templateId,
+        @PathVariable(value = "templateId") @Positive(message = "{common.id.positive}") Long templateId,
         @Login UserSession user
     ) {
         try {
@@ -146,7 +149,7 @@ public class TemplateController {
     @Operation(summary = "서브 템플릿 전체 조회", description = "템플릿에 종속된 모든 서브 템플릿을 조회합니다.")
     @GetMapping("/{templateId}/subtemplates")
     public ApiResponse<List<SubTemplateResponseDTO>> getSubTemplates(
-        @PathVariable(value = "templateId") Long templateId,
+        @PathVariable(value = "templateId") @Positive(message = "{common.id.positive}") Long templateId,
         @Login UserSession user
     ) {
         try {

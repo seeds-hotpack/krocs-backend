@@ -105,7 +105,7 @@ public class Goal extends BaseTimeEntity {
   }
 
     public void delete() {
-        if (this.status == Status.ACTIVE) {
+        if (this.status == Status.ACTIVE && this.subGoals != null) {
             this.status = Status.INACTIVE;
             this.subGoals.forEach(SubGoal::delete);
         }

@@ -1,6 +1,8 @@
 package com.hotpack.krocs.domain.templates.facade;
 
 import com.hotpack.krocs.domain.templates.domain.Template;
+import com.hotpack.krocs.domain.templates.exception.SubTemplateException;
+import com.hotpack.krocs.domain.templates.exception.SubTemplateExceptionType;
 import com.hotpack.krocs.domain.templates.exception.TemplateException;
 import com.hotpack.krocs.domain.templates.exception.TemplateExceptionType;
 import com.hotpack.krocs.domain.templates.repository.TemplateRepository;
@@ -37,8 +39,17 @@ public class TemplateRepositoryFacade {
     public Template findActiveTemplateByTemplateId(Long templateId) {
         Template template = templateRepository.findTemplateByTemplateIdAndStatus(templateId,
             Status.ACTIVE);
-        if (template == null) {
+        if(template == null){
             throw new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND);
+        }
+        return template;
+    }
+
+    public Template findActiveParentTemplateByTemplateId(Long templateId) {
+        Template template = templateRepository.findTemplateByTemplateIdAndStatus(templateId,
+            Status.ACTIVE);
+        if(template == null){
+            throw new SubTemplateException(SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_NOT_FOUND);
         }
         return template;
     }

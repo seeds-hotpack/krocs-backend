@@ -22,7 +22,8 @@ public enum ErrorStatus implements BaseCode {
     
     // 검증 에러
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "VALIDATION400", "입력값 검증 실패"),
-    
+    BAD_REQUEST_BODY(HttpStatus.BAD_REQUEST, "BAD_REQUEST_BODY400", "잘못된 데이터 타입"),
+
     // 비즈니스 로직 에러
     BUSINESS_LOGIC_ERROR(HttpStatus.BAD_REQUEST, "BUSINESS400", "비즈니스 로직 오류"),
     RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "RESOURCE404", "요청한 리소스를 찾을 수 없습니다"),

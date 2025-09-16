@@ -1,5 +1,6 @@
 package com.hotpack.krocs.domain.templates.dto.request;
 
+import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import com.hotpack.krocs.global.common.entity.Priority;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,15 +13,15 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class TemplateCreateRequestDTO {
-    @NotBlank(message = "목표 제목은 필수입니다")
-    @Size(max = 200, message = "목표 제목은 200자를 초과할 수 없습니다")
+    @NotBlank(message = "{template.title.notBlank}")
+    @Size(max = ValidationConstants.TITLE_MAX, message = "{template.title.size}")
     private String title;
 
     @Builder.Default
     private Priority priority = Priority.MEDIUM;
 
-    @NotNull(message = "목표 기간은 필수입니다")
-    @Positive(message = "목표 기간은 1일 이상이어야 합니다")
+    @NotNull(message = "{template.duration.notNull}")
+    @Positive(message = "{template.duration.positive}")
     private Integer duration;
 }
 

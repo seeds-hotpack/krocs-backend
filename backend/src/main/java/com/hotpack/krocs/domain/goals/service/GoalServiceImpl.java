@@ -20,6 +20,7 @@ import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.user.domain.User;
+import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -179,6 +180,9 @@ public class GoalServiceImpl implements GoalService {
             validateSubGoalCreation(requestDTO);
 
             Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
+            if (goal == null) {
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_NOT_FOUND);
+            }
 
             List<SubGoal> subGoals = subGoalConverter.toSubGoalEntityList(goal, requestDTO);
             List<SubGoal> createdSubGoals = subGoalRepositoryFacade.saveSubGoals(subGoals);
@@ -208,7 +212,7 @@ public class GoalServiceImpl implements GoalService {
             if (subGoalRequestDTO.getTitle().isBlank()) {
                 throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_TITLE_EMPTY);
             }
-            if (subGoalRequestDTO.getTitle().length() > 200) {
+            if (subGoalRequestDTO.getTitle().length() > ValidationConstants.TITLE_MAX) {
                 throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_TITLE_TOO_LONG);
             }
         }

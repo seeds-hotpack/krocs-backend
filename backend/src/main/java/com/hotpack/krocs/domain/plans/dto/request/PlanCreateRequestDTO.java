@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hotpack.krocs.domain.plans.domain.Color;
 import com.hotpack.krocs.domain.plans.domain.PlanCategory;
+import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -22,15 +24,14 @@ import lombok.NoArgsConstructor;
 @Builder
 public class PlanCreateRequestDTO {
 
-    @NotBlank(message = "일정 제목은 필수입니다")
-    @Size(max = 200, message = "일정 제목은 200자를 초과할 수 없습니다")
+    @NotBlank(message = "{plan.title.notBlank}")
+    @Size(max = ValidationConstants.TITLE_MAX, message = "{plan.title.size}")
     private String title;
 
     @JsonProperty("plan_category")
     @Builder.Default
     private PlanCategory planCategory = PlanCategory.ETC;
 
-    @Enumerated(EnumType.STRING)
     @Builder.Default
     private Color color = Color.BLUE;
 
@@ -41,6 +42,7 @@ public class PlanCreateRequestDTO {
     )
     @JsonProperty("start_date_time")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    @NotNull(message = "{plan.startDate.notNull}")
     private LocalDateTime startDateTime;
 
     @Schema(
@@ -50,6 +52,7 @@ public class PlanCreateRequestDTO {
     )
     @JsonProperty("end_date_time")
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+    @NotNull(message = "{plan.endDate.notNull}")
     private LocalDateTime endDateTime;
 
     @JsonProperty("all_day")
