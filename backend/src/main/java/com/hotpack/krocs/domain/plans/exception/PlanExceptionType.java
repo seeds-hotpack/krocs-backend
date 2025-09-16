@@ -13,7 +13,6 @@ public enum PlanExceptionType implements BaseCode {
     PLAN_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PLAN500", "일정 생성에 실패했습니다."),
     PLAN_FOUND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PLAN500", "일정 조회에 실패했습니다."),
     PLAN_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PLAN500", "일정 삭제에 실패했습니다."),
-    PLAN_DUPLICATE_TITLE(HttpStatus.CONFLICT, "PLAN409", "동일한 제목의 일정이 이미 존재합니다."),
     PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN404", "일정을 찾을 수 없습니다."),
     PLAN_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "PLAN400", "이미 완료된 일정입니다."),
     INVALID_PLAN_DATE_RANGE(HttpStatus.BAD_REQUEST, "PLAN400", "유효하지 않은 일정 기간입니다."),

@@ -15,7 +15,6 @@ public enum SubPlanExceptionType implements BaseCode {
     SUB_PLAN_TITLE_EMPTY(HttpStatus.BAD_REQUEST, "SUBPLAN400", "소계획 제목은 필수입니다."),
     SUB_PLAN_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SUBPLAN500", "소계획 생성에 실패했습니다."),
     SUB_PLAN_TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "SUBPLAN400", "일정 제목이 너무 깁니다."),
-    SUB_PLAN_DUPLICATE_TITLE(HttpStatus.CONFLICT, "SUBPLAN409", "동일한 제목의 일정이 이미 존재합니다."),
     SUB_PLAN_PLAN_ID_MISSING(HttpStatus.BAD_REQUEST, "SUBPLAN400", "상위 일정(planId)은 필수입니다."),
     SUB_PLAN_UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "SUBPLAN401", "소계획에 대한 접근 권한이 없습니다."),
     SUB_PLAN_CREATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SUBPLAN500", "소계획 생성에 실패했습니다."),
