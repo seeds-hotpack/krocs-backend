@@ -885,17 +885,22 @@ class GoalServiceTest {
     }
 
     @Test
-    @DisplayName("소목표 전체 조회 - 조회된 SubGoal이 한 건도 없는 경우")
-    void getAllSubGoals_SubGoalIsNull() {
+    @DisplayName("소목표 전체 조회 성공 - 해당하는 소목표가 없을 때 빈 리스트 반환")
+    void getAllSubGoals_whenNoSubGoalsExist_returnsEmptyList() {
         // given
-        when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(any())).thenReturn(new ArrayList<>());
+        Long goalId = 1L;
 
-        // when & then
-        assertThatThrownBy(() -> goalService.getAllSubGoals(1L))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
+        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal);
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(existingGoal)).thenReturn(Collections.emptyList());
+        when(subGoalConverter.toSubGoalResponseListDTO(Collections.emptyList())).thenReturn(Collections.emptyList());
+
+        // when
+        SubGoalListResponseDTO response = goalService.getAllSubGoals(goalId);
+
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getSubGoals()).isNotNull();
+        assertThat(response.getSubGoals()).isEmpty();
     }
 
     @Test
