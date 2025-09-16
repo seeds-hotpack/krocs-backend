@@ -36,12 +36,11 @@ public class PlanController {
     @PostMapping
     public ApiResponse<PlanResponseDTO> createPlan(
         @Valid @RequestBody PlanCreateRequestDTO requestDTO,
-        @Login UserSession user,
-        @RequestParam(value = "sub_goal_id", required = false) Long subGoalId
+        @Login UserSession user
     ) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
-            PlanResponseDTO responseDTO = planService.createPlan(requestDTO, userId, subGoalId);
+            PlanResponseDTO responseDTO = planService.createPlan(requestDTO, userId);
             return ApiResponse.success(responseDTO);
         } catch (PlanException e) {
             throw e;
@@ -92,13 +91,11 @@ public class PlanController {
     public ApiResponse<PlanResponseDTO> updatePlanById(
         @PathVariable @Positive(message = "{common.id.positive}") Long planId,
         @Valid @RequestBody PlanUpdateRequestDTO request,
-        @Login UserSession user,
-        @RequestParam(value = "sub_goal_id", required = false) @Positive(message = "{common.id.positive}") Long subGoalId) {
+        @Login UserSession user) {
 
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
-            PlanResponseDTO responseDTO = planService.updatePlanById(planId, subGoalId, request,
-                userId);
+            PlanResponseDTO responseDTO = planService.updatePlanById(planId, request, userId);
 
             return ApiResponse.success(responseDTO);
         } catch (PlanException e) {

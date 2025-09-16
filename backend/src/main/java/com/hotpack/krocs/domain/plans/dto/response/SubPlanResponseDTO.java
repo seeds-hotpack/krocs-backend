@@ -19,7 +19,6 @@ public class SubPlanResponseDTO {
     @JsonProperty("is_completed")
     private final Boolean isCompleted;
 
-
     @Schema(
         description = "완료 일시",
         pattern = "yyyy-MM-dd'T'HH:mm:ss",
