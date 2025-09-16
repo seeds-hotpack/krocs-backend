@@ -25,10 +25,8 @@ public class SubPlanRepositoryFacade {
         return subPlanRepository.saveAll(subPlans);
     }
 
-    // 빈 리스트는 정상 응답으로 간주하고 그대로 반환
     public List<SubPlan> findActiveSubPlansByPlan(Plan plan) {
-        List<SubPlan> subPlans = subPlanRepository.findSubPlansByPlanAndStatus(plan, Status.ACTIVE);
-        return subPlans;
+        return subPlanRepository.findSubPlansByPlanAndStatus(plan, Status.ACTIVE);
     }
 
     public SubPlan findActiveSubPlanBySubPlanId(Long subPlanId) {
