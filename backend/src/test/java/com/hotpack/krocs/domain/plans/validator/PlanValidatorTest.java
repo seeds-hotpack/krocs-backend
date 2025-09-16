@@ -35,7 +35,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatCode(() -> planValidator.validatePlanCreation(validRequest, 1L))
+        assertThatCode(() -> planValidator.validatePlanCreation(validRequest))
             .doesNotThrowAnyException();
     }
 
@@ -51,7 +51,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatCode(() -> planValidator.validatePlanCreation(allDayRequest, 1L))
+        assertThatCode(() -> planValidator.validatePlanCreation(allDayRequest))
             .doesNotThrowAnyException();
     }
 
@@ -67,7 +67,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatCode(() -> planValidator.validatePlanCreation(allDayRequest, 1L))
+        assertThatCode(() -> planValidator.validatePlanCreation(allDayRequest))
             .doesNotThrowAnyException();
     }
 
@@ -83,7 +83,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatCode(() -> planValidator.validatePlanCreation(validRequest, null))
+        assertThatCode(() -> planValidator.validatePlanCreation(validRequest))
             .doesNotThrowAnyException();
     }
 
@@ -99,7 +99,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatCode(() -> planValidator.validatePlanCreation(validRequest, 1L))
+        assertThatCode(() -> planValidator.validatePlanCreation(validRequest))
             .doesNotThrowAnyException();
     }
 
@@ -114,7 +114,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest, 1L))
+        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest))
             .isInstanceOf(PlanException.class)
             .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_START_TIME_REQUIRED);
     }
@@ -130,7 +130,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest, 1L))
+        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest))
             .isInstanceOf(PlanException.class)
             .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_END_TIME_REQUIRED);
     }
@@ -146,7 +146,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest, 1L))
+        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest))
             .isInstanceOf(PlanException.class)
             .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_START_TIME_REQUIRED);
     }
@@ -162,7 +162,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest, 1L))
+        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest))
             .isInstanceOf(PlanException.class)
             .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_END_TIME_REQUIRED);
     }
@@ -179,7 +179,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest, 1L))
+        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest))
             .isInstanceOf(PlanException.class)
             .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_PLAN_DATE_RANGE);
     }
@@ -196,7 +196,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest, 1L))
+        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest))
             .isInstanceOf(PlanException.class)
             .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_PLAN_DATE_RANGE);
     }
@@ -213,7 +213,7 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest, 1L))
+        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest))
             .isInstanceOf(PlanException.class)
             .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_TITLE_EMPTY);
     }
@@ -231,26 +231,9 @@ public class PlanValidatorTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest, 1L))
+        assertThatThrownBy(() -> planValidator.validatePlanCreation(invalidRequest))
             .isInstanceOf(PlanException.class)
             .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_TITLE_TOO_LONG);
-    }
-
-    @Test
-    @DisplayName("유효성 검사 실패 - subGoalId가 0 이하")
-    void validatePlanCreation_Fail_InvalidSubGoalId() {
-        // given
-        PlanCreateRequestDTO validRequest = PlanCreateRequestDTO.builder()
-            .title("테스트 일정")
-            .startDateTime(LocalDateTime.of(2025, 8, 1, 9, 0))
-            .endDateTime(LocalDateTime.of(2025, 8, 1, 10, 0))
-            .allDay(false)
-            .build();
-
-        // when & then
-        assertThatThrownBy(() -> planValidator.validatePlanCreation(validRequest, 0L))
-            .isInstanceOf(PlanException.class)
-            .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_GOAL_ID);
     }
 
     // ========== GET 관련 테스트 (validateGetPlan) ==========
