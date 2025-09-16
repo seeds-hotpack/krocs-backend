@@ -24,7 +24,6 @@ public enum TemplateExceptionType implements BaseCode {
     TEMPLATE_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "TEMPLATE500", "탬플릿 수정에 실패했습니다."),
     TEMPLATE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "TEMPLATE500", "탬플릿 삭제에 실패했습니다."),
     TEMPLATE_TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "TEMPLATE400", "탬플릿 제목이 너무 깁니다."),
-    TEMPLATE_DUPLICATE_TITLE(HttpStatus.CONFLICT, "TEMPLATE409", "동일한 제목의 탬플릿이 이미 존재합니다."),
     TEMPLATE_INVALID_PRIORITY(HttpStatus.BAD_REQUEST, "TEMPLATE400", "유효하지 않은 우선순위입니다.");
 
     private final HttpStatus httpStatus;

@@ -48,7 +48,6 @@ public class TemplateServiceImpl implements TemplateService {
                 template = templateConverter.toEntity(requestDTO);
             }
             // templateValidator.validateTemplateBusiness(template); 유효성 검사 적용 이후
-            templateRepositoryFacade.existsActiveTemplateByTemplateTitle(template.getTitle());
             Template savedTemplate = templateRepositoryFacade.save(template);
 
             return templateConverter.toCreateResponseDTO(savedTemplate);
@@ -88,10 +87,6 @@ public class TemplateServiceImpl implements TemplateService {
             templateValidator.validateTemplateUpdateDTO(requestDTO);
 
             Template template = templateRepositoryFacade.findActiveTemplateByTemplateId(templateId);
-
-            if (requestDTO.getTitle() != null) {
-                templateRepositoryFacade.existsActiveTemplateByTemplateTitle(requestDTO.getTitle());
-            }
 
             template.updateFrom(requestDTO);
             Template updatedTemplate = templateRepositoryFacade.findActiveTemplateByTemplateId(
