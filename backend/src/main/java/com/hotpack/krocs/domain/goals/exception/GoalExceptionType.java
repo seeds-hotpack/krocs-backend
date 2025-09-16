@@ -13,7 +13,6 @@ public enum GoalExceptionType implements BaseCode {
     GOAL_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "GOAL500", "목표 생성에 실패했습니다."),
     GOAL_FOUND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "GOAL500", "목표 조회에 실패했습니다."),
     GOAL_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "GOAL500", "목표 삭제에 실패했습니다."),
-    GOAL_DUPLICATE_TITLE(HttpStatus.CONFLICT, "GOAL409", "동일한 제목의 목표가 이미 존재합니다."),
     GOAL_NOT_FOUND(HttpStatus.NOT_FOUND, "GOAL404", "목표를 찾을 수 없습니다."),
     GOAL_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "GOAL400", "이미 완료된 목표입니다."),
     INVALID_GOAL_DATE_RANGE(HttpStatus.BAD_REQUEST, "GOAL400", "유효하지 않은 목표 기간입니다."),

@@ -47,9 +47,6 @@ public class GoalServiceImpl implements GoalService {
         try {
             goalValidator.validateGoalCreation(requestDTO);
 
-            if (goalRepositoryFacade.existsActiveGoalByTitle(requestDTO.getTitle())) {
-                throw new GoalException(GoalExceptionType.GOAL_DUPLICATE_TITLE);
-            }
             Goal goal;
             if (userId != null) {
                 User userRef = User.builder()
@@ -121,10 +118,6 @@ public class GoalServiceImpl implements GoalService {
 
             if (requestDTO.getTitle() != null) {
                 goalValidator.validateTitle(requestDTO.getTitle());
-            }
-            if (goalRepositoryFacade.existsActiveGoalByTitleAndGoalIdNot(requestDTO.getTitle(),
-                goalId)) {
-                throw new GoalException(GoalExceptionType.GOAL_DUPLICATE_TITLE);
             }
             if (requestDTO.getStartDate() != null && requestDTO.getEndDate() != null) {
                 goalValidator.validateDateRange(requestDTO.getStartDate(), requestDTO.getEndDate());

@@ -154,8 +154,6 @@ class GoalServiceTest {
     @DisplayName("대목표 생성 성공 테스트")
     void createGoal_Success() {
         // given
-        when(goalRepositoryFacade.existsActiveGoalByTitle(validRequestDTO.getTitle())).thenReturn(
-            false);
 //        when(goalConverter.toEntity(validRequestDTO)).thenReturn(validGoal);
         when(goalRepositoryFacade.saveGoal(validGoal)).thenReturn(validGoal);
         when(goalConverter.toCreateResponseDTO(validGoal)).thenReturn(validResponseDTO);
@@ -176,8 +174,6 @@ class GoalServiceTest {
     @DisplayName("대목표 생성 - 제목이 비어있는 경우")
     void createGoal_EmptyTitle() {
         // given
-        when(goalRepositoryFacade.existsActiveGoalByTitle(validRequestDTO.getTitle())).thenReturn(
-            false);
         when(goalConverter.toEntity(eq(validRequestDTO), any(User.class))).thenReturn(
             validGoal);
         when(goalRepositoryFacade.saveGoal(validGoal)).thenReturn(validGoal);
@@ -334,8 +330,6 @@ class GoalServiceTest {
             .build();
 
         when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal);
-        when(goalRepositoryFacade.existsActiveGoalByTitleAndGoalIdNot("수정된 제목", goalId)).thenReturn(
-            false);
         when(goalConverter.toGoalResponseDTO((Goal) any())).thenReturn(expectedResponse);
 
         // when
@@ -379,8 +373,6 @@ class GoalServiceTest {
 
         when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal)
             .thenReturn(updatedGoal);
-        when(goalRepositoryFacade.existsActiveGoalByTitleAndGoalIdNot("수정된 제목", goalId)).thenReturn(
-            false);
         when(goalConverter.toGoalResponseDTO(updatedGoal)).thenReturn(expectedResponse);
 
         // when
@@ -463,8 +455,7 @@ class GoalServiceTest {
             .title("기존 제목")
             .build();
 
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal);
-        when(goalRepositoryFacade.existsActiveGoalByTitleAndGoalIdNot(any(), any())).thenThrow(
+        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenThrow(
             new RuntimeException("데이터베이스 오류"));
 
         // when & then
