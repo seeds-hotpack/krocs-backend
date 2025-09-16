@@ -1,5 +1,6 @@
 package com.hotpack.krocs.global.security.oauth2.service;
 
+import com.hotpack.krocs.global.security.oauth2.exception.CustomOAuth2AuthenticationException;
 import com.hotpack.krocs.global.security.oauth2.exception.OAuth2ErrorType;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,6 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
-import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -33,19 +33,12 @@ public class GoogleOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         String email = (String) attributes.get("email");
 
         if (accountId == null) {
-            throw new OAuth2AuthenticationException(
-                new OAuth2Error(OAuth2ErrorType.GOOGLE_ACCOUNT_ID_MISSING.getCode(),
-                    OAuth2ErrorType.GOOGLE_ACCOUNT_ID_MISSING.getMessage(),
-                    OAuth2ErrorType.GOOGLE_ACCOUNT_ID_MISSING.getUrl())
-            );
+            throw new CustomOAuth2AuthenticationException(
+                OAuth2ErrorType.GOOGLE_ACCOUNT_ID_MISSING);
         }
-        
+
         if (name == null) {
-            throw new OAuth2AuthenticationException(
-                new OAuth2Error(OAuth2ErrorType.GOOGLE_NAME_MISSING.getCode(),
-                    OAuth2ErrorType.GOOGLE_NAME_MISSING.getMessage(),
-                    OAuth2ErrorType.GOOGLE_NAME_MISSING.getUrl())
-            );
+            throw new CustomOAuth2AuthenticationException(OAuth2ErrorType.GOOGLE_NAME_MISSING);
         }
 
         Map<String, Object> customAttributes = new HashMap<>();
