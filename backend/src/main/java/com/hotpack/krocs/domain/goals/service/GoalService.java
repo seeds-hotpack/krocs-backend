@@ -23,9 +23,10 @@ public interface GoalService {
 
     void deleteGoal(Long userId, Long goalId);
 
-    SubGoalCreateResponseDTO createSubGoals(Long goalId, SubGoalCreateRequestDTO requestDTO);
+    SubGoalCreateResponseDTO createSubGoals(Long userId, Long goalId,
+        SubGoalCreateRequestDTO requestDTO);
 
-    SubGoalListResponseDTO getAllSubGoals(Long goalId);
+    SubGoalListResponseDTO getAllSubGoals(Long userId, Long goalId);
 
-    SubGoalResponseDTO getSubGoal(Long goalId, Long subGoalId);
+    SubGoalResponseDTO getSubGoal(Long userId, Long goalId, Long subGoalId);
 }
