@@ -86,6 +86,19 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
+    public List<GoalResponseDTO> getAllGoalByUser(Long userId) {
+        try {
+            List<Goal> goals = goalRepositoryFacade.findAllGoals();
+            return goalConverter.toGoalResponseDTO(goals);
+        } catch (GoalException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("대목표 전체 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            throw new GoalException(GoalExceptionType.GOAL_FOUND_FAILED);
+        }
+    }
+
+    @Override
     public GoalResponseDTO getGoalByGoalId(Long userId, Long goalId) {
         try {
             goalValidator.validateGoalIdParameter(goalId);

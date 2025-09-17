@@ -35,6 +35,10 @@ public class GoalRepositoryFacade {
         return goalRepository.findAllGoalsByStatus(Status.ACTIVE);
     }
 
+    public List<Goal> findAllGoals() {
+        return goalRepository.findAll();
+    }
+
     public Goal findActiveGoalById(Long goalId) {
         return goalRepository.findGoalByGoalIdAndStatus(goalId, Status.ACTIVE);
     }
