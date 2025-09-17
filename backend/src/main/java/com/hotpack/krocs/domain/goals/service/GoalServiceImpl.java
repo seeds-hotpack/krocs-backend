@@ -221,9 +221,6 @@ public class GoalServiceImpl implements GoalService {
             Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
 
             List<SubGoal> subGoals = subGoalRepositoryFacade.findActiveSubGoalsByGoal(goal);
-            if (subGoals.isEmpty()) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
-            }
             List<SubGoalResponseDTO> subGoalResponseDTOS = subGoalConverter.toSubGoalResponseListDTO(
                 subGoals);
 

@@ -31,12 +31,7 @@ public class SubGoalRepositoryFacade {
     }
 
     public List<SubGoal> findActiveSubGoalsByGoal(Goal goal) {
-        List<SubGoal> subGoals = subGoalRepository.findSubGoalsByGoalAndStatus(goal, Status.ACTIVE);
-        if (subGoals.isEmpty()) {
-            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
-        }
-
-        return subGoals;
+        return subGoalRepository.findSubGoalsByGoalAndStatus(goal, Status.ACTIVE);
     }
 
     public SubGoal findActiveSubGoalBySubGoalId(Long subGoalId) {

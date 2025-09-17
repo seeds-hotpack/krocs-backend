@@ -25,7 +25,7 @@ public class TemplateConverter {
         .title(requestDTO.getTitle())
         .priority(priority)
         .duration(requestDTO.getDuration())
-        .subTemplates(List.of()) // 초기 생성 시 빈 리스트 (추후 추가 가능)
+        .subTemplates(List.of())
         .build();
   }
 

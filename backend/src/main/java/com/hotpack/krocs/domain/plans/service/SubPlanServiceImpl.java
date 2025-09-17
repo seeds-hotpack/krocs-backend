@@ -87,8 +87,6 @@ public class SubPlanServiceImpl implements SubPlanService {
             Plan plan = planRepositoryFacade.findActivePlanById(planId);
 
             List<SubPlan> subPlans = subPlanRepositoryFacade.findActiveSubPlansByPlan(plan);
-
-            // 빈 리스트는 정상 응답으로 간주하고 그대로 반환
             List<SubPlanResponseDTO> subPlanResponseDTOs = subPlanConverter.toSubPlanResponseListDTO(
                 subPlans);
 
