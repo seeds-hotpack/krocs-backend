@@ -20,6 +20,7 @@ import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.user.domain.User;
+import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import java.time.LocalDate;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class GoalServiceImpl implements GoalService {
 
     private final SubGoalRepositoryFacade subGoalRepositoryFacade;
+    private final UserRepositoryFacade userRepositoryFacade;
     private final SubGoalConverter subGoalConverter;
     private final GoalRepositoryFacade goalRepositoryFacade;
     private final GoalConverter goalConverter;
@@ -46,16 +48,12 @@ public class GoalServiceImpl implements GoalService {
     public GoalCreateResponseDTO createGoal(GoalCreateRequestDTO requestDTO, Long userId) {
         try {
             goalValidator.validateGoalCreation(requestDTO);
-
-            Goal goal;
-            if (userId != null) {
-                User userRef = User.builder()
-                    .userId(userId)
-                    .build();
-                goal = goalConverter.toEntity(requestDTO, userRef);
-            } else {
-                goal = goalConverter.toEntity(requestDTO);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
             }
+
+            Goal goal = goalConverter.toEntity(requestDTO, user);
             Goal savedGoal = goalRepositoryFacade.saveGoal(goal);
 
             return goalConverter.toCreateResponseDTO(savedGoal);
@@ -70,11 +68,16 @@ public class GoalServiceImpl implements GoalService {
     @Override
     public List<GoalResponseDTO> getGoalByUser(Long userId, LocalDate date) {
         try {
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
+
             List<Goal> goals;
             if (date != null) {
-                goals = goalRepositoryFacade.findActiveGoalByDate(date);
+                goals = goalRepositoryFacade.findActiveGoalByUserAndDate(user, date);
             } else {
-                goals = goalRepositoryFacade.findAllActiveGoals();
+                goals = goalRepositoryFacade.findAllActiveGoalsByUser(user);
             }
             return goalConverter.toGoalResponseDTO(goals);
         } catch (GoalException e) {
@@ -89,8 +92,12 @@ public class GoalServiceImpl implements GoalService {
     public GoalResponseDTO getGoalByGoalId(Long userId, Long goalId) {
         try {
             goalValidator.validateGoalIdParameter(goalId);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
 
-            Goal existingGoal = goalRepositoryFacade.findActiveGoalById(goalId);
+            Goal existingGoal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
             if (existingGoal == null) {
                 throw new GoalException(GoalExceptionType.GOAL_NOT_FOUND);
             }
@@ -111,11 +118,17 @@ public class GoalServiceImpl implements GoalService {
         try {
             goalValidator.validateGoalIdParameter(goalId);
 
-            Goal existingGoal = goalRepositoryFacade.findActiveGoalById(goalId);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
+
+            Goal existingGoal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
             if (existingGoal == null) {
                 throw new GoalException(GoalExceptionType.GOAL_NOT_FOUND);
             }
 
+            // validator 추출
             if (requestDTO.getTitle() != null) {
                 goalValidator.validateTitle(requestDTO.getTitle());
             }
@@ -130,7 +143,7 @@ public class GoalServiceImpl implements GoalService {
             }
 
             existingGoal.updateFrom(requestDTO);
-            Goal updatedGoal = goalRepositoryFacade.findActiveGoalById(goalId);
+            Goal updatedGoal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
 
             return goalConverter.toGoalResponseDTO(updatedGoal);
 
@@ -151,7 +164,12 @@ public class GoalServiceImpl implements GoalService {
                 throw new GoalException(GoalExceptionType.GOAL_NOT_FOUND);
             }
 
-            Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
+
+            Goal goal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
             goal.delete();
 
         } catch (GoalException e) {
@@ -164,7 +182,7 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     @Transactional
-    public SubGoalCreateResponseDTO createSubGoals(Long goalId,
+    public SubGoalCreateResponseDTO createSubGoals(Long userId, Long goalId,
         SubGoalCreateRequestDTO requestDTO) {
         try {
             if (goalId == null) {
@@ -172,7 +190,12 @@ public class GoalServiceImpl implements GoalService {
             }
             validateSubGoalCreation(requestDTO);
 
-            Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
+
+            Goal goal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
             if (goal == null) {
                 throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_NOT_FOUND);
             }
@@ -212,13 +235,18 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public SubGoalListResponseDTO getAllSubGoals(Long goalId) {
+    public SubGoalListResponseDTO getAllSubGoals(Long userId, Long goalId) {
         try {
             if (goalId == null) {
                 throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_ID_IS_NULL);
             }
 
-            Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
+
+            Goal goal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
 
             List<SubGoal> subGoals = subGoalRepositoryFacade.findActiveSubGoalsByGoal(goal);
             List<SubGoalResponseDTO> subGoalResponseDTOS = subGoalConverter.toSubGoalResponseListDTO(
@@ -237,7 +265,7 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public SubGoalResponseDTO getSubGoal(Long goalId, Long subGoalId) {
+    public SubGoalResponseDTO getSubGoal(Long userId, Long goalId, Long subGoalId) {
         try {
             if (goalId == null) {
                 throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_ID_IS_NULL);
@@ -246,7 +274,12 @@ public class GoalServiceImpl implements GoalService {
                 throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_ID_IS_NULL);
             }
 
-            Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
+
+            Goal goal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
             List<SubGoal> subGoals = subGoalRepositoryFacade.findActiveSubGoalsByGoal(goal);
             SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subGoalId);
             if (!subGoals.contains(subGoal)) {
