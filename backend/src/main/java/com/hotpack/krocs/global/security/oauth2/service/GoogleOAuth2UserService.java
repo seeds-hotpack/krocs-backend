@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class NaverOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
+public class GoogleOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 
@@ -25,25 +25,20 @@ public class NaverOAuth2UserService implements OAuth2UserService<OAuth2UserReque
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oauth2User = delegate.loadUser(userRequest);
+        OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
-        Map<String, Object> attributes = oauth2User.getAttributes();
-
-        Map<String, Object> response = (Map<String, Object>) attributes.get("response");
-        if (response == null) {
-            throw new CustomOAuth2AuthenticationException(OAuth2ErrorType.NAVER_RESPONSE_MISSING);
-        }
-
-        String accountId = (String) response.get("id");
-        String name = (String) response.get("name");
-        String email = (String) response.get("email");
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        String accountId = (String) attributes.get("sub");
+        String name = (String) attributes.get("name");
+        String email = (String) attributes.get("email");
 
         if (accountId == null) {
-            throw new CustomOAuth2AuthenticationException(OAuth2ErrorType.NAVER_ACCOUNT_ID_MISSING);
+            throw new CustomOAuth2AuthenticationException(
+                OAuth2ErrorType.GOOGLE_ACCOUNT_ID_MISSING);
         }
 
         if (name == null) {
-            throw new CustomOAuth2AuthenticationException(OAuth2ErrorType.NAVER_NAME_MISSING);
+            throw new CustomOAuth2AuthenticationException(OAuth2ErrorType.GOOGLE_NAME_MISSING);
         }
 
         Map<String, Object> customAttributes = new HashMap<>();
@@ -52,7 +47,7 @@ public class NaverOAuth2UserService implements OAuth2UserService<OAuth2UserReque
         customAttributes.put("email", email);
 
         return new DefaultOAuth2User(
-            oauth2User.getAuthorities(),
+            oAuth2User.getAuthorities(),
             customAttributes,
             nameAttributeKey
         );

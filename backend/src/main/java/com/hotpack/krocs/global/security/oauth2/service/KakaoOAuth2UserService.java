@@ -1,7 +1,11 @@
 package com.hotpack.krocs.global.security.oauth2.service;
 
+import com.hotpack.krocs.global.security.oauth2.exception.CustomOAuth2AuthenticationException;
+import com.hotpack.krocs.global.security.oauth2.exception.OAuth2ErrorType;
+import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -16,11 +20,14 @@ public class KakaoOAuth2UserService implements OAuth2UserService<OAuth2UserReque
 
     private final DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
 
+    @Value("${NAME_ATTRIBUTE_KEY}")
+    private String nameAttributeKey;
+
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
-
         Map<String, Object> attrs = oAuth2User.getAttributes();
+
         Object idObj = attrs.get("id");
         String accountId = null;
         if (idObj instanceof Number num) {
@@ -29,18 +36,44 @@ public class KakaoOAuth2UserService implements OAuth2UserService<OAuth2UserReque
             accountId = str;
         }
 
-        Map<String, Object> kakaoAccount = (Map<String, Object>) attrs.get("kakao_account");
-        Map<String, Object> profile =
-            kakaoAccount != null ? (Map<String, Object>) kakaoAccount.get("profile") : null;
-        String name = profile != null ? (String) profile.get("nickname") : null;
+        if (accountId == null) {
+            throw new CustomOAuth2AuthenticationException(OAuth2ErrorType.KAKAO_ACCOUNT_ID_MISSING);
+        }
+
+        Map<String, Object> profile = extractProfile(attrs);
+        String name = (String) profile.get("nickname");
+        String email = (String) profile.get("email");
+
+        if (name == null) {
+            throw new CustomOAuth2AuthenticationException(OAuth2ErrorType.KAKAO_NAME_MISSING);
+        }
+
+        Map<String, Object> customAttributes = new HashMap<>();
+        customAttributes.put("accountId", accountId);
+        customAttributes.put("name", name);
+        customAttributes.put("email", email);
 
         return new DefaultOAuth2User(
             oAuth2User.getAuthorities(),
-            Map.of(
-                "accountId", accountId,
-                "name", name
-            ),
-            "accountId"
+            customAttributes,
+            nameAttributeKey
         );
+    }
+
+    private Map<String, Object> extractProfile(Map<String, Object> attribute) {
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attribute.get("kakao_account");
+
+        if (kakaoAccount == null) {
+            throw new CustomOAuth2AuthenticationException(
+                OAuth2ErrorType.KAKAO_KAKAO_ACCOUNT_MISSING);
+        }
+
+        Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+
+        if (profile == null) {
+            throw new CustomOAuth2AuthenticationException(OAuth2ErrorType.KAKAO_PROFILE_MISSING);
+        }
+
+        return profile;
     }
 }
