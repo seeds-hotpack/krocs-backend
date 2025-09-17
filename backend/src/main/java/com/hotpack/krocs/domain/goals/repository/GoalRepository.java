@@ -1,6 +1,7 @@
 package com.hotpack.krocs.domain.goals.repository;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
+import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.global.common.entity.Status;
 import java.time.LocalDate;
 import java.util.List;
@@ -15,11 +16,12 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     @Query("SELECT g FROM Goal g WHERE :date BETWEEN g.startDate AND g.endDate")
     List<Goal> findByDate(@Param("date") LocalDate date);
 
-    @Query("SELECT g FROM Goal g WHERE :date BETWEEN g.startDate AND g.endDate AND g.status = :status")
-    List<Goal> findGoalByDateAndStatus(@Param("date") LocalDate date,
+    @Query("SELECT g FROM Goal g WHERE :date BETWEEN g.startDate AND g.endDate AND g.status = :status AND g.user = :user")
+    List<Goal> findGoalByUserIdAndDateAndStatus(@Param("user") User user,
+        @Param("date") LocalDate date,
         @Param("status") Status status);
 
-    Goal findGoalByGoalIdAndStatus(Long goalId, Status status);
+    Goal findGoalByUserAndGoalIdAndStatus(User user, Long goalId, Status status);
 
     Goal findGoalByGoalId(Long goalId);
 
@@ -31,5 +33,5 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
 
     boolean existsByTitleAndGoalIdNotAndStatus(String title, Long goalId, Status status);
 
-    List<Goal> findAllGoalsByStatus(Status status);
+    List<Goal> findAllGoalsByUserAndStatus(User user, Status status);
 }
