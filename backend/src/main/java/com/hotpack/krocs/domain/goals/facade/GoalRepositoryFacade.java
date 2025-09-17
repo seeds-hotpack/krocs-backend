@@ -48,10 +48,6 @@ public class GoalRepositoryFacade {
         return goalRepository.existsGoalByGoalIdAndStatus(goalId, Status.ACTIVE);
     }
 
-    public boolean existsActiveGoalByTitle(String title) {
-        return goalRepository.existsGoalByTitleAndStatus(title, Status.ACTIVE);
-    }
-
     public boolean existsActiveGoalByTitleAndGoalIdNot(String title, Long goalId) {
         return goalRepository.existsByTitleAndGoalIdNotAndStatus(title, goalId, Status.ACTIVE);
     }

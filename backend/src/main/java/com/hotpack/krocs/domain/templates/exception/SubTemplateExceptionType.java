@@ -24,8 +24,7 @@ public enum SubTemplateExceptionType implements BaseCode {
     SUB_TEMPLATE_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SUBTEMPLATE500",
         "서브 탬플릿 삭제에 실패했습니다."),
     SUB_TEMPLATE_TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "SUBTEMPLATE400", "서브 탬플릿 제목이 너무 깁니다."),
-    SUB_TEMPLATE_DUPLICATE_TITLE(HttpStatus.CONFLICT, "SUBTEMPLATE409",
-        "동일한 제목의 서브 탬플릿이 이미 존재합니다."), SUB_TEMPLATE_SUB_TEMPLATE_ID_IS_NULL(HttpStatus.BAD_REQUEST,
+    SUB_TEMPLATE_SUB_TEMPLATE_ID_IS_NULL(HttpStatus.BAD_REQUEST,
         "SUBTEMPLATE400",
         "서브 템플릿 아이디가 null 입니다.");
 

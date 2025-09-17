@@ -54,12 +54,6 @@ public class TemplateRepositoryFacade {
         return template;
     }
 
-    public void existsActiveTemplateByTemplateTitle(String title) {
-        if (templateRepository.existsTemplateByTitleAndStatus(title, Status.ACTIVE)) {
-            throw new TemplateException(TemplateExceptionType.TEMPLATE_DUPLICATE_TITLE);
-        }
-    }
-
     @Transactional
     public void deleteActiveTemplate(Template template) {
         template.delete();

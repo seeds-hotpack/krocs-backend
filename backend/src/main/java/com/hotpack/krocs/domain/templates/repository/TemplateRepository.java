@@ -15,5 +15,4 @@ public interface TemplateRepository extends JpaRepository<Template, Long> {
 
     Template findTemplateByTemplateIdAndStatus(Long templateId, Status status);
 
-    boolean existsTemplateByTitleAndStatus(String title, Status status);
 }
