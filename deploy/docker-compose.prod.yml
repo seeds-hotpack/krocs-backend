@@ -24,9 +24,9 @@ services:
       timeout: 10s
       retries: 3
 
-  # Spring Boot Application (from ECR)
+  # Spring Boot Application (from Docker Hub)
   krocs-backend:
-    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+    image: ${DOCKER_HUB_USERNAME}/${DOCKER_HUB_REPOSITORY}:latest
     container_name: krocs-backend
     ports:
       - "8080:8080"  # 내부 통신용
