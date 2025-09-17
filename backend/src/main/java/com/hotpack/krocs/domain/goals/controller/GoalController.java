@@ -82,6 +82,7 @@ public class GoalController {
         }
     }
 
+    @Operation(summary = "소목표 조회", description = "소목표들를 조회합니다.")
     @GetMapping("/{goalId}/subgoals")
     public ApiResponse<SubGoalListResponseDTO> getSubGoals(
         @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
@@ -91,6 +92,7 @@ public class GoalController {
         return ApiResponse.success(response);
     }
 
+    @Operation(summary = "특정 소목표 조회", description = "특정 소목표를 조회합니다.")
     @GetMapping("/{goalId}/subgoals/{subGoalId}")
     public ApiResponse<SubGoalResponseDTO> getSubGoal(
         @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
