@@ -1,6 +1,5 @@
 package com.hotpack.krocs.domain.goals.controller;
 
-import com.hotpack.krocs.domain.auth.dto.UserSession;
 import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.SubGoalCreateRequestDTO;
@@ -50,10 +49,9 @@ public class GoalController {
     @PostMapping
     public ApiResponse<GoalCreateResponseDTO> createGoal(
         @Valid @RequestBody GoalCreateRequestDTO requestDTO,
-        @Login UserSession user
+        @Login Long userId
     ) {
         try {
-            Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
             GoalCreateResponseDTO responseDTO = goalService.createGoal(requestDTO, userId);
             return ApiResponse.success(responseDTO);
         } catch (GoalException e) {
@@ -66,12 +64,14 @@ public class GoalController {
     @Operation(summary = "소목표 생성", description = "소목표를 생성합니다.")
     @PostMapping("/{goalId}/subgoals")
     public ApiResponse<SubGoalCreateResponseDTO> createSubGoals(
+        @Login Long userId,
         @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
         Long goalId,
         @Valid @RequestBody @Parameter(description = "SubGoals", example = "{\"title\": \"소목표1\"}")
         SubGoalCreateRequestDTO subGoalCreateRequestDTO) {
         try {
-            SubGoalCreateResponseDTO responseDTO = goalService.createSubGoals(goalId,
+            // todo
+            SubGoalCreateResponseDTO responseDTO = goalService.createSubGoals(userId, goalId,
                 subGoalCreateRequestDTO);
 
             return ApiResponse.success(responseDTO);
@@ -84,21 +84,23 @@ public class GoalController {
 
     @GetMapping("/{goalId}/subgoals")
     public ApiResponse<SubGoalListResponseDTO> getSubGoals(
+        @Login Long userId,
         @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
         Long goalId
     ) {
-        SubGoalListResponseDTO response = goalService.getAllSubGoals(goalId);
+        SubGoalListResponseDTO response = goalService.getAllSubGoals(userId, goalId);
         return ApiResponse.success(response);
     }
 
     @GetMapping("/{goalId}/subgoals/{subGoalId}")
     public ApiResponse<SubGoalResponseDTO> getSubGoal(
+        @Login Long userId,
         @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
         Long goalId,
         @PathVariable @Parameter(description = "SubGoal ID", example = "23") @Positive(message = "{common.id.positive}")
         Long subGoalId
     ) {
-        SubGoalResponseDTO response = goalService.getSubGoal(goalId, subGoalId);
+        SubGoalResponseDTO response = goalService.getSubGoal(userId, goalId, subGoalId);
         return ApiResponse.success(response);
     }
 
@@ -106,13 +108,12 @@ public class GoalController {
     )
     @GetMapping
     public ApiResponse<List<GoalResponseDTO>> getGoal(
-        @Login UserSession user, @RequestParam(required = false) LocalDate date
+        @Login Long userId, @RequestParam(required = false) LocalDate date
     ) {
         try {
             if (date == null) {
                 date = LocalDate.now();
             }
-            Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
             List<GoalResponseDTO> responseDTO = goalService.getGoalByUser(userId, date);
             return ApiResponse.success(responseDTO);
         } catch (GoalException e) {
@@ -127,9 +128,8 @@ public class GoalController {
     @GetMapping("/{goalId}")
     public ApiResponse<GoalResponseDTO> getGoalById(
         @PathVariable @Positive(message = "{common.id.positive}") Long goalId,
-        @Login UserSession user) {
+        @Login Long userId) {
         try {
-            Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
             GoalResponseDTO responseDTO = goalService.getGoalByGoalId(userId, goalId);
             return ApiResponse.success(responseDTO);
         } catch (GoalException e) {
@@ -145,9 +145,8 @@ public class GoalController {
     public ApiResponse<GoalResponseDTO> updateGoalById(
         @PathVariable @Positive(message = "{common.id.positive}") Long goalId,
         @Valid @RequestBody GoalUpdateRequestDTO request,
-        @Login UserSession user) {
+        @Login Long userId) {
         try {
-            Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
             GoalResponseDTO responseDTO = goalService.updateGoalById(goalId, request, userId);
 
             return ApiResponse.success(responseDTO);
@@ -163,9 +162,8 @@ public class GoalController {
     @DeleteMapping("/{goalId}")
     public ApiResponse<Void> deleteGoal(
         @PathVariable @Positive(message = "{common.id.positive}") Long goalId,
-        @Login UserSession user) {
+        @Login Long userId) {
         try {
-            Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
             goalService.deleteGoal(userId, goalId);
             return ApiResponse.success();
         } catch (GoalException e) {
