@@ -70,7 +70,6 @@ public class GoalController {
         @Valid @RequestBody @Parameter(description = "SubGoals", example = "{\"title\": \"소목표1\"}")
         SubGoalCreateRequestDTO subGoalCreateRequestDTO) {
         try {
-            // todo
             SubGoalCreateResponseDTO responseDTO = goalService.createSubGoals(userId, goalId,
                 subGoalCreateRequestDTO);
 
