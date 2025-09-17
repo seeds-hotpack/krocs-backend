@@ -1,7 +1,5 @@
 package com.hotpack.krocs.domain.plans.converter;
 
-import com.hotpack.krocs.domain.goals.domain.Goal;
-import com.hotpack.krocs.domain.goals.domain.SubGoal;
 import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.domain.plans.dto.request.PlanCreateRequestDTO;
 import com.hotpack.krocs.domain.plans.dto.request.PlanUpdateRequestDTO;
@@ -20,7 +18,7 @@ public class PlanConverter {
 
     private final SubPlanConverter subPlanConverter;
 
-    public Plan toEntity(PlanCreateRequestDTO requestDTO, Goal goal, SubGoal subGoal) {
+    public Plan toEntity(PlanCreateRequestDTO requestDTO) {
         LocalDateTime startDateTime = requestDTO.getStartDateTime();
         LocalDateTime endDateTime = requestDTO.getEndDateTime();
 
@@ -35,8 +33,6 @@ public class PlanConverter {
         }
 
         return Plan.builder()
-            .goal(goal)
-            .subGoal(subGoal)
             .title(requestDTO.getTitle())
             .planCategory(requestDTO.getPlanCategory())
             .color(requestDTO.getColor())
@@ -47,7 +43,7 @@ public class PlanConverter {
             .build();
     }
 
-    public Plan toEntity(PlanCreateRequestDTO requestDTO, Goal goal, SubGoal subGoal, User user) {
+    public Plan toEntity(PlanCreateRequestDTO requestDTO, User user) {
         LocalDateTime startDateTime = requestDTO.getStartDateTime();
         LocalDateTime endDateTime = requestDTO.getEndDateTime();
 
@@ -63,8 +59,6 @@ public class PlanConverter {
 
         return Plan.builder()
             .user(user)
-            .goal(goal)
-            .subGoal(subGoal)
             .planCategory(requestDTO.getPlanCategory())
             .color(requestDTO.getColor())
             .title(requestDTO.getTitle())
@@ -95,14 +89,6 @@ public class PlanConverter {
             .completedAt(plan.getCompletedAt())
             .createdAt(plan.getCreatedAt())
             .updatedAt(plan.getUpdatedAt());
-
-        if (plan.getGoal() != null) {
-            builder.goalId(plan.getGoal().getGoalId());
-        }
-
-        if (plan.getSubGoal() != null) {
-            builder.subGoalId(plan.getSubGoal().getSubGoalId());
-        }
 
         return builder.build();
     }

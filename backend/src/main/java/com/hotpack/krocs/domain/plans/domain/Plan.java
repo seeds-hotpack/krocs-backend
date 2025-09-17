@@ -31,8 +31,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "plans", indexes = {
     @Index(name = "idx_plans_user_id", columnList = "user_id"),
-    @Index(name = "idx_plans_goal_id", columnList = "goal_id"),
-    @Index(name = "idx_plans_sub_goal_id", columnList = "sub_goal_id")
 })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,14 +46,6 @@ public class Plan extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "goal_id")
-    private Goal goal;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sub_goal_id")
-    private SubGoal subGoal;
 
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<SubPlan> subPlans;
@@ -103,7 +93,7 @@ public class Plan extends BaseTimeEntity {
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
 
-    public void updateFrom(PlanUpdateRequestDTO request, Goal goal, SubGoal subGoal) {
+    public void updateFrom(PlanUpdateRequestDTO request) {
         if (request.getTitle() != null) {
             this.title = request.getTitle();
         }
@@ -135,14 +125,6 @@ public class Plan extends BaseTimeEntity {
             } else {
                 this.completedAt = null;
             }
-        }
-
-        if (goal != null) {
-            this.goal = goal;
-        }
-
-        if (subGoal != null) {
-            this.subGoal = subGoal;
         }
     }
 

@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-drop-plan-goal-id-column
+      author: system
+      preConditions:
+        - onFail: MARK_RAN
+        - columnExists:
+            tableName: plans
+            columnName: goal_id
+      changes:
+        - dropColumn:
+            tableName: plans
+            columnName: goal_id
+
+  - changeSet:
+      id: 006-drop-plan-sub-goal-id-column
+      author: system
+      preConditions:
+        - onFail: MARK_RAN
+        - columnExists:
+            tableName: plans
+            columnName: sub_goal_id
+      changes:
+        - dropColumn:
+            tableName: plans
+            columnName: sub_goal_id

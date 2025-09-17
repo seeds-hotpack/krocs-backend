@@ -18,10 +18,6 @@ public class PlanResponseDTO {
 
     @JsonProperty("plan_id")
     private Long planId;
-    @JsonProperty("goal_id")
-    private Long goalId;
-    @JsonProperty("sub_goal_id")
-    private Long subGoalId;
 
     @JsonProperty("sub_plans")
     private List<SubPlanResponseDTO> subPlans;

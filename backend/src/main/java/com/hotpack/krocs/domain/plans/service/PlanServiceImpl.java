@@ -36,34 +36,18 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional
-    public PlanResponseDTO createPlan(PlanCreateRequestDTO requestDTO, Long userId,
-        Long subGoalId) {
+    public PlanResponseDTO createPlan(PlanCreateRequestDTO requestDTO, Long userId) {
         try {
-            planValidator.validatePlanCreation(requestDTO, subGoalId);
-
-            SubGoal subGoal = null;
-            Goal goal = null;
-
-            if (subGoalId != null) {
-                subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subGoalId);
-                if (subGoal == null) {
-                    throw new PlanException(PlanExceptionType.PLAN_SUB_GOAL_NOT_FOUND);
-                }
-
-                goal = subGoalRepositoryFacade.findActiveGoalBySubGoalId(subGoalId);
-                if (goal == null) {
-                    throw new PlanException(PlanExceptionType.PLAN_GOAL_NOT_FOUND);
-                }
-            }
+            planValidator.validatePlanCreation(requestDTO);
 
             Plan plan;
             if (userId != null) {
                 User userRef = User.builder()
                     .userId(userId)
                     .build();
-                plan = planConverter.toEntity(requestDTO, goal, subGoal, userRef);
+                plan = planConverter.toEntity(requestDTO, userRef);
             } else {
-                plan = planConverter.toEntity(requestDTO, goal, subGoal);
+                plan = planConverter.toEntity(requestDTO);
             }
             Plan savedPlan = planRepositoryFacade.savePlan(plan);
 
@@ -120,7 +104,7 @@ public class PlanServiceImpl implements PlanService {
 
     @Override
     @Transactional
-    public PlanResponseDTO updatePlanById(Long planId, Long subGoalId, PlanUpdateRequestDTO request,
+    public PlanResponseDTO updatePlanById(Long planId, PlanUpdateRequestDTO request,
         Long userId) {
         try {
             planValidator.validateUpdatePlan(planId);
@@ -128,16 +112,6 @@ public class PlanServiceImpl implements PlanService {
             Plan plan = planRepositoryFacade.findActivePlanById(planId);
             if (plan == null) {
                 throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
-            }
-
-            SubGoal subGoal = plan.getSubGoal();
-            Goal goal = plan.getGoal();
-            if (subGoalId != null) {
-                subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subGoalId);
-                if (subGoal == null) {
-                    throw new PlanException(PlanExceptionType.PLAN_SUB_GOAL_NOT_FOUND);
-                }
-                goal = subGoalRepositoryFacade.findActiveGoalBySubGoalId(subGoalId);
             }
 
             if (request.getTitle() != null) {
@@ -178,7 +152,7 @@ public class PlanServiceImpl implements PlanService {
             PlanUpdateRequestDTO updatePlanRequestDTO = planConverter.toUpdatePlanRequestDTO(
                 request, allDay, startDateTime, endDateTime);
 
-            plan.updateFrom(updatePlanRequestDTO, goal, subGoal);
+            plan.updateFrom(updatePlanRequestDTO);
 
             return planConverter.toEntity(plan);
         } catch (PlanException e) {

@@ -65,8 +65,6 @@ public class PlanConverterTest {
 
         validPlan = Plan.builder()
             .planId(1L)
-            .goal(validGoal)
-            .subGoal(validSubGoal)
             .title("테스트 일정")
             .planCategory(PlanCategory.STUDY)
             .color(Color.BLUE)
@@ -83,12 +81,10 @@ public class PlanConverterTest {
     @DisplayName("RequestDTO를 Plan 엔티티로 변환")
     void toEntity_Success() {
         // when
-        Plan result = planConverter.toEntity(validRequestDTO, validGoal, validSubGoal);
+        Plan result = planConverter.toEntity(validRequestDTO);
 
         // then
         assertThat(result.getTitle()).isEqualTo("테스트 일정");
-        assertThat(result.getGoal()).isEqualTo(validGoal);
-        assertThat(result.getSubGoal()).isEqualTo(validSubGoal);
         assertThat(result.getPlanCategory()).isEqualTo(PlanCategory.STUDY);
         assertThat(result.getColor()).isEqualTo(Color.BLUE);
         assertThat(result.getStartDateTime()).isEqualTo(LocalDateTime.of(2025, 8, 1, 9, 0));
@@ -107,7 +103,7 @@ public class PlanConverterTest {
             .build();
 
         // when
-        Plan result = planConverter.toEntity(allDayRequest, validGoal, validSubGoal);
+        Plan result = planConverter.toEntity(allDayRequest);
 
         // then
         assertThat(result.getAllDay()).isTrue();
@@ -127,7 +123,7 @@ public class PlanConverterTest {
             .build();
 
         // when
-        Plan result = planConverter.toEntity(request, validGoal, validSubGoal);
+        Plan result = planConverter.toEntity(request);
 
         // then
         assertThat(result.getAllDay()).isFalse();
@@ -149,7 +145,7 @@ public class PlanConverterTest {
             .build();
 
         // when
-        Plan result = planConverter.toEntity(request, validGoal, validSubGoal);
+        Plan result = planConverter.toEntity(request);
 
         // then
         assertThat(result.getAllDay()).isNull();
@@ -171,7 +167,7 @@ public class PlanConverterTest {
             .build();
 
         // when
-        Plan result = planConverter.toEntity(request, validGoal, validSubGoal);
+        Plan result = planConverter.toEntity(request);
 
         // then
         assertThat(result.getAllDay()).isTrue();
@@ -179,49 +175,12 @@ public class PlanConverterTest {
         assertThat(result.getEndDateTime()).isEqualTo(LocalDateTime.of(2025, 8, 1, 23, 59, 59));
     }
 
-    @Test
-    @DisplayName("Goal과 SubGoal이 모두 null인 경우")
-    void toEntity_Goal_SubGoal_Both_Null() {
-        // when
-        Plan result = planConverter.toEntity(validRequestDTO, null, null);
-
-        // then
-        assertThat(result.getGoal()).isNull();
-        assertThat(result.getSubGoal()).isNull();
-        assertThat(result.getTitle()).isEqualTo("테스트 일정");
-        assertThat(result.getIsCompleted()).isFalse();
-    }
-
-    @Test
-    @DisplayName("Goal만 null인 경우")
-    void toEntity_Goal_Null() {
-        // when
-        Plan result = planConverter.toEntity(validRequestDTO, null, validSubGoal);
-
-        // then
-        assertThat(result.getGoal()).isNull();
-        assertThat(result.getSubGoal()).isEqualTo(validSubGoal);
-        assertThat(result.getTitle()).isEqualTo("테스트 일정");
-    }
-
-    @Test
-    @DisplayName("SubGoal만 null인 경우")
-    void toEntity_SubGoal_Null() {
-        // when
-        Plan result = planConverter.toEntity(validRequestDTO, validGoal, null);
-
-        // then
-        assertThat(result.getGoal()).isEqualTo(validGoal);
-        assertThat(result.getSubGoal()).isNull();
-        assertThat(result.getTitle()).isEqualTo("테스트 일정");
-    }
 
     @Test
     @DisplayName("RequestDTO가 null인 경우")
     void toEntity_RequestDTO_Null() {
         // when & then
-        assertThatThrownBy(() -> planConverter.toEntity(null, validGoal, validSubGoal))
-            .isInstanceOf(NullPointerException.class);
+        assertThatThrownBy(() -> planConverter.toEntity((PlanCreateRequestDTO) null)).isInstanceOf(NullPointerException.class);
     }
 
     // 2. toEntity from Plan
@@ -234,11 +193,9 @@ public class PlanConverterTest {
 
         // then
         assertThat(result.getPlanId()).isEqualTo(1L);
-        assertThat(result.getGoalId()).isEqualTo(1L);
         assertThat(result.getTitle()).isEqualTo("테스트 일정");
         assertThat(result.getPlanCategory()).isEqualTo(PlanCategory.STUDY);
         assertThat(result.getColor()).isEqualTo(Color.BLUE);
-        assertThat(result.getSubGoalId()).isEqualTo(1L);
         assertThat(result.getStartDateTime()).isEqualTo(LocalDateTime.of(2025, 8, 1, 9, 0));
         assertThat(result.getEndDateTime()).isEqualTo(LocalDateTime.of(2025, 8, 1, 10, 0));
         assertThat(result.getAllDay()).isFalse();
@@ -249,59 +206,10 @@ public class PlanConverterTest {
     @DisplayName("Plan 객체가 null인 경우")
     void toCreateResponseDTO_PlanNull() {
         // when & then
-        assertThatThrownBy(() -> planConverter.toEntity(null))
+        assertThatThrownBy(() -> planConverter.toEntity((Plan) null))
             .isInstanceOf(NullPointerException.class);
     }
 
-    @Test
-    @DisplayName("Plan의 Goal이 null인 경우")
-    void toResponseDTO_Plan_Goal_Null() {
-        // given
-        Plan planWithNullGoal = Plan.builder()
-            .planId(1L)
-            .goal(null)
-            .subGoal(validSubGoal)
-            .title("Goal 없는 일정")
-            .planCategory(PlanCategory.ETC)
-            .color(Color.GREEN)
-            .allDay(false)
-            .isCompleted(false)
-            .build();
-
-        // when
-        PlanResponseDTO result = planConverter.toEntity(planWithNullGoal);
-
-        // then
-        assertThat(result.getPlanId()).isEqualTo(1L);
-        assertThat(result.getGoalId()).isNull();
-        assertThat(result.getSubGoalId()).isEqualTo(1L);
-        assertThat(result.getTitle()).isEqualTo("Goal 없는 일정");
-    }
-
-    @Test
-    @DisplayName("Plan의 SubGoal이 null인 경우")
-    void toResponseDTO_Plan_SubGoal_Null() {
-        // given
-        Plan planWithNullSubGoal = Plan.builder()
-            .planId(1L)
-            .goal(validGoal)
-            .subGoal(null)
-            .title("SubGoal 없는 일정")
-            .planCategory(PlanCategory.ETC)
-            .color(Color.GREEN)
-            .allDay(false)
-            .isCompleted(false)
-            .build();
-
-        // when
-        PlanResponseDTO result = planConverter.toEntity(planWithNullSubGoal);
-
-        // then
-        assertThat(result.getPlanId()).isEqualTo(1L);
-        assertThat(result.getGoalId()).isEqualTo(1L);
-        assertThat(result.getSubGoalId()).isNull();
-        assertThat(result.getTitle()).isEqualTo("SubGoal 없는 일정");
-    }
 
     @Test
     @DisplayName("Plan의 SubPlans가 null인 경우")
@@ -309,8 +217,6 @@ public class PlanConverterTest {
         // given
         Plan planWithNullSubPlans = Plan.builder()
             .planId(1L)
-            .goal(validGoal)
-            .subGoal(validSubGoal)
             .subPlans(null)
             .title("SubPlans null인 일정")
             .allDay(false)
@@ -331,8 +237,6 @@ public class PlanConverterTest {
         // given
         Plan planWithEmptySubPlans = Plan.builder()
             .planId(1L)
-            .goal(validGoal)
-            .subGoal(validSubGoal)
             .subPlans(List.of())
             .title("SubPlans 빈 리스트인 일정")
             .planCategory(PlanCategory.ETC)
@@ -356,8 +260,6 @@ public class PlanConverterTest {
         LocalDateTime completedTime = LocalDateTime.of(2025, 8, 1, 15, 0);
         Plan completedPlan = Plan.builder()
             .planId(1L)
-            .goal(validGoal)
-            .subGoal(validSubGoal)
             .title("완료된 일정")
             .planCategory(PlanCategory.ETC)
             .color(Color.GREEN)
@@ -385,8 +287,6 @@ public class PlanConverterTest {
             .title("일정 1")
             .planCategory(PlanCategory.ETC)
             .color(Color.GREEN)
-            .goal(validGoal)
-            .subGoal(validSubGoal)
             .allDay(false)
             .isCompleted(false)
             .build();
@@ -396,8 +296,6 @@ public class PlanConverterTest {
             .title("일정 2")
             .planCategory(PlanCategory.ETC)
             .color(Color.GREEN)
-            .goal(null)
-            .subGoal(null)
             .allDay(true)
             .isCompleted(true)
             .build();
@@ -411,11 +309,9 @@ public class PlanConverterTest {
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getPlanId()).isEqualTo(1L);
         assertThat(result.get(0).getTitle()).isEqualTo("일정 1");
-        assertThat(result.get(0).getGoalId()).isEqualTo(1L);
 
         assertThat(result.get(1).getPlanId()).isEqualTo(2L);
         assertThat(result.get(1).getTitle()).isEqualTo("일정 2");
-        assertThat(result.get(1).getGoalId()).isNull();
     }
 
     @Test

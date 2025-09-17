@@ -8,13 +8,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public interface PlanService {
-    PlanResponseDTO createPlan(PlanCreateRequestDTO requestDTO, Long userId, Long goalId);
+    PlanResponseDTO createPlan(PlanCreateRequestDTO requestDTO, Long userId);
 
     PlanListResponseDTO getPlans(LocalDate date, Long userId);
 
     PlanResponseDTO getPlanById(Long planId, Long userId);
 
-    PlanResponseDTO updatePlanById(Long planId, Long subGoalId, PlanUpdateRequestDTO request, Long userId);
+    PlanResponseDTO updatePlanById(Long planId, PlanUpdateRequestDTO request, Long userId);
 
     void deletePlan(Long planId, Long userId);
 }

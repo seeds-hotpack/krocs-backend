@@ -17,7 +17,7 @@ import org.springframework.util.StringUtils;
 @Transactional(readOnly = true)
 public class PlanValidator {
 
-    public void validatePlanCreation(PlanCreateRequestDTO requestDTO, Long subGoalId) {
+    public void validatePlanCreation(PlanCreateRequestDTO requestDTO) {
         Boolean allDay = requestDTO.getAllDay();
         if (allDay == null) {
             allDay = false;
@@ -25,7 +25,6 @@ public class PlanValidator {
 
         validateTitle(requestDTO.getTitle());
         validatePlanCategory(requestDTO.getPlanCategory());
-        validateSubGoalIdParameter(subGoalId);
         validateAllDayDateTime(allDay, requestDTO.getStartDateTime(), requestDTO.getEndDateTime());
     }
 
@@ -44,13 +43,6 @@ public class PlanValidator {
     private void validatePlanIdParameter(Long planId) {
         if (planId == null || planId <= 0) {
             throw new PlanException(PlanExceptionType.PLAN_INVALID_PLAN_ID);
-        }
-    }
-
-    public void validateSubGoalIdParameter(Long subGoalId) {
-        if (subGoalId == null) return;
-        if (subGoalId <= 0) {
-            throw new PlanException(PlanExceptionType.PLAN_INVALID_GOAL_ID);
         }
     }
 
