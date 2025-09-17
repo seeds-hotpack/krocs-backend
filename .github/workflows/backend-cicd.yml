@@ -128,6 +128,7 @@ jobs:
             export DB_URL="${{ secrets.DB_URL }}"
             export DB_USER="${{ secrets.DB_USER }}"
             export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
+            export SWAGGER_SERVER_URL="${{ secrets.SWAGGER_SERVER_URL }}"
             
             # 배포 디렉토리로 이동
             mkdir -p /home/ubuntu/krocs-deploy/nginx/conf.d
