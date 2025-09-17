@@ -102,7 +102,7 @@ public class GoalController {
         return ApiResponse.success(response);
     }
 
-    @Operation(summary = "활성 대목표 목록 조회", description = "사용자의 활성화된 대목표 목록을 조회합니다.")
+    @Operation(summary = "날짜 기준 활성 대목표 목록 조회", description = "사용자의 활성화된 대목표 목록을 조회합니다.")
     @GetMapping
     public ApiResponse<List<GoalResponseDTO>> getGoal(
         @Login UserSession user, @RequestParam(required = false) LocalDate date

@@ -21,7 +21,9 @@ import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.global.common.constant.ValidationConstants;
+import com.hotpack.krocs.global.common.util.SortUtils;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +91,15 @@ public class GoalServiceImpl implements GoalService {
     public List<GoalResponseDTO> getAllGoalByUser(Long userId) {
         try {
             List<Goal> goals = goalRepositoryFacade.findAllGoals();
-            return goalConverter.toGoalResponseDTO(goals);
+
+            List<GoalResponseDTO> goalResponseDTOs = goalConverter.toGoalResponseDTO(goals);
+
+            goalResponseDTOs.sort(Comparator
+                    .comparing(GoalResponseDTO::getEndDate)
+                    .thenComparing(goal -> SortUtils.sortByKoreanFirst(goal.getTitle()))
+                    .thenComparing(GoalResponseDTO::getGoalId));
+
+            return goalResponseDTOs;
         } catch (GoalException e) {
             throw e;
         } catch (Exception e) {
