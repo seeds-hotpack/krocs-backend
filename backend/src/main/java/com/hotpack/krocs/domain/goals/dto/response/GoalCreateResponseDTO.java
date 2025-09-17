@@ -14,8 +14,6 @@ public class GoalCreateResponseDTO {
 
     private final Long goalId;
 
-    private final Long userId;
-
     private final String title;
 
     private final Priority priority;
