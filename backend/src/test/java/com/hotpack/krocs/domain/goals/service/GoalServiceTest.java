@@ -289,12 +289,8 @@ class GoalServiceTest {
             .isCompleted(false)
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
-            .userId(user.getUserId())
             .build();
-
-        // when(goalConverter.toEntity(minimalRequest)).thenReturn(minimalGoal);
-        // when(goalRepositoryFacade.saveGoal(minimalGoal)).thenReturn(minimalGoal);
-        // when(goalConverter.toCreateResponseDTO(minimalGoal)).thenReturn(minimalResponse);
+        
         when(goalConverter.toCreateResponseDTO(any(Goal.class))).thenReturn(minimalResponse);
         when(goalRepositoryFacade.saveGoal(validGoal)).thenReturn(validGoal);
         when(goalConverter.toEntity(eq(minimalRequest), any(User.class))).thenReturn(
