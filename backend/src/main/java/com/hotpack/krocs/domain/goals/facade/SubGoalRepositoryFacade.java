@@ -25,11 +25,6 @@ public class SubGoalRepositoryFacade {
         return subGoalRepository.saveAll(subGoals);
     }
 
-    @Transactional
-    public SubGoal saveSubGoal(SubGoal subGoal) {
-        return subGoalRepository.save(subGoal);
-    }
-
     public List<SubGoal> findActiveSubGoalsByGoal(Goal goal) {
         return subGoalRepository.findSubGoalsByGoalAndStatus(goal, Status.ACTIVE);
     }
@@ -57,5 +52,11 @@ public class SubGoalRepositoryFacade {
         SubGoal subGoal = subGoalRepository.findSubGoalsBySubGoalIdAndStatus(subGoalId,
             Status.ACTIVE);
         return subGoal.getGoal();
+    }
+
+    public boolean existsValidSubGoal(Long userId, Long goalId,
+        Long subGoalId) {
+        return subGoalRepository.existsValidSubGoal(
+            userId, goalId, subGoalId, Status.ACTIVE);
     }
 }
