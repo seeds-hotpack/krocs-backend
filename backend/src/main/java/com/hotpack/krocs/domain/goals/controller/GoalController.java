@@ -2,21 +2,14 @@ package com.hotpack.krocs.domain.goals.controller;
 
 import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
-import com.hotpack.krocs.domain.goals.dto.request.SubGoalCreateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import com.hotpack.krocs.domain.goals.exception.GoalException;
 import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
-import com.hotpack.krocs.domain.goals.exception.SubGoalException;
-import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.service.GoalService;
 import com.hotpack.krocs.global.common.response.ApiResponse;
 import com.hotpack.krocs.global.security.annotation.Login;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -59,48 +52,6 @@ public class GoalController {
         } catch (Exception e) {
             throw new GoalException(GoalExceptionType.GOAL_CREATION_FAILED);
         }
-    }
-
-    @Operation(summary = "소목표 생성", description = "소목표를 생성합니다.")
-    @PostMapping("/{goalId}/subgoals")
-    public ApiResponse<SubGoalCreateResponseDTO> createSubGoals(
-        @Login Long userId,
-        @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
-        Long goalId,
-        @Valid @RequestBody @Parameter(description = "SubGoals", example = "{\"title\": \"소목표1\"}")
-        SubGoalCreateRequestDTO subGoalCreateRequestDTO) {
-        try {
-            SubGoalCreateResponseDTO responseDTO = goalService.createSubGoals(userId, goalId,
-                subGoalCreateRequestDTO);
-
-            return ApiResponse.success(responseDTO);
-        } catch (SubGoalException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_CREATE_FAILED);
-        }
-    }
-
-    @GetMapping("/{goalId}/subgoals")
-    public ApiResponse<SubGoalListResponseDTO> getSubGoals(
-        @Login Long userId,
-        @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
-        Long goalId
-    ) {
-        SubGoalListResponseDTO response = goalService.getAllSubGoals(userId, goalId);
-        return ApiResponse.success(response);
-    }
-
-    @GetMapping("/{goalId}/subgoals/{subGoalId}")
-    public ApiResponse<SubGoalResponseDTO> getSubGoal(
-        @Login Long userId,
-        @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
-        Long goalId,
-        @PathVariable @Parameter(description = "SubGoal ID", example = "23") @Positive(message = "{common.id.positive}")
-        Long subGoalId
-    ) {
-        SubGoalResponseDTO response = goalService.getSubGoal(userId, goalId, subGoalId);
-        return ApiResponse.success(response);
     }
 
     @Operation(summary = "대목표 목록 조회", description = "사용자의 대목표 목록을 조회합니다."
