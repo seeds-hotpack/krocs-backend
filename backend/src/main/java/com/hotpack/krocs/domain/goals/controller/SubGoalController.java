@@ -7,7 +7,6 @@ import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalUpdateResponseDTO;
 import com.hotpack.krocs.domain.goals.exception.SubGoalException;
 import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
-import com.hotpack.krocs.domain.goals.service.GoalService;
 import com.hotpack.krocs.domain.goals.service.SubGoalService;
 import com.hotpack.krocs.global.common.response.ApiResponse;
 import com.hotpack.krocs.global.security.annotation.Login;
@@ -33,7 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class SubGoalController {
 
     private final SubGoalService subGoalService;
-    private final GoalService goalService;
 
     @Operation(summary = "소목표 생성", description = "소목표를 생성합니다.")
     @PostMapping("/{goalId}/subgoals")
@@ -44,7 +42,7 @@ public class SubGoalController {
         @Valid @RequestBody @Parameter(description = "SubGoals", example = "{\"title\": \"소목표1\"}")
         SubGoalCreateRequestDTO subGoalCreateRequestDTO) {
         try {
-            SubGoalCreateResponseDTO responseDTO = goalService.createSubGoals(userId, goalId,
+            SubGoalCreateResponseDTO responseDTO = subGoalService.createSubGoals(userId, goalId,
                 subGoalCreateRequestDTO);
 
             return ApiResponse.success(responseDTO);
@@ -61,7 +59,7 @@ public class SubGoalController {
         @PathVariable @Parameter(description = "Goal ID", example = "1") @Positive(message = "{common.id.positive}")
         Long goalId
     ) {
-        SubGoalListResponseDTO response = goalService.getAllSubGoals(userId, goalId);
+        SubGoalListResponseDTO response = subGoalService.getAllSubGoals(userId, goalId);
         return ApiResponse.success(response);
     }
 
