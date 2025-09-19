@@ -7,7 +7,6 @@ import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -27,6 +26,4 @@ public interface GoalService {
         SubGoalCreateRequestDTO requestDTO);
 
     SubGoalListResponseDTO getAllSubGoals(Long userId, Long goalId);
-
-    SubGoalResponseDTO getSubGoal(Long userId, Long goalId, Long subGoalId);
 }
