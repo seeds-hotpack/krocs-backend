@@ -121,13 +121,22 @@ public class GoalController {
         }
     }
 
-    @Operation(summary = "대목표 전체 목록 조회", description = "사용자의 대목표 전체 목록을 조회합니다.")
-    @GetMapping("/all")
-    public ApiResponse<List<GoalResponseDTO>> getAllGoals(@Login UserSession user) {
+    @Operation(summary = "대목표 검색", description = "조건에 따라 대목표를 검색합니다.")
+    @GetMapping("/search")
+    public ApiResponse<List<GoalResponseDTO>> getGoals(
+            @Login UserSession user,
+            @RequestParam(required = false) @Parameter(description = "검색일", example = "2024-01-01")
+            LocalDate searchDate,
+            @RequestParam(required = false) @Parameter(description = "제목 키워드", example = "운동")
+            String keyword,
+            @RequestParam(required = false) @Parameter(description = "상태 필터 (IN_PROGRESS/COMPLETED/EXPIRED)", example = "IN_PROGRESS")
+            String status
+    ) {
         try {
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
-            List<GoalResponseDTO> responseDTO = goalService.getAllGoalByUser(userId);
-            return ApiResponse.success(responseDTO);
+
+            List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+            return ApiResponse.success(result);
         } catch (GoalException e) {
             throw e;
         } catch (Exception e) {

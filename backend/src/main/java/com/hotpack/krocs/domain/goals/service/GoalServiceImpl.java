@@ -4,10 +4,7 @@ import com.hotpack.krocs.domain.goals.converter.GoalConverter;
 import com.hotpack.krocs.domain.goals.converter.SubGoalConverter;
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.domain.SubGoal;
-import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
-import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
-import com.hotpack.krocs.domain.goals.dto.request.SubGoalCreateRequestDTO;
-import com.hotpack.krocs.domain.goals.dto.request.SubGoalRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.*;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
@@ -25,6 +22,8 @@ import com.hotpack.krocs.global.common.util.SortUtils;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -88,14 +87,39 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public List<GoalResponseDTO> getAllGoalByUser(Long userId) {
+    public List<GoalResponseDTO> getGoalsByUser(Long userId, LocalDate searchDate, String keyword, String status) {
         try {
-            List<Goal> goals = goalRepositoryFacade.findAllGoals();
+            GoalSearchRequestDTO searchRequest = goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status);
+
+            List<Goal> goals = goalRepositoryFacade.findGoalsWithFilters(
+                    userId,
+                    searchRequest.getKeyword(),
+                    searchRequest.getSearchDate()
+            );
+
+            if (searchRequest.getStatus() != null && !searchRequest.getStatus().isEmpty()) {
+                LocalDate now = LocalDate.now();
+                goals = goals.stream().filter(goal -> {
+                    switch (searchRequest.getStatus().toUpperCase()) {
+                        case "COMPLETED":
+                            return goal.getIsCompleted();
+                        case "IN_PROGRESS":
+                            return !goal.getIsCompleted() &&
+                                    (goal.getEndDate() == null || !goal.getEndDate().isBefore(now));
+                        case "EXPIRED":
+                            return !goal.getIsCompleted() &&
+                                    goal.getEndDate() != null && goal.getEndDate().isBefore(now);
+                        default:
+                            return true;
+                    }
+                }).collect(Collectors.toList());
+            }
 
             List<GoalResponseDTO> goalResponseDTOs = goalConverter.toGoalResponseDTO(goals);
 
             goalResponseDTOs.sort(Comparator
-                    .comparing(GoalResponseDTO::getEndDate)
+                    .comparing(GoalResponseDTO::getEndDate,
+                            Comparator.nullsLast(Comparator.naturalOrder()))
                     .thenComparing(goal -> SortUtils.sortByKoreanFirst(goal.getTitle()))
                     .thenComparing(GoalResponseDTO::getGoalId));
 

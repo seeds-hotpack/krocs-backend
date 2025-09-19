@@ -2,12 +2,15 @@ package com.hotpack.krocs.domain.goals.converter;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.domain.SubGoal;
+import com.hotpack.krocs.domain.goals.dto.request.GoalSearchRequestDTO;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import com.hotpack.krocs.global.common.entity.Priority;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -95,6 +98,14 @@ public class GoalConverter {
         .createdAt(goal.getCreatedAt())
         .updatedAt(goal.getUpdatedAt())
         .build();
+  }
+
+  public GoalSearchRequestDTO toGoalSearchRequestDTO(LocalDate searchDate, String keyword, String status) {
+    return GoalSearchRequestDTO.builder()
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
   }
 
   private int calculateCompletionPercentage(Goal goal) {
