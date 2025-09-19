@@ -263,35 +263,4 @@ public class GoalServiceImpl implements GoalService {
             throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_READ_FAILED);
         }
     }
-
-    @Override
-    public SubGoalResponseDTO getSubGoal(Long userId, Long goalId, Long subGoalId) {
-        try {
-            if (goalId == null) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_ID_IS_NULL);
-            }
-            if (subGoalId == null) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_ID_IS_NULL);
-            }
-
-            User user = userRepositoryFacade.findActiveUserByUserId(userId);
-            if (user == null) {
-                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
-            }
-
-            Goal goal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
-            List<SubGoal> subGoals = subGoalRepositoryFacade.findActiveSubGoalsByGoal(goal);
-            SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subGoalId);
-            if (!subGoals.contains(subGoal)) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_BELONG_TO_GOAL);
-            }
-            return subGoalConverter.toSubGoalResponseDTO(subGoal);
-
-        } catch (SubGoalException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("소목표 단건 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
-            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_READ_FAILED);
-        }
-    }
 }
