@@ -11,24 +11,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.hotpack.krocs.domain.goals.converter.GoalConverter;
-import com.hotpack.krocs.domain.goals.converter.SubGoalConverter;
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.domain.SubGoal;
 import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
-import com.hotpack.krocs.domain.goals.dto.request.SubGoalCreateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.SubGoalRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import com.hotpack.krocs.domain.goals.exception.GoalException;
 import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
-import com.hotpack.krocs.domain.goals.exception.SubGoalException;
-import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
-import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
 import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
@@ -53,14 +45,10 @@ class GoalServiceTest {
     @Mock
     private GoalRepositoryFacade goalRepositoryFacade;
     @Mock
-    private SubGoalRepositoryFacade subGoalRepositoryFacade;
-    @Mock
-    private SubGoalConverter subGoalConverter;
-    @Mock
     private UserRepositoryFacade userRepositoryFacade;
 
     @InjectMocks
-    private GoalServiceImpl goalService;
+    private GoalServiceImpl subGoalService;
 
     private GoalCreateRequestDTO validRequestDTO;
     private Goal validGoal;
@@ -69,16 +57,14 @@ class GoalServiceTest {
     @Mock
     private GoalConverter goalConverter;
 
-    //    private GoalServiceImpl goalService;
+    //    private GoalServiceImpl subGoalService;
     private GoalValidator goalValidator = new GoalValidator();
 
     private Goal existingGoal;
 
     private User user;
 
-    private SubGoalCreateRequestDTO validSubGoalCreateRequestDTO;
     private SubGoal validSubGoal;
-    private SubGoalResponseDTO validSubGoalResponseDTO;
     private SubGoalRequestDTO validSubGoalRequestDTO;
 
     @BeforeEach
@@ -90,9 +76,8 @@ class GoalServiceTest {
             .accountType(AccountType.LOCAL)
             .build();
 
-        goalService = new GoalServiceImpl(subGoalRepositoryFacade, userRepositoryFacade,
-            subGoalConverter,
-            goalRepositoryFacade, goalConverter, goalValidator);
+        subGoalService = new GoalServiceImpl(userRepositoryFacade, goalRepositoryFacade,
+            goalConverter, goalValidator);
 
         validRequestDTO = GoalCreateRequestDTO.builder()
             .title("테스트 목표")
@@ -126,21 +111,11 @@ class GoalServiceTest {
             .title("테스트 소목표1")
             .build();
 
-        validSubGoalCreateRequestDTO = SubGoalCreateRequestDTO.builder()
-            .subGoals(List.of(validSubGoalRequestDTO))
-            .build();
-
         validSubGoal = SubGoal.builder()
             .subGoalId(1L)
             .goal(validGoal)
             .title("테스트 소목표1")
             .isCompleted(false)
-            .build();
-
-        validSubGoalResponseDTO = SubGoalResponseDTO.builder()
-            .subGoalId(validSubGoal.getSubGoalId())
-            .title(validSubGoal.getTitle())
-            .isCompleted(validSubGoal.getIsCompleted())
             .build();
 
         existingGoal = Goal.builder()
@@ -158,7 +133,6 @@ class GoalServiceTest {
     @DisplayName("대목표 생성 성공 테스트")
     void createGoal_Success() {
         // given
-//        when(goalConverter.toEntity(validRequestDTO)).thenReturn(validGoal);
         when(goalRepositoryFacade.saveGoal(validGoal)).thenReturn(validGoal);
         when(goalConverter.toCreateResponseDTO(validGoal)).thenReturn(validResponseDTO);
         when(goalConverter.toEntity(eq(validRequestDTO), any(User.class))).thenReturn(
@@ -166,7 +140,7 @@ class GoalServiceTest {
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when
-        GoalCreateResponseDTO result = goalService.createGoal(validRequestDTO, 1L);
+        GoalCreateResponseDTO result = subGoalService.createGoal(validRequestDTO, 1L);
 
         // then
         assertThat(result).isNotNull();
@@ -185,7 +159,7 @@ class GoalServiceTest {
         when(goalConverter.toCreateResponseDTO(any(Goal.class))).thenReturn(validResponseDTO);
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when
-        GoalCreateResponseDTO result = goalService.createGoal(validRequestDTO, 1L);
+        GoalCreateResponseDTO result = subGoalService.createGoal(validRequestDTO, 1L);
 
         // then
         assertThat(result).isNotNull();
@@ -203,7 +177,7 @@ class GoalServiceTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> goalService.createGoal(invalidRequest, 1L))
+        assertThatThrownBy(() -> subGoalService.createGoal(invalidRequest, 1L))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_TITLE_EMPTY);
     }
@@ -217,7 +191,7 @@ class GoalServiceTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> goalService.createGoal(invalidRequest, 1L))
+        assertThatThrownBy(() -> subGoalService.createGoal(invalidRequest, 1L))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_TITLE_EMPTY);
     }
@@ -233,7 +207,7 @@ class GoalServiceTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> goalService.createGoal(invalidRequest, 1L))
+        assertThatThrownBy(() -> subGoalService.createGoal(invalidRequest, 1L))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType",
                 GoalExceptionType.INVALID_GOAL_DATE_RANGE);
@@ -247,7 +221,7 @@ class GoalServiceTest {
         when(goalRepositoryFacade.saveGoal(any())).thenThrow(new RuntimeException("데이터베이스 오류"));
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when & then
-        assertThatThrownBy(() -> goalService.createGoal(validRequestDTO, 1L))
+        assertThatThrownBy(() -> subGoalService.createGoal(validRequestDTO, 1L))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType",
                 GoalExceptionType.GOAL_CREATION_FAILED);
@@ -260,7 +234,7 @@ class GoalServiceTest {
         when(goalConverter.toEntity(any())).thenThrow(new RuntimeException("변환 오류"));
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when & then
-        assertThatThrownBy(() -> goalService.createGoal(validRequestDTO, 1L))
+        assertThatThrownBy(() -> subGoalService.createGoal(validRequestDTO, 1L))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType",
                 GoalExceptionType.GOAL_CREATION_FAILED);
@@ -290,14 +264,14 @@ class GoalServiceTest {
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
             .build();
-        
+
         when(goalConverter.toCreateResponseDTO(any(Goal.class))).thenReturn(minimalResponse);
         when(goalRepositoryFacade.saveGoal(validGoal)).thenReturn(validGoal);
         when(goalConverter.toEntity(eq(minimalRequest), any(User.class))).thenReturn(
             validGoal);
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when
-        GoalCreateResponseDTO result = goalService.createGoal(minimalRequest, 1L);
+        GoalCreateResponseDTO result = subGoalService.createGoal(minimalRequest, 1L);
 
         // then
         assertThat(result).isNotNull();
@@ -336,7 +310,7 @@ class GoalServiceTest {
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when
-        GoalResponseDTO result = goalService.updateGoalById(goalId, updateRequest, 1L);
+        GoalResponseDTO result = subGoalService.updateGoalById(goalId, updateRequest, 1L);
 
         // then
         assertThat(result).isNotNull();
@@ -381,7 +355,7 @@ class GoalServiceTest {
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when
-        GoalResponseDTO result = goalService.updateGoalById(goalId, updateRequest, 1L);
+        GoalResponseDTO result = subGoalService.updateGoalById(goalId, updateRequest, 1L);
 
         // then
         assertThat(result).isNotNull();
@@ -405,7 +379,7 @@ class GoalServiceTest {
             new GoalException(GoalExceptionType.GOAL_NOT_FOUND));
 
         // when & then
-        assertThatThrownBy(() -> goalService.updateGoalById(goalId, updateRequest, 1L))
+        assertThatThrownBy(() -> subGoalService.updateGoalById(goalId, updateRequest, 1L))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_NOT_FOUND);
     }
@@ -424,7 +398,7 @@ class GoalServiceTest {
             existingGoal);
 
         // when & then
-        assertThatThrownBy(() -> goalService.updateGoalById(goalId, updateRequest, 1L))
+        assertThatThrownBy(() -> subGoalService.updateGoalById(goalId, updateRequest, 1L))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_TITLE_EMPTY);
     }
@@ -445,7 +419,7 @@ class GoalServiceTest {
             existingGoal);
 
         // when & then
-        assertThatThrownBy(() -> goalService.updateGoalById(goalId, updateRequest, 1L))
+        assertThatThrownBy(() -> subGoalService.updateGoalById(goalId, updateRequest, 1L))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType",
                 GoalExceptionType.INVALID_GOAL_DATE_RANGE);
@@ -470,7 +444,7 @@ class GoalServiceTest {
             new RuntimeException("데이터베이스 오류"));
 
         // when & then
-        assertThatThrownBy(() -> goalService.updateGoalById(goalId, updateRequest, 1L))
+        assertThatThrownBy(() -> subGoalService.updateGoalById(goalId, updateRequest, 1L))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_UPDATE_FAILED);
     }
@@ -490,7 +464,7 @@ class GoalServiceTest {
             existingGoal);
 
         // when & then
-        assertThatCode(() -> goalService.deleteGoal(userId, goalId))
+        assertThatCode(() -> subGoalService.deleteGoal(userId, goalId))
             .doesNotThrowAnyException();
 
         verify(goalRepositoryFacade).existsActiveGoalById(goalId);
@@ -506,7 +480,7 @@ class GoalServiceTest {
         when(goalRepositoryFacade.existsActiveGoalById(goalId)).thenReturn(false);
 
         // when & then
-        assertThatThrownBy(() -> goalService.deleteGoal(userId, goalId))
+        assertThatThrownBy(() -> subGoalService.deleteGoal(userId, goalId))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_NOT_FOUND);
 
@@ -525,7 +499,7 @@ class GoalServiceTest {
             .existsActiveGoalById(goalId);
 
         // when & then
-        assertThatThrownBy(() -> goalService.deleteGoal(userId, goalId))
+        assertThatThrownBy(() -> subGoalService.deleteGoal(userId, goalId))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_DELETE_FAILED);
     }
@@ -558,7 +532,7 @@ class GoalServiceTest {
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when
-        GoalResponseDTO result = goalService.getGoalByGoalId(userId, goalId);
+        GoalResponseDTO result = subGoalService.getGoalByGoalId(userId, goalId);
 
         // then
         assertThat(result).isNotNull();
@@ -575,7 +549,7 @@ class GoalServiceTest {
         Long userId = 1L;
 
         // when & then
-        assertThatThrownBy(() -> goalService.getGoalByGoalId(userId, goalId))
+        assertThatThrownBy(() -> subGoalService.getGoalByGoalId(userId, goalId))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType",
                 GoalExceptionType.GOAL_INVALID_GOAL_ID);
@@ -592,7 +566,7 @@ class GoalServiceTest {
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when & then
-        assertThatThrownBy(() -> goalService.getGoalByGoalId(userId, goalId))
+        assertThatThrownBy(() -> subGoalService.getGoalByGoalId(userId, goalId))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_NOT_FOUND);
     }
@@ -608,7 +582,7 @@ class GoalServiceTest {
             new RuntimeException("데이터베이스 오류"));
 
         // when & then
-        assertThatThrownBy(() -> goalService.getGoalByGoalId(userId, goalId))
+        assertThatThrownBy(() -> subGoalService.getGoalByGoalId(userId, goalId))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_FOUND_FAILED);
     }
@@ -634,7 +608,7 @@ class GoalServiceTest {
         when(goalConverter.toGoalResponseDTO(goalList)).thenReturn(expectedResponse);
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when
-        List<GoalResponseDTO> result = goalService.getGoalByUser(userId, date);
+        List<GoalResponseDTO> result = subGoalService.getGoalByUser(userId, date);
 
         // then
         assertThat(result).isNotNull();
@@ -662,7 +636,7 @@ class GoalServiceTest {
         when(goalConverter.toGoalResponseDTO(goalList)).thenReturn(expectedResponse);
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when
-        List<GoalResponseDTO> result = goalService.getGoalByUser(userId, date);
+        List<GoalResponseDTO> result = subGoalService.getGoalByUser(userId, date);
 
         // then
         assertThat(result).isNotNull();
@@ -683,7 +657,7 @@ class GoalServiceTest {
         when(goalConverter.toGoalResponseDTO(emptyGoalList)).thenReturn(emptyResponse);
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when
-        List<GoalResponseDTO> result = goalService.getGoalByUser(userId, date);
+        List<GoalResponseDTO> result = subGoalService.getGoalByUser(userId, date);
 
         // then
         assertThat(result).isNotNull();
@@ -702,284 +676,10 @@ class GoalServiceTest {
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when & then
-        assertThatThrownBy(() -> goalService.getGoalByUser(userId, date))
+        assertThatThrownBy(() -> subGoalService.getGoalByUser(userId, date))
             .isInstanceOf(GoalException.class)
             .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_FOUND_FAILED);
     }
 
-    @Test
-    @DisplayName("소목표 생성 성공 테스트")
-    void createSubGoals_Success() {
-        // given
-        List<SubGoalResponseDTO> subGoalListResponseDTO = List.of(validSubGoalResponseDTO);
-        ;
-        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.saveSubGoals(List.of(validSubGoal))).thenReturn(
-            List.of(validSubGoal));
-        when(subGoalConverter.toSubGoalResponseListDTO(any()))
-            .thenReturn(subGoalListResponseDTO);
-        when(subGoalConverter.toSubGoalEntityList(any(), any())).thenReturn(List.of(validSubGoal));
 
-        // when
-        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-        SubGoalCreateResponseDTO result = goalService.createSubGoals(1L, 1L,
-            validSubGoalCreateRequestDTO);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getGoalId()).isEqualTo(1L);
-        assertThat(result.getCreatedSubGoals()).isNotEmpty();
-        for (SubGoalResponseDTO subGoalRequestDTO : result.getCreatedSubGoals()) {
-            assertThat(subGoalRequestDTO.getSubGoalId()).isEqualTo(1L);
-            assertThat(subGoalRequestDTO.getTitle()).isEqualTo("테스트 소목표1");
-            assertThat(subGoalRequestDTO.getIsCompleted()).isEqualTo(false);
-        }
-    }
-
-    @Test
-    @DisplayName("소목표 생성 - GoalRepository에서 예외 발생")
-    void createSubGoal_GoalsRepositoryException() {
-        // given
-        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L)).thenThrow(
-            new RuntimeException("데이터베이스 오류"));
-
-        // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, 1L, validSubGoalCreateRequestDTO))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_CREATE_FAILED);
-    }
-
-    @Test
-    @DisplayName("소목표 생성 - Goal 조회 실패")
-    void createSubGoal_GoalsRepositoryNotFound() {
-        // given
-        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L))
-            .thenThrow(new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_NOT_FOUND));
-        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-
-        // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, 1L, validSubGoalCreateRequestDTO))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_GOAL_NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("소목표 생성 - SubGoalCreateRequest.subGoals()가 비어있는 리스트인 경우")
-    void createSubGoals_subGoalsIsEmpty() {
-        // given
-        SubGoalCreateRequestDTO invalidSubGoalCreateRequestDTO = SubGoalCreateRequestDTO
-            .builder()
-            .subGoals(new ArrayList<>())
-            .build();
-
-        // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, 1L, invalidSubGoalCreateRequestDTO))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_CREATE_EMPTY);
-    }
-
-    @Test
-    @DisplayName("소목표 생성 - SubGoalRequestDTO.title()이 Blank인 경우")
-    void createSubGoals_titleIsBlank() {
-        // given
-        SubGoalRequestDTO invalidSubGoalRequestDTO = SubGoalRequestDTO
-            .builder()
-            .title("")
-            .build();
-        SubGoalCreateRequestDTO invalidSubGoalCreateRequestDTO = SubGoalCreateRequestDTO
-            .builder()
-            .subGoals(List.of(invalidSubGoalRequestDTO))
-            .build();
-
-        // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, 1L, invalidSubGoalCreateRequestDTO))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_TITLE_EMPTY);
-    }
-
-    @Test
-    @DisplayName("소목표 생성 - SubGoalRequestDTO.title()이 200자를 초과하는 경우")
-    void createSubGoals_titleExceedsMaxLength() {
-        // given
-        SubGoalRequestDTO invalidSubGoalRequestDTO = SubGoalRequestDTO
-            .builder()
-            .title(
-                "123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901")
-            .build();
-        SubGoalCreateRequestDTO invalidSubGoalCreateRequestDTO = SubGoalCreateRequestDTO
-            .builder()
-            .subGoals(List.of(invalidSubGoalRequestDTO))
-            .build();
-
-        // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, 1L, invalidSubGoalCreateRequestDTO))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_TITLE_TOO_LONG);
-    }
-
-    @Test
-    @DisplayName("소목표 생성 - SubGoalRepository 저장 실패")
-    void createSubGoal_SubGoalsRepositoryException() {
-        // given
-        when(subGoalRepositoryFacade.saveSubGoals(any())).thenThrow(
-            new RuntimeException("데이터베이스 오류"));
-        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L)).thenReturn(validGoal);
-        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-
-        // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, 1L, validSubGoalCreateRequestDTO))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_CREATE_FAILED);
-    }
-
-    // SubGoal 전체 조회 test code
-    @Test
-    @DisplayName("소목표 전체 조회 성공")
-    void getAllSubGoals_Success() {
-        // given
-        List<SubGoal> subGoals = new ArrayList<>();
-        subGoals.add(validSubGoal);
-        subGoals.add(validSubGoal);
-        subGoals.add(validSubGoal);
-        subGoals.add(validSubGoal);
-        List<SubGoalResponseDTO> subGoalResponseDTOs = List.of(
-            validSubGoalResponseDTO,
-            validSubGoalResponseDTO,
-            validSubGoalResponseDTO,
-            validSubGoalResponseDTO
-        );
-
-        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(subGoals);
-        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L)).thenReturn(validGoal);
-        when(subGoalConverter.toSubGoalResponseListDTO(any())).thenReturn(subGoalResponseDTOs);
-        // when
-        SubGoalListResponseDTO subGoalListResponseDTO = goalService.getAllSubGoals(1L, 1L);
-
-        // then
-        assertThat(subGoalListResponseDTO.getSubGoals().size()).isEqualTo(4);
-        assertThat(subGoalListResponseDTO.getSubGoals().getFirst().getSubGoalId()).isEqualTo(1L);
-        assertThat(subGoalListResponseDTO.getSubGoals().getFirst().getIsCompleted()).isEqualTo(
-            false);
-        assertThat(subGoalListResponseDTO.getSubGoals().getFirst().getTitle()).isEqualTo(
-            "테스트 소목표1");
-    }
-
-    @Test
-    @DisplayName("소목표 전체 조회 - goalId가 null인 경우")
-    void getAllSubGoals_goalIdIsNull() {
-        // when & then
-        assertThatThrownBy(() -> goalService.getAllSubGoals(1L, null))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_GOAL_ID_IS_NULL);
-    }
-
-    @Test
-    @DisplayName("소목표 전체 조회 - SubGoalRepository에서 조회 중 예상치 못한 오류가 발생하는 경우")
-    void getAllSubGoals_SubGoalRepositoryException() {
-        // given
-        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(any())).thenThrow(
-            new RuntimeException());
-
-        // when & then
-        assertThatThrownBy(() -> goalService.getAllSubGoals(1L, 1L))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_READ_FAILED);
-    }
-
-    @Test
-    @DisplayName("소목표 전체 조회 성공 - 해당하는 소목표가 없을 때 빈 리스트 반환")
-    void getAllSubGoals_whenNoSubGoalsExist_returnsEmptyList() {
-        // given
-        Long goalId = 1L;
-
-        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenReturn(
-            existingGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(existingGoal)).thenReturn(
-            Collections.emptyList());
-        when(subGoalConverter.toSubGoalResponseListDTO(Collections.emptyList())).thenReturn(
-            Collections.emptyList());
-
-        // when
-        SubGoalListResponseDTO response = goalService.getAllSubGoals(1L, goalId);
-
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.getSubGoals()).isNotNull();
-        assertThat(response.getSubGoals()).isEmpty();
-    }
-
-    @Test
-    @DisplayName("소목표 단건 조회 성공")
-    void getSubGoal_Success() {
-        // given
-        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(
-            List.of(validSubGoal));
-        when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(1L)).thenReturn(validSubGoal);
-        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-
-        // when
-        SubGoalResponseDTO response = goalService.getSubGoal(1L, 1L, 1L);
-
-        // then
-        assertThat(response).isEqualTo(subGoalConverter.toSubGoalResponseDTO(validSubGoal));
-    }
-
-    @Test
-    @DisplayName("소목표 단건 조회 - subGoalId가 null인 경우")
-    void getSubGoal_subGoalIdIsNull() {
-        // when & then
-        assertThatThrownBy(() -> goalService.getSubGoal(1L, 1L, null))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_ID_IS_NULL);
-    }
-
-    @Test
-    @DisplayName("소목표 단건 조회 - SubGoalRepository 조회 결과 없는 경우")
-    void getSubGoal_subGoalRepositoryResultIsNull() {
-        // given
-        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(
-            List.of(validSubGoal));
-        when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(1L)).thenThrow(
-            new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND));
-        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-
-        // when & then
-        assertThatThrownBy(() -> goalService.getSubGoal(1L, 1L, validSubGoal.getSubGoalId()))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("소목표 단건 조회 - 소목표가 해당 목표에 속하지 않음")
-    void getSubGoal_SubGoalNotBelongToGoal() {
-        // given
-        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(
-            new ArrayList<>());
-        when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(1L)).thenReturn(validSubGoal);
-
-        // when & then
-        assertThatThrownBy(() -> goalService.getSubGoal(1L, 1L, validSubGoal.getSubGoalId()))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_NOT_BELONG_TO_GOAL);
-    }
 } 
