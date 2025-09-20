@@ -6,6 +6,7 @@ import com.hotpack.krocs.global.common.entity.Status;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -17,7 +18,7 @@ public interface SubGoalRepository extends JpaRepository<SubGoal, Long> {
 
     @Query(value = """
         SELECT EXISTS (
-            SELECT s
+            SELECT 1
             FROM sub_goal s
             JOIN goals g ON s.goal_id = g.goal_id
             JOIN users u ON g.user_id = u.user_id
@@ -27,7 +28,10 @@ public interface SubGoalRepository extends JpaRepository<SubGoal, Long> {
               AND s.status = :status
         )
         """, nativeQuery = true)
-    boolean existsValidSubGoal(Long userId,
-        Long goalId, Long subGoalId, Status status);
+    boolean existsValidSubGoal(
+        @Param("userId") Long userId,
+        @Param("goalId") Long goalId,
+        @Param("subGoalId") Long subGoalId,
+        @Param("status") Status status);
 
 }
