@@ -60,7 +60,7 @@ class SubPlanConverterTest {
             .build();
 
         // when
-        List<SubPlan> subPlans = subPlanConverter.toSubPlanEntityList(testPlan, createRequest);
+        List<SubPlan> subPlans = subPlanConverter.toEntityList(testPlan, createRequest);
 
         // then
         assertThat(subPlans).hasSize(2);
