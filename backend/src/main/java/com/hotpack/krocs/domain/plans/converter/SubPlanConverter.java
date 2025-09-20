@@ -22,7 +22,7 @@ public class SubPlanConverter {
             .build();
     }
 
-    public List<SubPlan> toSubPlanEntityList(Plan plan,
+    public List<SubPlan> toEntityList(Plan plan,
         SubPlanCreateRequestDTO subPlanCreateRequestDTO) {
         return subPlanCreateRequestDTO.getSubPlans().stream()
             .map(subPlanRequestDTO -> toEntity(plan, subPlanRequestDTO))
