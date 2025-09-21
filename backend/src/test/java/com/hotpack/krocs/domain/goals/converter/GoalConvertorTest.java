@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.GoalSearchRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
 import com.hotpack.krocs.global.common.entity.Priority;
@@ -281,5 +282,99 @@ class GoalConvertorTest {
     // then
     assertThat(result.getCreatedAt()).isNull();
     assertThat(result.getUpdatedAt()).isNull();
+  }
+
+  // ========== toGoalSearchRequestDTO 테스트 ==========
+
+  @Test
+  @DisplayName("GoalSearchRequestDTO 변환 성공 - 모든 필드 값 있음")
+  void toGoalSearchRequestDTO_Success_AllFields() {
+    // given
+    LocalDate searchDate = LocalDate.of(2024, 3, 15);
+    String keyword = "운동";
+    String status = "IN_PROGRESS";
+
+    // when
+    GoalSearchRequestDTO result = goalConvertor.toGoalSearchRequestDTO(searchDate, keyword, status);
+
+    // then
+    assertThat(result).isNotNull();
+    assertThat(result.getSearchDate()).isEqualTo(LocalDate.of(2024, 3, 15));
+    assertThat(result.getKeyword()).isEqualTo("운동");
+    assertThat(result.getStatus()).isEqualTo("IN_PROGRESS");
+  }
+
+  @Test
+  @DisplayName("GoalSearchRequestDTO 변환 성공 - 모든 필드 null")
+  void toGoalSearchRequestDTO_Success_AllFieldsNull() {
+    // given
+    LocalDate searchDate = null;
+    String keyword = null;
+    String status = null;
+
+    // when
+    GoalSearchRequestDTO result = goalConvertor.toGoalSearchRequestDTO(searchDate, keyword, status);
+
+    // then
+    assertThat(result).isNotNull();
+    assertThat(result.getSearchDate()).isNull();
+    assertThat(result.getKeyword()).isNull();
+    assertThat(result.getStatus()).isNull();
+  }
+
+  @Test
+  @DisplayName("GoalSearchRequestDTO 변환 성공 - 일부 필드만 값 있음")
+  void toGoalSearchRequestDTO_Success_PartialFields() {
+    // given
+    LocalDate searchDate = LocalDate.of(2024, 6, 1);
+    String keyword = null;
+    String status = "COMPLETED";
+
+    // when
+    GoalSearchRequestDTO result = goalConvertor.toGoalSearchRequestDTO(searchDate, keyword, status);
+
+    // then
+    assertThat(result).isNotNull();
+    assertThat(result.getSearchDate()).isEqualTo(LocalDate.of(2024, 6, 1));
+    assertThat(result.getKeyword()).isNull();
+    assertThat(result.getStatus()).isEqualTo("COMPLETED");
+  }
+
+  @Test
+  @DisplayName("GoalSearchRequestDTO 변환 성공 - 빈 문자열 처리")
+  void toGoalSearchRequestDTO_Success_EmptyStrings() {
+    // given
+    LocalDate searchDate = LocalDate.now();
+    String keyword = "";
+    String status = "";
+
+    // when
+    GoalSearchRequestDTO result = goalConvertor.toGoalSearchRequestDTO(searchDate, keyword, status);
+
+    // then
+    assertThat(result).isNotNull();
+    assertThat(result.getSearchDate()).isEqualTo(LocalDate.now());
+    assertThat(result.getKeyword()).isEqualTo("");
+    assertThat(result.getStatus()).isEqualTo("");
+  }
+
+  @Test
+  @DisplayName("GoalSearchRequestDTO 변환 성공 - 다양한 상태값")
+  void toGoalSearchRequestDTO_Success_VariousStatusValues() {
+    // given & when & then
+    // IN_PROGRESS 상태
+    GoalSearchRequestDTO inProgressResult = goalConvertor.toGoalSearchRequestDTO(
+            LocalDate.now(), "키워드", "IN_PROGRESS");
+    assertThat(inProgressResult.getStatus()).isEqualTo("IN_PROGRESS");
+
+    // COMPLETED 상태
+    GoalSearchRequestDTO completedResult = goalConvertor.toGoalSearchRequestDTO(
+            LocalDate.now(), "키워드", "COMPLETED");
+    assertThat(completedResult.getStatus()).isEqualTo("COMPLETED");
+
+    // EXPIRED 상태
+    GoalSearchRequestDTO expiredResult = goalConvertor.toGoalSearchRequestDTO(
+            LocalDate.now(), "키워드", "EXPIRED");
+    assertThat(expiredResult.getStatus()).isEqualTo("EXPIRED");
   }
 } 
