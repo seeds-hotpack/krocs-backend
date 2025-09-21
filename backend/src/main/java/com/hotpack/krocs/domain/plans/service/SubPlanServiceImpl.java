@@ -166,7 +166,7 @@ public class SubPlanServiceImpl implements SubPlanService {
         boolean accessible = subPlanRepositoryFacade.existsValidSubPlan(userId, planId, subPlanId);
 
         if (!accessible) {
-            throw new SubPlanException(SubPlanExceptionType.SUB_PlAN_ACCESS_DENIED);
+            throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_ACCESS_DENIED);
         }
     }
 }
