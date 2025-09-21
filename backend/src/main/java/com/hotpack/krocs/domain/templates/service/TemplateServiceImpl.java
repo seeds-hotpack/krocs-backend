@@ -12,6 +12,7 @@ import com.hotpack.krocs.domain.templates.exception.TemplateExceptionType;
 import com.hotpack.krocs.domain.templates.facade.TemplateRepositoryFacade;
 import com.hotpack.krocs.domain.templates.validator.TemplateValidator;
 import com.hotpack.krocs.domain.user.domain.User;
+import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ import org.springframework.util.StringUtils;
 public class TemplateServiceImpl implements TemplateService {
 
     private final TemplateRepositoryFacade templateRepositoryFacade;
+    private final UserRepositoryFacade userRepositoryFacade;
     private final TemplateConverter templateConverter;
     private final TemplateValidator templateValidator;
 
@@ -36,17 +38,13 @@ public class TemplateServiceImpl implements TemplateService {
     public TemplateCreateResponseDTO createTemplate(TemplateCreateRequestDTO requestDTO,
         Long userId) {
         try {
-
             templateValidator.validateTemplateCreateDTO(requestDTO);
-            Template template;
-            if (userId != null) {
-                User userRef = User.builder()
-                    .userId(userId)
-                    .build();
-                template = templateConverter.toEntity(requestDTO, userRef);
-            } else {
-                template = templateConverter.toEntity(requestDTO);
+
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new TemplateException(TemplateExceptionType.TEMPLATE_USER_NOT_FOUND);
             }
+            Template template = templateConverter.toEntity(requestDTO, user);
             // templateValidator.validateTemplateBusiness(template); 유효성 검사 적용 이후
             Template savedTemplate = templateRepositoryFacade.save(template);
 
@@ -61,12 +59,13 @@ public class TemplateServiceImpl implements TemplateService {
     @Override
     public List<TemplateResponseDTO> getTemplatesByUserAndTitle(Long userId, String title) {
         try {
-            List<Template> templates;
 
+            List<Template> templates;
             if (StringUtils.hasText(title) && title.length() <= ValidationConstants.TITLE_MAX) {
-                templates = templateRepositoryFacade.findActiveTemplatesByTitle(title);
+                templates = templateRepositoryFacade.findActiveTemplatesByTitleAndUserId(title,
+                    userId);
             } else {
-                templates = templateRepositoryFacade.findAllActiveTemplates();
+                templates = templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId);
             }
 
             return templates.stream()
@@ -86,11 +85,15 @@ public class TemplateServiceImpl implements TemplateService {
         try {
             templateValidator.validateTemplateUpdateDTO(requestDTO);
 
-            Template template = templateRepositoryFacade.findActiveTemplateByTemplateId(templateId);
+            Template template = templateRepositoryFacade.findActiveTemplateByTemplateIdAndUserId(
+                templateId, userId);
+            if (template == null) {
+                throw new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND);
+            }
 
             template.updateFrom(requestDTO);
-            Template updatedTemplate = templateRepositoryFacade.findActiveTemplateByTemplateId(
-                templateId);
+            Template updatedTemplate = templateRepositoryFacade.findActiveTemplateByTemplateIdAndUserId(
+                templateId, userId);
 
             return templateConverter.toTemplateResponseDTO(updatedTemplate);
         } catch (TemplateException e) {
@@ -104,7 +107,11 @@ public class TemplateServiceImpl implements TemplateService {
     @Transactional
     public void deleteTemplate(Long templateId, Long userId) {
         try {
-            Template template = templateRepositoryFacade.findActiveTemplateByTemplateId(templateId);
+            Template template = templateRepositoryFacade.findActiveTemplateByTemplateIdAndUserId(
+                templateId, userId);
+            if (template == null) {
+                throw new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND);
+            }
 
             templateRepositoryFacade.deleteActiveTemplate(template);
         } catch (TemplateException e) {
