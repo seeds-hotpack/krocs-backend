@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -190,6 +191,18 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
         );
 
         return new ResponseEntity<>(body, headers, errorStatus.getHttpStatus());
+    }
+
+    @ExceptionHandler(value = PropertyReferenceException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePropertyReferenceException(
+        PropertyReferenceException e, WebRequest request) {
+        log.warn("잘못된 정렬 필드명입니다: {}", e.getMessage());
+
+        ErrorStatus errorStatus = ErrorStatus.INVALID_SORT_PARAMETER;
+
+        String errorMessage = String.format("'%s'은(는) 유효하지 않은 정렬 기준입니다.", e.getPropertyName());
+
+        return handleExceptionInternalFalse(e, errorStatus, HttpHeaders.EMPTY, errorStatus.getHttpStatus(), request, errorMessage);
     }
 
 

@@ -23,6 +23,7 @@ public enum ErrorStatus implements BaseCode {
     // 검증 에러
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "VALIDATION400", "입력값 검증 실패"),
     BAD_REQUEST_BODY(HttpStatus.BAD_REQUEST, "BAD_REQUEST_BODY400", "잘못된 데이터 타입"),
+    INVALID_SORT_PARAMETER(HttpStatus.BAD_REQUEST, "INVALID_SORT_PARAMETER400", "잘못된 정렬 기준입니다."),
 
     // 비즈니스 로직 에러
     BUSINESS_LOGIC_ERROR(HttpStatus.BAD_REQUEST, "BUSINESS400", "비즈니스 로직 오류"),
