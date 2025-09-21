@@ -60,24 +60,6 @@ public class TemplateController {
         }
     }
 
-/*    @Operation(summary = "템플릿 전체 조회 및 검색", description = "사용자 ID 기반으로 템플릿을 조회하며, title 키워드로 부분 검색이 가능합니다.")
-    @GetMapping
-    public ApiResponse<List<TemplateResponseDTO>> getTemplates(
-        @Login Long userId,
-        @RequestParam(required = false) String title) {
-        try {
-            List<TemplateResponseDTO> responseDTO = templateService.getTemplatesByUserAndTitle(
-                userId, title);
-            return ApiResponse.success(responseDTO);
-
-        } catch (TemplateException e) {
-            throw e;
-
-        } catch (Exception e) {
-            throw new TemplateException(TemplateExceptionType.TEMPLATE_FOUND_FAILED);
-        }
-    }*/
-
     @Operation(summary = "템플릿 전체 조회 및 검색", description = "사용자 ID 기반으로 템플릿을 조회하며, title 키워드로 부분 검색이 가능합니다.")
     @GetMapping
     public ApiResponse<PageResponseDTO<TemplateResponseDTO>> getTemplates(

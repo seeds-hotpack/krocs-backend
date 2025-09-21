@@ -81,28 +81,6 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public List<TemplateResponseDTO> getTemplatesByUserAndTitle(Long userId, String title) {
-        try {
-
-            List<Template> templates;
-            if (StringUtils.hasText(title) && title.length() <= ValidationConstants.TITLE_MAX) {
-                templates = templateRepositoryFacade.findActiveTemplatesByTitleAndUserId(title,
-                    userId);
-            } else {
-                templates = templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId);
-            }
-
-            return templates.stream()
-                .map(templateConverter::toTemplateResponseDTO)
-                .toList();
-        } catch (TemplateException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new TemplateException(TemplateExceptionType.TEMPLATE_FOUND_FAILED);
-        }
-    }
-
-    @Override
     @Transactional
     public TemplateResponseDTO updateTemplate(Long templateId, Long userId,
         TemplateUpdateRequestDTO requestDTO) {

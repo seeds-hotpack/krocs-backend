@@ -34,15 +34,6 @@ public class TemplateRepositoryFacade {
         return templateRepository.findAllTemplatesByUser_UserIdAndStatus(userId, Status.ACTIVE, pageable);
     }
 
-    public List<Template> findActiveTemplatesByTitleAndUserId(String title, Long userId) {
-        return templateRepository.findTemplatesByTitleContainingIgnoreCaseAndUser_userIdAndStatus(
-            title, userId, Status.ACTIVE);
-    }
-
-    public List<Template> findAllActiveTemplatesAndUserId(Long userId) {
-        return templateRepository.findAllTemplatesByUser_UserIdAndStatus(userId, Status.ACTIVE);
-    }
-
     public Template findActiveTemplateByTemplateIdAndUserId(Long templateId, Long userId) {
         return templateRepository.findTemplateByTemplateIdAndUser_UserIdAndStatus(templateId,
             userId, Status.ACTIVE);

@@ -16,8 +16,6 @@ public interface TemplateService {
     PageResponseDTO<TemplateResponseDTO> getTemplatesByUserAndTitle(Long userId, String title,
         Pageable pageable);
 
-    List<TemplateResponseDTO> getTemplatesByUserAndTitle(Long userId, String title);
-
     TemplateResponseDTO updateTemplate(Long templateId, Long userId, TemplateUpdateRequestDTO requestDTO);
 
     void deleteTemplate(Long templateId, Long userId);
