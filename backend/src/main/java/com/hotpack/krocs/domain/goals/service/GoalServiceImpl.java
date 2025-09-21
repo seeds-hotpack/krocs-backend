@@ -69,24 +69,6 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public List<GoalResponseDTO> getGoalByUser(Long userId, LocalDate date) {
-        try {
-            List<Goal> goals;
-            if (date != null) {
-                goals = goalRepositoryFacade.findActiveGoalByDate(date);
-            } else {
-                goals = goalRepositoryFacade.findAllActiveGoals();
-            }
-            return goalConverter.toGoalResponseDTO(goals);
-        } catch (GoalException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("대목표 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
-            throw new GoalException(GoalExceptionType.GOAL_FOUND_FAILED);
-        }
-    }
-
-    @Override
     public List<GoalResponseDTO> getGoalsByUser(Long userId, LocalDate searchDate, String keyword, String status) {
         try {
             GoalSearchRequestDTO searchRequest = goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status);

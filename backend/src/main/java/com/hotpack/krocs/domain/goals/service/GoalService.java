@@ -16,8 +16,6 @@ public interface GoalService {
 
     GoalCreateResponseDTO createGoal(GoalCreateRequestDTO requestDTO, Long userId);
 
-    List<GoalResponseDTO> getGoalByUser(Long userId, LocalDate dateTime);
-
     List<GoalResponseDTO> getGoalsByUser(Long userId, LocalDate searchDate, String keyword, String status);
 
     GoalResponseDTO getGoalByGoalId(Long userId, Long goalId);
