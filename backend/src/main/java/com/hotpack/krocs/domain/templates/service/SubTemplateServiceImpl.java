@@ -1,5 +1,6 @@
 package com.hotpack.krocs.domain.templates.service;
 
+import com.hotpack.krocs.domain.plans.facade.SubPlanRepositoryFacade;
 import com.hotpack.krocs.domain.templates.converter.SubTemplateConverter;
 import com.hotpack.krocs.domain.templates.domain.SubTemplate;
 import com.hotpack.krocs.domain.templates.domain.Template;
@@ -12,6 +13,8 @@ import com.hotpack.krocs.domain.templates.exception.SubTemplateException;
 import com.hotpack.krocs.domain.templates.exception.SubTemplateExceptionType;
 import com.hotpack.krocs.domain.templates.facade.SubTemplateRepositoryFacade;
 import com.hotpack.krocs.domain.templates.facade.TemplateRepositoryFacade;
+import com.hotpack.krocs.domain.user.domain.User;
+import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +27,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class SubTemplateServiceImpl implements SubTemplateService {
 
     private final TemplateRepositoryFacade templateRepositoryFacade;
+    private final UserRepositoryFacade userRepositoryFacade;
     private final SubTemplateRepositoryFacade subTemplateRepositoryFacade;
 
     private final SubTemplateConverter subTemplateConverter;
+    private final SubPlanRepositoryFacade subPlanRepositoryFacade;
 
     @Override
     @Transactional
@@ -38,12 +43,25 @@ public class SubTemplateServiceImpl implements SubTemplateService {
                 throw new SubTemplateException(
                     SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_ID_IS_NULL);
             }
-            Template template = templateRepositoryFacade.findActiveParentTemplateByTemplateId(
-                templateId);
+
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new SubTemplateException(
+                    SubTemplateExceptionType.SUB_TEMPLATE_USER_NOT_FOUND);
+            }
+
+            Template template = templateRepositoryFacade.findActiveParentTemplateByTemplateIdAndUserId(
+                templateId, userId);
+            if (template == null) {
+                throw new SubTemplateException(
+                    SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_NOT_FOUND);
+            }
+
             List<SubTemplate> subTemplates = subTemplateConverter.toEntityList(template,
                 requestDTO);
             List<SubTemplate> createdSubTemplates = subTemplateRepositoryFacade.saveAll(
                 subTemplates);
+
             return subTemplateConverter.toCreateResponseDTO(createdSubTemplates);
 
         } catch (SubTemplateException e) {
@@ -55,15 +73,19 @@ public class SubTemplateServiceImpl implements SubTemplateService {
     }
 
     @Override
-    public List<SubTemplateResponseDTO> getSubTemplates(Long templateId) {
+    public List<SubTemplateResponseDTO> getSubTemplates(Long templateId, Long userId) {
         try {
             if (templateId == null) {
                 throw new SubTemplateException(
                     SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_ID_IS_NULL);
             }
 
-            Template template = templateRepositoryFacade.findActiveParentTemplateByTemplateId(
-                templateId);
+            Template template = templateRepositoryFacade.findActiveParentTemplateByTemplateIdAndUserId(
+                templateId, userId);
+            if (template == null) {
+                throw new SubTemplateException(
+                    SubTemplateExceptionType.SUB_TEMPLATE_TEMPLATE_NOT_FOUND);
+            }
 
             List<SubTemplate> subTemplates = subTemplateRepositoryFacade.findActiveSubTemplatesByTemplate(
                 template);
@@ -79,12 +101,14 @@ public class SubTemplateServiceImpl implements SubTemplateService {
 
     @Override
     @Transactional
-    public SubTemplateDeleteResponseDTO deleteSubTemplate(Long subTemplateId) {
+    public SubTemplateDeleteResponseDTO deleteSubTemplate(Long subTemplateId, Long templateId,
+        Long userId) {
         try {
             if (subTemplateId == null) {
                 throw new SubTemplateException(
                     SubTemplateExceptionType.SUB_TEMPLATE_SUB_TEMPLATE_ID_IS_NULL);
             }
+            validateSubTemplateAccess(userId, templateId, subTemplateId);
 
             Long deletedSubTemplateId = subTemplateRepositoryFacade.deleteActiveSubTemplateBySubTemplateId(
                 subTemplateId);
@@ -92,6 +116,7 @@ public class SubTemplateServiceImpl implements SubTemplateService {
             return SubTemplateDeleteResponseDTO.builder()
                 .subTemplateId(deletedSubTemplateId)
                 .build();
+
         } catch (SubTemplateException e) {
             throw e;
         } catch (Exception e) {
@@ -102,13 +127,15 @@ public class SubTemplateServiceImpl implements SubTemplateService {
 
     @Override
     @Transactional
-    public SubTemplateResponseDTO updateSubTemplate(Long subTemplateId,
-        SubTemplateUpdateRequestDTO requestDTO) {
+    public SubTemplateResponseDTO updateSubTemplate(Long subTemplateId, Long templateId,
+        Long userId, SubTemplateUpdateRequestDTO requestDTO) {
         try {
             if (subTemplateId == null) {
                 throw new SubTemplateException(
                     SubTemplateExceptionType.SUB_TEMPLATE_SUB_TEMPLATE_ID_IS_NULL);
             }
+
+            validateSubTemplateAccess(userId, templateId, subTemplateId);
 
             SubTemplate updatedSubTemplate = subTemplateRepositoryFacade.updateActiveSubTemplateBySubTemplateId(
                 subTemplateId, requestDTO);
@@ -119,6 +146,15 @@ public class SubTemplateServiceImpl implements SubTemplateService {
             throw e;
         } catch (Exception e) {
             throw new SubTemplateException(SubTemplateExceptionType.SUB_TEMPLATE_UPDATE_FAILED);
+        }
+    }
+
+    private void validateSubTemplateAccess(Long userId, Long templateId, Long subTemplateId) {
+        boolean accessible = subTemplateRepositoryFacade.existsValidSubTemplate(userId, templateId,
+            subTemplateId);
+
+        if (!accessible) {
+            throw new SubTemplateException(SubTemplateExceptionType.SUB_TEMPLATE_ACCESS_DENIED);
         }
     }
 }
