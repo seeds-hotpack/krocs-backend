@@ -14,9 +14,12 @@ import com.hotpack.krocs.domain.templates.validator.TemplateValidator;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import com.hotpack.krocs.global.common.constant.ValidationConstants;
+import com.hotpack.krocs.global.common.response.PageResponseDTO;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -53,6 +56,27 @@ public class TemplateServiceImpl implements TemplateService {
             throw e;
         } catch (Exception e) {
             throw new TemplateException(TemplateExceptionType.TEMPLATE_CREATION_FAILED);
+        }
+    }
+
+    @Override
+    public PageResponseDTO<TemplateResponseDTO> getTemplatesByUserAndTitle(Long userId,
+        String title, Pageable pageable) {
+        try {
+            Page<Template> templatePage;
+            if (StringUtils.hasText(title) && title.length() <= ValidationConstants.TITLE_MAX) {
+                templatePage = templateRepositoryFacade.findActiveTemplatesByTitleAndUserId(title,
+                    userId, pageable);
+            } else {
+                templatePage = templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId, pageable);
+            }
+
+            Page<TemplateResponseDTO> dtoPage = templatePage.map(templateConverter::toTemplateResponseDTO);
+
+            return PageResponseDTO.of(dtoPage);
+
+        } catch (Exception e) {
+            throw new TemplateException(TemplateExceptionType.TEMPLATE_FOUND_FAILED);
         }
     }
 
