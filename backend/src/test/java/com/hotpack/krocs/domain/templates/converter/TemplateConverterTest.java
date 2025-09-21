@@ -151,5 +151,24 @@ class TemplateConverterTest {
         assertThat(result.getSubTemplates().get(0).getTitle()).isEqualTo("소목표1");
     }
 
+    @Test
+    @DisplayName("비어있는 SubTemplate 리스트를 포함한 Template 엔티티를 응답 DTO로 변환")
+    void toCreateResponseDTO_WithEmptySubTemplates() {
+        // given
+        Template templateWithEmptyList = Template.builder()
+            .templateId(3L)
+            .title("빈 서브템플릿 템플릿")
+            .subTemplates(List.of()) // 명시적으로 비어있는 리스트
+            .build();
+
+        // when
+        TemplateCreateResponseDTO result = templateConverter.toCreateResponseDTO(templateWithEmptyList);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getSubTemplates()).isNotNull();
+        assertThat(result.getSubTemplates()).isEmpty();
+    }
+
 
 }

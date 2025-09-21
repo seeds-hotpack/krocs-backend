@@ -24,6 +24,7 @@ import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
 import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import com.hotpack.krocs.global.common.entity.Priority;
+import com.hotpack.krocs.global.common.response.PageResponseDTO;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +38,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class TemplateServiceTest {
@@ -360,6 +365,51 @@ class TemplateServiceTest {
         assertThat(exception.getTemplateExceptionType()).isEqualTo(
             TemplateExceptionType.TEMPLATE_NOT_FOUND);
     }
+
+    // ======= READ (PAGINATION) =======
+
+    @Test
+    @DisplayName("템플릿 페이지네이션 조회 성공 - 결과가 있을 경우")
+    void getTemplates_Pagination_Success() {
+        // given
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+        List<Template> templateList = List.of(validTemplate);
+        Page<Template> templatePage = new PageImpl<>(templateList, pageable, 1);
+
+        when(templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId, pageable))
+            .thenReturn(templatePage);
+
+        // when
+        PageResponseDTO<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(userId, null, pageable);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getPageNumber()).isEqualTo(0);
+        assertThat(result.getTotalElements()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("템플릿 페이지네이션 조회 성공 - 결과가 없는 경우")
+    void getTemplates_Pagination_EmptyResult() {
+        // given
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Template> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
+
+        when(templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId, pageable))
+            .thenReturn(emptyPage);
+
+        // when
+        PageResponseDTO<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(userId, null, pageable);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isEmpty();
+        assertThat(result.getTotalElements()).isEqualTo(0);
+    }
+
 
 
 }
