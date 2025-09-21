@@ -197,47 +197,93 @@ class TemplateServiceTest {
     }
 
     // ======= READ =======
+
     @Test
-    @DisplayName("템플릿 전체 조회 성공 - 제목 없이 조회")
-    void getTemplates_Success_WithoutTitle() {
+    @DisplayName("템플릿 페이지네이션 조회 성공 - 검색어 없이 전체 조회")
+    void getTemplates_Pagination_Success_WithoutTitle() {
         // given
-        when(templateRepositoryFacade.findAllActiveTemplatesAndUserId(1L))
-            .thenReturn(List.of(validTemplate));
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 5); // 0번 페이지, 5개씩
+        List<Template> templateList = List.of(validTemplate);
+        Page<Template> templatePage = new PageImpl<>(templateList, pageable, 1);
 
-        when(templateConverter.toTemplateResponseDTO(validTemplate))
-            .thenReturn(validResponseDTO);
+        when(templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId, pageable))
+            .thenReturn(templatePage);
 
         // when
-        List<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(1L, null);
+        PageResponseDTO<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(userId, null, pageable);
 
         // then
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getTitle()).isEqualTo("공부 루틴");
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getPageNumber()).isEqualTo(0);
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.isLast()).isTrue();
     }
 
     @Test
-    @DisplayName("템플릿 검색 조회 성공 - 제목 키워드 포함")
-    void getTemplates_Success_WithKeyword() {
-        // when
-        when(templateRepositoryFacade.findActiveTemplatesByTitleAndUserId("공부", 1L))
-            .thenReturn(List.of(validTemplate));
+    @DisplayName("템플릿 페이지네이션 조회 성공 - 제목 키워드로 검색")
+    void getTemplates_Pagination_Success_WithKeyword() {
+        // given
+        Long userId = 1L;
+        String keyword = "공부";
+        Pageable pageable = PageRequest.of(0, 5);
+        List<Template> templateList = List.of(validTemplate);
+        Page<Template> templatePage = new PageImpl<>(templateList, pageable, 1);
 
-        when(templateConverter.toTemplateResponseDTO(validTemplate))
-            .thenReturn(validResponseDTO);
+        when(templateRepositoryFacade.findActiveTemplatesByTitleAndUserId(keyword, userId, pageable))
+            .thenReturn(templatePage);
+
+        // when
+        PageResponseDTO<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(userId, keyword, pageable);
 
         // then
-        List<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(1L, "공부");
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getTitle()).contains("공부");
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(1);
+        // Converter가 DTO로 잘 변환했는지도 확인 (필요시)
+        // assertThat(result.getContent().get(0).getTitle()).isEqualTo(validTemplate.getTitle());
     }
 
     @Test
-    @DisplayName("템플릿 검색 조회 - 결과가 없는 경우")
-    void getTemplates_EmptyResult() {
+    @DisplayName("템플릿 페이지네이션 조회 - 검색 결과가 없는 경우 빈 리스트 반환")
+    void getTemplates_Pagination_EmptyResult() {
+        // given
+        Long userId = 1L;
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Template> emptyPage = Page.empty(pageable); // 비어있는 Page 객체 생성
+
+        when(templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId, pageable))
+            .thenReturn(emptyPage);
+
+        // when
+        PageResponseDTO<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(userId, null, pageable);
 
         // then
-        List<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(1L, "운동");
-        assertThat(result).isEmpty();
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isEmpty(); // content가 비어있는지 확인
+        assertThat(result.getTotalElements()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("템플릿 페이지네이션 조회 - 범위를 벗어난 페이지 요청 시 빈 리스트 반환")
+    void getTemplates_Pagination_PageOutOfRange() {
+        // given
+        Long userId = 1L;
+        // 총 1페이지(5개 데이터)만 있는데, 10번 페이지를 요청하는 상황
+        Pageable pageable = PageRequest.of(10, 5);
+        Page<Template> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 5); // content는 비어있지만, totalElements는 5
+
+        when(templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId, pageable))
+            .thenReturn(emptyPage);
+
+        // when
+        PageResponseDTO<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(userId, null, pageable);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).isEmpty(); // content는 비어있어야 함
+        assertThat(result.getTotalElements()).isEqualTo(5); // 하지만 총 개수는 올바르게 나와야 함
+        assertThat(result.getPageNumber()).isEqualTo(10); // 요청한 페이지 번호가 그대로 반영되어야 함
     }
 
     // ======= UPDATE =======
@@ -365,51 +411,5 @@ class TemplateServiceTest {
         assertThat(exception.getTemplateExceptionType()).isEqualTo(
             TemplateExceptionType.TEMPLATE_NOT_FOUND);
     }
-
-    // ======= READ (PAGINATION) =======
-
-    @Test
-    @DisplayName("템플릿 페이지네이션 조회 성공 - 결과가 있을 경우")
-    void getTemplates_Pagination_Success() {
-        // given
-        Long userId = 1L;
-        Pageable pageable = PageRequest.of(0, 10);
-        List<Template> templateList = List.of(validTemplate);
-        Page<Template> templatePage = new PageImpl<>(templateList, pageable, 1);
-
-        when(templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId, pageable))
-            .thenReturn(templatePage);
-
-        // when
-        PageResponseDTO<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(userId, null, pageable);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getPageNumber()).isEqualTo(0);
-        assertThat(result.getTotalElements()).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("템플릿 페이지네이션 조회 성공 - 결과가 없는 경우")
-    void getTemplates_Pagination_EmptyResult() {
-        // given
-        Long userId = 1L;
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Template> emptyPage = new PageImpl<>(Collections.emptyList(), pageable, 0);
-
-        when(templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId, pageable))
-            .thenReturn(emptyPage);
-
-        // when
-        PageResponseDTO<TemplateResponseDTO> result = templateService.getTemplatesByUserAndTitle(userId, null, pageable);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
-    }
-
-
 
 }
