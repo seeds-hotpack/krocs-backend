@@ -56,4 +56,9 @@ public class SubTemplateRepositoryFacade {
 
         return subTemplate;
     }
+
+    public boolean existsValidSubTemplate(Long userId, Long subTemplateId, Long templateId) {
+        return subTemplateRepository.existsValidSubTemplate(userId, subTemplateId, templateId,
+            Status.ACTIVE);
+    }
 }
