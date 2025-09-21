@@ -27,7 +27,7 @@ public enum SubPlanExceptionType implements BaseCode {
     SUB_PLAN_PLAN_ID_IS_NULL(HttpStatus.BAD_REQUEST, "SUBPLAN400", "일정 ID가 null 입니다."),
     SUB_PLAN_ID_IS_NULL(HttpStatus.BAD_REQUEST, "SUBPLAN400", "소계획 ID가 null 입니다."),
     SUB_PLAN_NOT_BELONG_TO_PLAN(HttpStatus.BAD_REQUEST, "SUBPLAN400", "소계획이 해당 일정에 속하지 않습니다."),
-    SUB_PlAN_ACCESS_DENIED(HttpStatus.NOT_FOUND, "SUBPLAN404", "해당 소계획에 접근할 수 없습니다.");
+    SUB_TEMPLATE_ACCESS_DENIED(HttpStatus.NOT_FOUND, "SUBPLAN404", "해당 소계획에 접근할 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
