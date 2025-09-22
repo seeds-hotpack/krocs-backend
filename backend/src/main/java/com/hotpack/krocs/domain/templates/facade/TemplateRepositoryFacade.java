@@ -1,8 +1,6 @@
 package com.hotpack.krocs.domain.templates.facade;
 
 import com.hotpack.krocs.domain.templates.domain.Template;
-import com.hotpack.krocs.domain.templates.exception.TemplateException;
-import com.hotpack.krocs.domain.templates.exception.TemplateExceptionType;
 import com.hotpack.krocs.domain.templates.repository.TemplateRepository;
 import com.hotpack.krocs.global.common.entity.Status;
 import java.util.List;
@@ -40,12 +38,8 @@ public class TemplateRepositoryFacade {
     }
 
     public Template findActiveParentTemplateByTemplateIdAndUserId(Long templateId, Long userId) {
-        Template template = templateRepository.findTemplateByTemplateIdAndUser_UserIdAndStatus(
+        return templateRepository.findTemplateByTemplateIdAndUser_UserIdAndStatus(
             templateId, userId, Status.ACTIVE);
-        if (template == null) {
-            throw new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND);
-        }
-        return template;
     }
 
     @Transactional
