@@ -103,7 +103,7 @@ public class GoalController {
     }
 
     @Operation(summary = "대목표 검색", description = "조건에 따라 대목표를 검색합니다.")
-    @GetMapping("/search")
+    @GetMapping
     public ApiResponse<List<GoalResponseDTO>> getGoals(
             @Login UserSession user,
             @RequestParam(required = false) @Parameter(description = "검색일", example = "2024-01-01")
