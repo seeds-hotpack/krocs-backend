@@ -104,19 +104,22 @@ public class GoalController {
         return ApiResponse.success(response);
     }
 
-    @Operation(summary = "대목표 목록 조회", description = "사용자의 대목표 목록을 조회합니다."
-    )
+    @Operation(summary = "대목표 검색", description = "조건에 따라 대목표를 검색합니다.")
     @GetMapping
-    public ApiResponse<List<GoalResponseDTO>> getGoal(
-        @Login UserSession user, @RequestParam(required = false) LocalDate date
+    public ApiResponse<List<GoalResponseDTO>> getGoals(
+            @Login UserSession user,
+            @RequestParam(required = false) @Parameter(description = "검색일", example = "2024-01-01")
+            LocalDate searchDate,
+            @RequestParam(required = false) @Parameter(description = "제목 키워드", example = "운동")
+            String keyword,
+            @RequestParam(required = false) @Parameter(description = "상태 필터 (IN_PROGRESS/COMPLETED/EXPIRED)", example = "IN_PROGRESS")
+            String status
     ) {
         try {
-            if (date == null) {
-                date = LocalDate.now();
-            }
             Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
-            List<GoalResponseDTO> responseDTO = goalService.getGoalByUser(userId, date);
-            return ApiResponse.success(responseDTO);
+
+            List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+            return ApiResponse.success(result);
         } catch (GoalException e) {
             throw e;
         } catch (Exception e) {
@@ -124,7 +127,7 @@ public class GoalController {
         }
     }
 
-    @Operation(summary = "특정 목표 상세 조회", description = "특정 목표의 상세 정보를 조회합니다."
+    @Operation(summary = "특정 대목표 상세 조회", description = "특정 대목표의 상세 정보를 조회합니다."
     )
     @GetMapping("/{goalId}")
     public ApiResponse<GoalResponseDTO> getGoalById(
@@ -141,7 +144,7 @@ public class GoalController {
         }
     }
 
-    @Operation(summary = "목표 수정", description = "기존 목표의 정보를 수정합니다."
+    @Operation(summary = "대목표 수정", description = "기존 대목표의 정보를 수정합니다."
     )
     @PatchMapping("/{goalId}")
     public ApiResponse<GoalResponseDTO> updateGoalById(
@@ -160,7 +163,7 @@ public class GoalController {
         }
     }
 
-    @Operation(summary = "목표 삭제", description = "기존 목표를 삭제합니다."
+    @Operation(summary = "대목표 삭제", description = "기존 대목표를 삭제합니다."
     )
     @DeleteMapping("/{goalId}")
     public ApiResponse<Void> deleteGoal(

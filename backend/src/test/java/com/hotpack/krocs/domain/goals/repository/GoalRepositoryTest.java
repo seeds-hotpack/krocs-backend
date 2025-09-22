@@ -168,20 +168,6 @@ class GoalRepositoryTest {
         assertThat(result).isEmpty();
     }
 
-//    @Test
-//    @DisplayName("날짜 범위 내 목표 조회 - 과거 날짜")
-//    void findByDateTime_PastDate() {
-//        // given
-//        LocalDate searchDate = LocalDate.of(2025, 6, 15);
-//
-//        // when
-//        List<Goal> result = goalRepository.findByDateTime(searchDate);
-//
-//        // then
-//        assertThat(result).hasSize(1);
-//        assertThat(result.get(0).getTitle()).isEqualTo("6월 목표");
-//    }
-
     @Test
     @DisplayName("날짜 범위 내 목표 조회 - null 날짜 필드가 있는 경우")
     void findByDateTime_WithNullDates() {
@@ -381,5 +367,239 @@ class GoalRepositoryTest {
         } catch (Exception e) {
             assertThat(e).isNotNull();
         }
+    }
+
+    // ========== findGoalsWithFilters 테스트 ==========
+
+    @Test
+    @DisplayName("필터 검색 - userId만 적용")
+    void findGoalsWithFilters_UserIdOnly() {
+        // given
+        Long userId = user.getUserId();
+        String keyword = null;
+        LocalDate searchDate = null;
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).hasSize(4);
+        assertThat(result).extracting(Goal::getTitle)
+                .containsExactlyInAnyOrder("7월 목표", "7-8월 목표", "8월 목표", "6월 목표");
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 키워드만 적용")
+    void findGoalsWithFilters_KeywordOnly() {
+        // given
+        Long userId = null;
+        String keyword = "7월";
+        LocalDate searchDate = null;
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitle()).isEqualTo("7월 목표");
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 날짜만 적용")
+    void findGoalsWithFilters_SearchDateOnly() {
+        // given
+        Long userId = null;
+        String keyword = null;
+        LocalDate searchDate = LocalDate.of(2025, 7, 25);
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(Goal::getTitle)
+                .containsExactlyInAnyOrder("7월 목표", "7-8월 목표");
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 모든 조건 적용")
+    void findGoalsWithFilters_AllFilters() {
+        // given
+        Long userId = user.getUserId();
+        String keyword = "7";
+        LocalDate searchDate = LocalDate.of(2025, 7, 25);
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(Goal::getTitle)
+                .containsExactlyInAnyOrder("7월 목표", "7-8월 목표");
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 키워드 대소문자 무시")
+    void findGoalsWithFilters_KeywordCaseInsensitive() {
+        // given
+        Long userId = null;
+        String keyword = "월"; // 한글 키워드
+        LocalDate searchDate = null;
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).hasSize(4);
+        assertThat(result).extracting(Goal::getTitle)
+                .containsExactlyInAnyOrder("7월 목표", "7-8월 목표", "8월 목표", "6월 목표");
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 부분 키워드 매칭")
+    void findGoalsWithFilters_PartialKeywordMatch() {
+        // given
+        Long userId = null;
+        String keyword = "8";
+        LocalDate searchDate = null;
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).hasSize(2);
+        assertThat(result).extracting(Goal::getTitle)
+                .containsExactlyInAnyOrder("7-8월 목표", "8월 목표");
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 빈 결과 (일치하는 키워드 없음)")
+    void findGoalsWithFilters_NoMatchingKeyword() {
+        // given
+        Long userId = null;
+        String keyword = "존재하지않는키워드";
+        LocalDate searchDate = null;
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 빈 결과 (날짜 범위 밖)")
+    void findGoalsWithFilters_NoMatchingDate() {
+        // given
+        Long userId = null;
+        String keyword = null;
+        LocalDate searchDate = LocalDate.of(2025, 12, 25);
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 존재하지 않는 userId")
+    void findGoalsWithFilters_NonExistentUserId() {
+        // given
+        Long userId = 999L;
+        String keyword = null;
+        LocalDate searchDate = null;
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 빈 키워드 문자열")
+    void findGoalsWithFilters_EmptyKeyword() {
+        // given
+        Long userId = null;
+        String keyword = "";
+        LocalDate searchDate = null;
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).hasSize(4);
+        assertThat(result).extracting(Goal::getTitle)
+                .containsExactlyInAnyOrder("7월 목표", "7-8월 목표", "8월 목표", "6월 목표");
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 날짜 경계값 테스트 (시작일)")
+    void findGoalsWithFilters_DateBoundary_StartDate() {
+        // given
+        Long userId = null;
+        String keyword = null;
+        LocalDate searchDate = LocalDate.of(2025, 7, 1); // 7월 목표의 시작일
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitle()).isEqualTo("7월 목표");
+    }
+
+    @Test
+    @DisplayName("필터 검색 - 날짜 경계값 테스트 (종료일)")
+    void findGoalsWithFilters_DateBoundary_EndDate() {
+        // given
+        Long userId = null;
+        String keyword = null;
+        LocalDate searchDate = LocalDate.of(2025, 7, 31); // 7월 목표의 종료일
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        assertThat(result).hasSizeGreaterThanOrEqualTo(1);
+        assertThat(result).extracting(Goal::getTitle).contains("7월 목표");
+    }
+
+    @Test
+    @DisplayName("필터 검색 - INACTIVE 상태 Goal 제외")
+    void findGoalsWithFilters_ExcludeInactiveGoals() {
+        // given
+        // INACTIVE 상태의 Goal 생성
+        Goal inactiveGoal = Goal.builder()
+                .title("비활성 목표")
+                .priority(Priority.MEDIUM)
+                .startDate(LocalDate.of(2025, 7, 1))
+                .endDate(LocalDate.of(2025, 7, 31))
+                .isCompleted(false)
+                .user(user)
+                .build();
+
+        entityManager.persistAndFlush(inactiveGoal);
+
+        // INACTIVE 상태로 설정하기 위해 직접 SQL 실행
+        entityManager.getEntityManager()
+                .createNativeQuery("UPDATE goals SET status = 'INACTIVE' WHERE goal_id = ?")
+                .setParameter(1, inactiveGoal.getGoalId())
+                .executeUpdate();
+        entityManager.flush();
+
+        Long userId = null;
+        String keyword = "목표";
+        LocalDate searchDate = LocalDate.of(2025, 7, 15);
+
+        // when
+        List<Goal> result = goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+
+        // then
+        // INACTIVE 상태의 Goal은 제외되고 ACTIVE 상태만 조회
+        assertThat(result).extracting(Goal::getTitle)
+                .contains("7월 목표", "7-8월 목표")
+                .doesNotContain("비활성 목표");
     }
 }

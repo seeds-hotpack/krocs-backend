@@ -31,8 +31,20 @@ public class GoalRepositoryFacade {
         return goalRepository.findGoalByDateAndStatus(date, Status.ACTIVE);
     }
 
+    public List<Goal> findGoalsWithFilters(Long userId, String keyword, LocalDate searchDate) {
+        return goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+    }
+
+    public List<Goal> findCompleteGoalByDate(LocalDate date) {
+        return goalRepository.findGoalByDateAndStatus(date, Status.INACTIVE);
+    }
+
     public List<Goal> findAllActiveGoals() {
         return goalRepository.findAllGoalsByStatus(Status.ACTIVE);
+    }
+
+    public List<Goal> findAllGoals() {
+        return goalRepository.findAll();
     }
 
     public Goal findActiveGoalById(Long goalId) {
