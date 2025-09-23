@@ -7,6 +7,8 @@ import com.hotpack.krocs.domain.plans.converter.PlanConverter;
 import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.domain.plans.dto.request.PlanCreateRequestDTO;
 import com.hotpack.krocs.domain.plans.dto.request.PlanUpdateRequestDTO;
+import com.hotpack.krocs.domain.plans.dto.response.DailyPlanSummaryDTO;
+import com.hotpack.krocs.domain.plans.dto.response.MonthlyPlanResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.PlanListResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.PlanResponseDTO;
 import com.hotpack.krocs.domain.plans.exception.PlanException;
@@ -17,7 +19,12 @@ import com.hotpack.krocs.domain.user.domain.User;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -178,6 +185,49 @@ public class PlanServiceImpl implements PlanService {
         } catch (Exception e) {
             log.error("계획 삭제 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
             throw new PlanException(PlanExceptionType.PLAN_DELETE_FAILED);
+        }
+    }
+
+    @Override
+    public MonthlyPlanResponseDTO getMonthlyPlans(int year, int month, Long userId) {
+        try {
+            planValidator.validateMonthlyPlanRequest(year, month);
+
+            List<Plan> monthlyPlans = planRepositoryFacade.findActivePlansByMonth(year, month, userId);
+
+            // 날짜별로 그룹핑
+            Map<LocalDate, List<Plan>> plansByDate = monthlyPlans.stream()
+                    .collect(Collectors.groupingBy(plan -> plan.getStartDateTime().toLocalDate()));
+
+            // 해당 월의 모든 날짜 생성 (1일부터 마지막일까지)
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+            List<DailyPlanSummaryDTO> dailyPlans = new ArrayList<>();
+
+            // 각 날짜별로 DailyPlanSummaryDTO 생성
+            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+                List<Plan> plansForDate = plansByDate.getOrDefault(date, Collections.emptyList());
+                List<PlanResponseDTO> planResponseDTOs = planConverter.toListPlanResponseDTO(plansForDate);
+
+                DailyPlanSummaryDTO dailySummary = DailyPlanSummaryDTO.builder()
+                        .date(date)
+                        .planCount(plansForDate.size())
+                        .plans(planResponseDTOs)
+                        .build();
+
+                dailyPlans.add(dailySummary);
+            }
+
+            return MonthlyPlanResponseDTO.builder()
+                    .year(year)
+                    .month(month)
+                    .dailyPlans(dailyPlans)
+                    .build();
+
+        } catch (Exception e) {
+            log.error("월별 일정 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            throw new PlanException(PlanExceptionType.PLAN_FOUND_FAILED);
         }
     }
 }
