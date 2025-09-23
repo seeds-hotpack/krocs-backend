@@ -3,6 +3,7 @@ package com.hotpack.krocs.domain.goals.service;
 import com.hotpack.krocs.domain.goals.converter.GoalConverter;
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.GoalSearchRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
@@ -11,8 +12,12 @@ import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
+import com.hotpack.krocs.global.common.util.SortUtils;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -53,24 +58,47 @@ public class GoalServiceImpl implements GoalService {
     }
 
     @Override
-    public List<GoalResponseDTO> getGoalByUser(Long userId, LocalDate date) {
+    public List<GoalResponseDTO> getGoalsByUser(Long userId, LocalDate searchDate, String keyword, String status) {
         try {
-            User user = userRepositoryFacade.findActiveUserByUserId(userId);
-            if (user == null) {
-                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            GoalSearchRequestDTO searchRequest = goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status);
+
+            List<Goal> goals = goalRepositoryFacade.findGoalsWithFilters(
+                    userId,
+                    searchRequest.getKeyword(),
+                    searchRequest.getSearchDate()
+            );
+
+            if (searchRequest.getStatus() != null && !searchRequest.getStatus().isEmpty()) {
+                LocalDate now = LocalDate.now();
+                goals = goals.stream().filter(goal -> {
+                    switch (searchRequest.getStatus().toUpperCase()) {
+                        case "COMPLETED":
+                            return goal.getIsCompleted();
+                        case "IN_PROGRESS":
+                            return !goal.getIsCompleted() &&
+                                    (goal.getEndDate() == null || !goal.getEndDate().isBefore(now));
+                        case "EXPIRED":
+                            return !goal.getIsCompleted() &&
+                                    goal.getEndDate() != null && goal.getEndDate().isBefore(now);
+                        default:
+                            return true;
+                    }
+                }).collect(Collectors.toList());
             }
 
-            List<Goal> goals;
-            if (date != null) {
-                goals = goalRepositoryFacade.findActiveGoalByUserAndDate(user, date);
-            } else {
-                goals = goalRepositoryFacade.findAllActiveGoalsByUser(user);
-            }
-            return goalConverter.toGoalResponseDTO(goals);
+            List<GoalResponseDTO> goalResponseDTOs = goalConverter.toGoalResponseDTO(goals);
+
+            goalResponseDTOs.sort(Comparator
+                    .comparing(GoalResponseDTO::getEndDate,
+                            Comparator.nullsLast(Comparator.naturalOrder()))
+                    .thenComparing(goal -> SortUtils.sortByKoreanFirst(goal.getTitle()))
+                    .thenComparing(GoalResponseDTO::getGoalId));
+
+            return goalResponseDTOs;
         } catch (GoalException e) {
             throw e;
         } catch (Exception e) {
-            log.error("대목표 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            log.error("대목표 전체 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
             throw new GoalException(GoalExceptionType.GOAL_FOUND_FAILED);
         }
     }
@@ -115,7 +143,6 @@ public class GoalServiceImpl implements GoalService {
                 throw new GoalException(GoalExceptionType.GOAL_NOT_FOUND);
             }
 
-            // validator 추출
             if (requestDTO.getTitle() != null) {
                 goalValidator.validateTitle(requestDTO.getTitle());
             }

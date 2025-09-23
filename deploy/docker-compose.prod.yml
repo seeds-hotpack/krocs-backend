@@ -24,9 +24,9 @@ services:
       timeout: 10s
       retries: 3
 
-  # Spring Boot Application (from ECR)
+  # Spring Boot Application (from Docker Hub)
   krocs-backend:
-    image: ${ECR_REGISTRY}/${ECR_REPOSITORY}:latest
+    image: ${DOCKER_HUB_USERNAME}/${DOCKER_HUB_REPOSITORY}:latest
     container_name: krocs-backend
     ports:
       - "8080:8080"  # 내부 통신용
@@ -34,9 +34,11 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - DB_URL=${DB_URL}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRINGDOC_SWAGGER_UI_SERVERS_0_URL=${SWAGGER_SERVER_URL}
+      - SPRINGDOC_SWAGGER_UI_SERVERS_0_DESCRIPTION=Production Server
     depends_on:
       redis:
         condition: service_healthy

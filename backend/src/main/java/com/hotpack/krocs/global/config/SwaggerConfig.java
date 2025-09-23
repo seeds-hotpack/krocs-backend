@@ -1,33 +1,47 @@
 package com.hotpack.krocs.global.config;
 
-import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.context.annotation.Configuration;
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import com.hotpack.krocs.global.security.annotation.Login;
-import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springdoc.core.customizers.OperationCustomizer;
+import com.hotpack.krocs.global.security.annotation.Login;
+
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Configuration
-@ConditionalOnClass(OpenAPIDefinition.class) // springdoc 없으면 자동 무시
-@OpenAPIDefinition(
-        info = @Info(title = "Krocs API", version = "v1", description = "Krocs API 명세서"),
-        security = {@SecurityRequirement(name = "bearerAuth")}
-)
-@SecurityScheme(
-        name = "bearerAuth",
-        type = SecuritySchemeType.HTTP,
-        bearerFormat = "JWT",
-        scheme = "bearer"
-)
+@ConditionalOnClass(OpenAPI.class)
 public class SwaggerConfig {
+
+    @Value("${SPRINGDOC_SWAGGER_UI_SERVERS_0_URL:http://localhost:8080}")
+    private String serverUrl;
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .info(new Info()
+                        .title("Krocs API")
+                        .version("v1")
+                        .description("Krocs API 명세서"))
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")))
+                .addServersItem(new Server()
+                        .url(serverUrl)
+                        .description("API Server"));
+    }
 
     @Bean
     public OperationCustomizer hideLoginArguments() {

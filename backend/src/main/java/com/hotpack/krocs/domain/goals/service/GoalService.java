@@ -1,6 +1,7 @@
 package com.hotpack.krocs.domain.goals.service;
 
 import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.GoalSearchRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
@@ -11,7 +12,7 @@ public interface GoalService {
 
     GoalCreateResponseDTO createGoal(GoalCreateRequestDTO requestDTO, Long userId);
 
-    List<GoalResponseDTO> getGoalByUser(Long userId, LocalDate dateTime);
+    List<GoalResponseDTO> getGoalsByUser(Long userId, LocalDate searchDate, String keyword, String status);
 
     GoalResponseDTO getGoalByGoalId(Long userId, Long goalId);
 
