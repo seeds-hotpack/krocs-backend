@@ -1,26 +1,22 @@
 package com.hotpack.krocs.domain.plans.service;
 
 
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.request.SubPlanCreateRequestDTO;
 import com.hotpack.krocs.domain.plans.dto.request.SubPlanUpdateRequestDTO;
 import com.hotpack.krocs.domain.plans.dto.response.SubPlanCreateResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.SubPlanListResponseDTO;
-import com.hotpack.krocs.domain.plans.dto.response.SubPlanResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.SubPlanUpdateResponseDTO;
-import org.springframework.stereotype.Service;
 
 public interface SubPlanService {
 
-    SubPlanCreateResponseDTO createSubPlans(Long planId,
+    SubPlanCreateResponseDTO createSubPlans(Long planId, Long userId,
         SubPlanCreateRequestDTO subPlanCreateRequestDTO);
 
-    SubPlanListResponseDTO getAllSubPlans(Long planId);
+    SubPlanListResponseDTO getAllSubPlans(Long planId, Long userId);
 
-    SubPlanResponseDTO getSubPlan(Long planId, Long subPlanId);
+    SubPlanUpdateResponseDTO updateSubPlan(Long subPlanId, Long planId, Long userId,
+        SubPlanUpdateRequestDTO requestDTO);
 
-    SubPlanUpdateResponseDTO updateSubPlan(Long subPlanId, SubPlanUpdateRequestDTO requestDTO);
-
-    void deleteSubPlan(Long subPlanId);
+    void deleteSubPlan(Long subPlanId, Long planId, Long userId);
 }
 

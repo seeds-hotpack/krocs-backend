@@ -21,11 +21,14 @@ import com.hotpack.krocs.domain.templates.exception.TemplateExceptionType;
 import com.hotpack.krocs.domain.templates.facade.TemplateRepositoryFacade;
 import com.hotpack.krocs.domain.templates.validator.TemplateValidator;
 import com.hotpack.krocs.domain.user.domain.User;
+import com.hotpack.krocs.domain.user.domain.enums.AccountType;
+import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import com.hotpack.krocs.global.common.entity.Priority;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +43,9 @@ class TemplateServiceTest {
 
     @Mock
     private TemplateRepositoryFacade templateRepositoryFacade;
+
+    @Mock
+    private UserRepositoryFacade userRepositoryFacade;
 
     @Spy
     private TemplateValidator templateValidator = new TemplateValidator(); // 수동 생성
@@ -56,9 +62,17 @@ class TemplateServiceTest {
     private TemplateCreateResponseDTO validCreateResponseDTO;
     private TemplateResponseDTO validResponseDTO;
     private SubTemplateResponseDTO subTemplateResponseDTO;
+    private User user;
 
     @BeforeEach
     void setUp() {
+        user = User.builder()
+            .name("박성열")
+            .email("qkrtjdduf@example.com")
+            .accountId("local-" + UUID.randomUUID())
+            .accountType(AccountType.LOCAL)
+            .build();
+
         validCreateRequestDTO = TemplateCreateRequestDTO.builder()
             .title("공부 루틴")
             .priority(Priority.HIGH)
@@ -104,6 +118,7 @@ class TemplateServiceTest {
     @DisplayName("템플릿 생성 성공 테스트")
     void createTemplate_Success() {
         // given
+        when(userRepositoryFacade.findActiveUserByUserId(3L)).thenReturn(user);
         when(templateConverter.toEntity(eq(validCreateRequestDTO), any(User.class))).thenReturn(
             validTemplate);
         when(templateRepositoryFacade.save(validTemplate)).thenReturn(validTemplate);
@@ -181,8 +196,7 @@ class TemplateServiceTest {
     @DisplayName("템플릿 전체 조회 성공 - 제목 없이 조회")
     void getTemplates_Success_WithoutTitle() {
         // given
-
-        when(templateRepositoryFacade.findAllActiveTemplates())
+        when(templateRepositoryFacade.findAllActiveTemplatesAndUserId(1L))
             .thenReturn(List.of(validTemplate));
 
         when(templateConverter.toTemplateResponseDTO(validTemplate))
@@ -200,7 +214,7 @@ class TemplateServiceTest {
     @DisplayName("템플릿 검색 조회 성공 - 제목 키워드 포함")
     void getTemplates_Success_WithKeyword() {
         // when
-        when(templateRepositoryFacade.findActiveTemplatesByTitle("공부"))
+        when(templateRepositoryFacade.findActiveTemplatesByTitleAndUserId("공부", 1L))
             .thenReturn(List.of(validTemplate));
 
         when(templateConverter.toTemplateResponseDTO(validTemplate))
@@ -251,7 +265,7 @@ class TemplateServiceTest {
         when(templateConverter.toTemplateResponseDTO(updatedEntity))
             .thenReturn(validResponseDTO);
 
-        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L))
+        when(templateRepositoryFacade.findActiveTemplateByTemplateIdAndUserId(1L, 1L))
             .thenReturn(existed).thenReturn(updatedEntity);
 
         // when
@@ -298,7 +312,7 @@ class TemplateServiceTest {
     @DisplayName("템플릿 수정 실패 - 존재하지 않는 템플릿")
     void updateTemplate_Fail_TemplateNotFound() {
         // when
-        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L))
+        when(templateRepositoryFacade.findActiveTemplateByTemplateIdAndUserId(1L, 1L))
             .thenThrow(new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND));
 
         TemplateException exception = catchThrowableOfType(
@@ -318,7 +332,7 @@ class TemplateServiceTest {
     @DisplayName("템플릿 삭제 성공")
     void deleteTemplate_Success() {
         // when
-        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L))
+        when(templateRepositoryFacade.findActiveTemplateByTemplateIdAndUserId(1L, 1L))
             .thenReturn(validTemplate);
 
         // then
@@ -333,7 +347,7 @@ class TemplateServiceTest {
     void deleteTemplate_Fail_TemplateNotFound() {
         // when
 
-        when(templateRepositoryFacade.findActiveTemplateByTemplateId(1L))
+        when(templateRepositoryFacade.findActiveTemplateByTemplateIdAndUserId(1L, 1L))
             .thenThrow(new TemplateException(TemplateExceptionType.TEMPLATE_NOT_FOUND));
 
         TemplateException exception = catchThrowableOfType(

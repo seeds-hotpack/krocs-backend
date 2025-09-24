@@ -1,23 +1,17 @@
 package com.hotpack.krocs.domain.goals.service;
 
 import com.hotpack.krocs.domain.goals.converter.GoalConverter;
-import com.hotpack.krocs.domain.goals.converter.SubGoalConverter;
 import com.hotpack.krocs.domain.goals.domain.Goal;
-import com.hotpack.krocs.domain.goals.domain.SubGoal;
-import com.hotpack.krocs.domain.goals.dto.request.*;
+import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.GoalSearchRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import com.hotpack.krocs.domain.goals.exception.GoalException;
 import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
-import com.hotpack.krocs.domain.goals.exception.SubGoalException;
-import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
-import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.user.domain.User;
-import com.hotpack.krocs.global.common.constant.ValidationConstants;
+import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import com.hotpack.krocs.global.common.util.SortUtils;
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -36,8 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class GoalServiceImpl implements GoalService {
 
-    private final SubGoalRepositoryFacade subGoalRepositoryFacade;
-    private final SubGoalConverter subGoalConverter;
+    private final UserRepositoryFacade userRepositoryFacade;
     private final GoalRepositoryFacade goalRepositoryFacade;
     private final GoalConverter goalConverter;
     private final GoalValidator goalValidator;
@@ -47,16 +40,12 @@ public class GoalServiceImpl implements GoalService {
     public GoalCreateResponseDTO createGoal(GoalCreateRequestDTO requestDTO, Long userId) {
         try {
             goalValidator.validateGoalCreation(requestDTO);
-
-            Goal goal;
-            if (userId != null) {
-                User userRef = User.builder()
-                    .userId(userId)
-                    .build();
-                goal = goalConverter.toEntity(requestDTO, userRef);
-            } else {
-                goal = goalConverter.toEntity(requestDTO);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
             }
+
+            Goal goal = goalConverter.toEntity(requestDTO, user);
             Goal savedGoal = goalRepositoryFacade.saveGoal(goal);
 
             return goalConverter.toCreateResponseDTO(savedGoal);
@@ -118,8 +107,12 @@ public class GoalServiceImpl implements GoalService {
     public GoalResponseDTO getGoalByGoalId(Long userId, Long goalId) {
         try {
             goalValidator.validateGoalIdParameter(goalId);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
 
-            Goal existingGoal = goalRepositoryFacade.findActiveGoalById(goalId);
+            Goal existingGoal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
             if (existingGoal == null) {
                 throw new GoalException(GoalExceptionType.GOAL_NOT_FOUND);
             }
@@ -140,7 +133,12 @@ public class GoalServiceImpl implements GoalService {
         try {
             goalValidator.validateGoalIdParameter(goalId);
 
-            Goal existingGoal = goalRepositoryFacade.findActiveGoalById(goalId);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
+
+            Goal existingGoal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
             if (existingGoal == null) {
                 throw new GoalException(GoalExceptionType.GOAL_NOT_FOUND);
             }
@@ -159,7 +157,7 @@ public class GoalServiceImpl implements GoalService {
             }
 
             existingGoal.updateFrom(requestDTO);
-            Goal updatedGoal = goalRepositoryFacade.findActiveGoalById(goalId);
+            Goal updatedGoal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
 
             return goalConverter.toGoalResponseDTO(updatedGoal);
 
@@ -180,7 +178,12 @@ public class GoalServiceImpl implements GoalService {
                 throw new GoalException(GoalExceptionType.GOAL_NOT_FOUND);
             }
 
-            Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
+
+            Goal goal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
             goal.delete();
 
         } catch (GoalException e) {
@@ -188,106 +191,6 @@ public class GoalServiceImpl implements GoalService {
         } catch (Exception e) {
             log.error("대목표 삭제 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
             throw new GoalException(GoalExceptionType.GOAL_DELETE_FAILED);
-        }
-    }
-
-    @Override
-    @Transactional
-    public SubGoalCreateResponseDTO createSubGoals(Long goalId,
-        SubGoalCreateRequestDTO requestDTO) {
-        try {
-            if (goalId == null) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_ID_IS_NULL);
-            }
-            validateSubGoalCreation(requestDTO);
-
-            Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
-            if (goal == null) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_NOT_FOUND);
-            }
-
-            List<SubGoal> subGoals = subGoalConverter.toSubGoalEntityList(goal, requestDTO);
-            List<SubGoal> createdSubGoals = subGoalRepositoryFacade.saveSubGoals(subGoals);
-            List<SubGoalResponseDTO> subGoalResponseDTOs = subGoalConverter.toSubGoalResponseListDTO(
-                createdSubGoals);
-
-            return SubGoalCreateResponseDTO
-                .builder()
-                .goalId(goalId)
-                .createdSubGoals(subGoalResponseDTOs)
-                .build();
-
-        } catch (SubGoalException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("소목표 생성 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
-            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_CREATE_FAILED);
-        }
-    }
-
-    private void validateSubGoalCreation(SubGoalCreateRequestDTO subGoalCreateRequestDTO) {
-        if (subGoalCreateRequestDTO.getSubGoals().isEmpty()) {
-            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_CREATE_EMPTY);
-        }
-
-        for (SubGoalRequestDTO subGoalRequestDTO : subGoalCreateRequestDTO.getSubGoals()) {
-            if (subGoalRequestDTO.getTitle().isBlank()) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_TITLE_EMPTY);
-            }
-            if (subGoalRequestDTO.getTitle().length() > ValidationConstants.TITLE_MAX) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_TITLE_TOO_LONG);
-            }
-        }
-    }
-
-    @Override
-    public SubGoalListResponseDTO getAllSubGoals(Long goalId) {
-        try {
-            if (goalId == null) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_ID_IS_NULL);
-            }
-
-            Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
-
-            List<SubGoal> subGoals = subGoalRepositoryFacade.findActiveSubGoalsByGoal(goal);
-            List<SubGoalResponseDTO> subGoalResponseDTOS = subGoalConverter.toSubGoalResponseListDTO(
-                subGoals);
-
-            return SubGoalListResponseDTO
-                .builder()
-                .subGoals(subGoalResponseDTOS)
-                .build();
-        } catch (SubGoalException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("소목표 전체 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
-            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_READ_FAILED);
-        }
-    }
-
-    @Override
-    public SubGoalResponseDTO getSubGoal(Long goalId, Long subGoalId) {
-        try {
-            if (goalId == null) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_ID_IS_NULL);
-            }
-            if (subGoalId == null) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_ID_IS_NULL);
-            }
-
-            Goal goal = goalRepositoryFacade.findActiveGoalById(goalId);
-            List<SubGoal> subGoals = subGoalRepositoryFacade.findActiveSubGoalsByGoal(goal);
-            SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subGoalId);
-            if (!subGoals.contains(subGoal)) {
-                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_BELONG_TO_GOAL);
-            }
-            return subGoalConverter.toSubGoalResponseDTO(subGoal);
-
-        } catch (SubGoalException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("소목표 단건 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
-            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_READ_FAILED);
         }
     }
 }

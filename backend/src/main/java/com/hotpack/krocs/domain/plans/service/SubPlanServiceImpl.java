@@ -34,7 +34,7 @@ public class SubPlanServiceImpl implements SubPlanService {
 
     @Override
     @Transactional
-    public SubPlanCreateResponseDTO createSubPlans(Long planId,
+    public SubPlanCreateResponseDTO createSubPlans(Long planId, Long userId,
         SubPlanCreateRequestDTO requestDTO) {
         try {
             if (planId == null) {
@@ -42,9 +42,12 @@ public class SubPlanServiceImpl implements SubPlanService {
             }
             validateSubPlanCreation(requestDTO);
 
-            Plan plan = planRepositoryFacade.findActivePlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanByPlanIdAndUserId(planId, userId);
+            if (plan == null) {
+                throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_NOT_FOUND);
+            }
 
-            List<SubPlan> subPlans = subPlanConverter.toSubPlanEntityList(plan, requestDTO);
+            List<SubPlan> subPlans = subPlanConverter.toEntityList(plan, requestDTO);
             List<SubPlan> createdSubPlans = subPlanRepositoryFacade.saveSubPlans(subPlans);
             List<SubPlanResponseDTO> subPlanResponseDTOs = subPlanConverter.toSubPlanResponseListDTO(
                 createdSubPlans);
@@ -78,13 +81,16 @@ public class SubPlanServiceImpl implements SubPlanService {
     }
 
     @Override
-    public SubPlanListResponseDTO getAllSubPlans(Long planId) {
+    public SubPlanListResponseDTO getAllSubPlans(Long planId, Long userId) {
         try {
             if (planId == null) {
                 throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_ID_IS_NULL);
             }
 
-            Plan plan = planRepositoryFacade.findActivePlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanByPlanIdAndUserId(planId, userId);
+            if (plan == null) {
+                throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_NOT_FOUND);
+            }
 
             List<SubPlan> subPlans = subPlanRepositoryFacade.findActiveSubPlansByPlan(plan);
             List<SubPlanResponseDTO> subPlanResponseDTOs = subPlanConverter.toSubPlanResponseListDTO(
@@ -102,42 +108,15 @@ public class SubPlanServiceImpl implements SubPlanService {
     }
 
     @Override
-    public SubPlanResponseDTO getSubPlan(Long planId, Long subPlanId) {
-        try {
-            if (planId == null) {
-                throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_ID_IS_NULL);
-            }
-            if (subPlanId == null) {
-                throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_ID_IS_NULL);
-            }
-
-            Plan plan = planRepositoryFacade.findActivePlanById(planId);
-            List<SubPlan> subPlans = subPlanRepositoryFacade.findActiveSubPlansByPlan(plan);
-            SubPlan subPlan = subPlanRepositoryFacade.findActiveSubPlanBySubPlanId(subPlanId);
-
-            if (!subPlans.contains(subPlan)) {
-                throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_NOT_BELONG_TO_PLAN);
-            }
-
-            return subPlanConverter.toSubPlanResponseDTO(subPlan);
-
-        } catch (SubPlanException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("소계획 단건 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
-            throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_READ_FAILED);
-        }
-    }
-
-    @Override
     @Transactional
-    public SubPlanUpdateResponseDTO updateSubPlan(Long subPlanId,
+    public SubPlanUpdateResponseDTO updateSubPlan(Long subPlanId, Long planId, Long userId,
         SubPlanUpdateRequestDTO requestDTO) {
         try {
             if (subPlanId == null) {
                 throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_ID_IS_NULL);
             }
 
+            validateSubPlanAccess(userId, planId, subPlanId);
             validateBusinessRules(requestDTO);
 
             SubPlan subPlan = subPlanRepositoryFacade.findActiveSubPlanBySubPlanId(subPlanId);
@@ -167,17 +146,27 @@ public class SubPlanServiceImpl implements SubPlanService {
 
     @Override
     @Transactional
-    public void deleteSubPlan(Long subPlanId) {
+    public void deleteSubPlan(Long subPlanId, Long planId, Long userId) {
         try {
             if (subPlanId == null) {
                 throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_ID_IS_NULL);
             }
+            validateSubPlanAccess(userId, planId, subPlanId);
+
             subPlanRepositoryFacade.deleteActiveSubPlanBySubPlanId(subPlanId);
         } catch (SubPlanException e) {
             throw e;
         } catch (Exception e) {
             log.error("소계획 삭제 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
             throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_DELETE_FAILED);
+        }
+    }
+
+    private void validateSubPlanAccess(Long userId, Long planId, Long subPlanId) {
+        boolean accessible = subPlanRepositoryFacade.existsValidSubPlan(userId, planId, subPlanId);
+
+        if (!accessible) {
+            throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_ACCESS_DENIED);
         }
     }
 }

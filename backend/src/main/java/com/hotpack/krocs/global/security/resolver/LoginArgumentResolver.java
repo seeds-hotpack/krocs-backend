@@ -17,21 +17,21 @@ public class LoginArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(Login.class) && parameter.getParameterType().isAssignableFrom(UserSession.class);
+        return parameter.hasParameterAnnotation(Login.class)
+            && (parameter.getParameterType().equals(Long.class)
+            || parameter.getParameterType().equals(long.class));
     }
 
     @Override
-    public Object resolveArgument(
-            MethodParameter parameter,
-            ModelAndViewContainer mavContainer,
-            NativeWebRequest webRequest,
-            WebDataBinderFactory binderFactory
-    ) {
+    public Object resolveArgument(MethodParameter parameter,
+        ModelAndViewContainer mavContainer,
+        NativeWebRequest webRequest,
+        WebDataBinderFactory binderFactory) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserSession)) {
+        if (authentication == null
+            || !(authentication.getPrincipal() instanceof UserSession userSession)) {
             throw new AccessDeniedException("Unauthenticated");
         }
-        return authentication.getPrincipal();
+        return Long.valueOf(userSession.getUserId());
     }
 }
-

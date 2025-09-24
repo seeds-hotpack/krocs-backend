@@ -14,6 +14,7 @@ public enum GoalExceptionType implements BaseCode {
     GOAL_FOUND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "GOAL500", "목표 조회에 실패했습니다."),
     GOAL_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "GOAL500", "목표 삭제에 실패했습니다."),
     GOAL_NOT_FOUND(HttpStatus.NOT_FOUND, "GOAL404", "목표를 찾을 수 없습니다."),
+    GOAL_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "GOAL404", "사용자를 찾을 수 없습니다."),
     GOAL_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "GOAL400", "이미 완료된 목표입니다."),
     INVALID_GOAL_DATE_RANGE(HttpStatus.BAD_REQUEST, "GOAL400", "유효하지 않은 목표 기간입니다."),
     GOAL_TITLE_EMPTY(HttpStatus.BAD_REQUEST, "GOAL400", "목표 제목은 필수입니다."),
@@ -30,21 +31,21 @@ public enum GoalExceptionType implements BaseCode {
     @Override
     public Reason getReason() {
         return Reason.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .data("")
-                .build();
+            .message(message)
+            .code(code)
+            .isSuccess(false)
+            .data("")
+            .build();
     }
 
     @Override
     public Reason getReasonHttpStatus() {
         return Reason.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .httpStatus(httpStatus)
-                .data("")
-                .build();
+            .message(message)
+            .code(code)
+            .isSuccess(false)
+            .httpStatus(httpStatus)
+            .data("")
+            .build();
     }
 }

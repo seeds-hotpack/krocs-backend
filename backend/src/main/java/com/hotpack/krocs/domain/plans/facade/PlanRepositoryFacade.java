@@ -3,8 +3,6 @@ package com.hotpack.krocs.domain.plans.facade;
 import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.domain.plans.exception.PlanException;
 import com.hotpack.krocs.domain.plans.exception.PlanExceptionType;
-import com.hotpack.krocs.domain.plans.exception.SubPlanException;
-import com.hotpack.krocs.domain.plans.exception.SubPlanExceptionType;
 import com.hotpack.krocs.domain.plans.repository.PlanRepository;
 import com.hotpack.krocs.global.common.entity.Status;
 import java.time.LocalDateTime;
@@ -27,15 +25,11 @@ public class PlanRepositoryFacade {
         return planRepository.save(plan);
     }
 
-    public Plan findActivePlanById(Long id) {
-        Plan plan = planRepository.findPlanByPlanIdAndStatus(id, Status.ACTIVE);
-        if (plan == null) {
-            throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_PLAN_NOT_FOUND);
-        }
-
-        return plan;
+    public Plan findActivePlanByPlanIdAndUserId(Long planId, Long userId) {
+        return planRepository.findPlanByIdAndUserIdAndStatus(planId, userId,
+            Status.ACTIVE);
     }
-    
+
     public List<Plan> findActivePlansByDateRange(LocalDateTime startOfDay, LocalDateTime endOfDay,
         Long userId) {
         return planRepository.findPlansByDateRangeAndStatus(startOfDay, endOfDay, userId,
@@ -43,8 +37,8 @@ public class PlanRepositoryFacade {
     }
 
     @Transactional
-    public void deleteActivePlanByPlanId(Long planId) {
-        Plan plan = findActivePlanById(planId);
+    public void deleteActivePlanByPlanId(Long planId, Long userId) {
+        Plan plan = findActivePlanByPlanIdAndUserId(planId, userId);
         if (plan == null) {
             throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
         }

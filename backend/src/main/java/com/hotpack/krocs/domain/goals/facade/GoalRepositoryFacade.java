@@ -1,11 +1,8 @@
 package com.hotpack.krocs.domain.goals.facade;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
-import com.hotpack.krocs.domain.goals.exception.SubGoalException;
-import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.repository.GoalRepository;
-import com.hotpack.krocs.domain.plans.exception.SubPlanException;
-import com.hotpack.krocs.domain.plans.exception.SubPlanExceptionType;
+import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.global.common.entity.Status;
 import java.time.LocalDate;
 import java.util.List;
@@ -27,28 +24,20 @@ public class GoalRepositoryFacade {
         return goalRepository.save(goal);
     }
 
-    public List<Goal> findActiveGoalByDate(LocalDate date) {
-        return goalRepository.findGoalByDateAndStatus(date, Status.ACTIVE);
+    public List<Goal> findActiveGoalByUserAndDate(User user, LocalDate date) {
+        return goalRepository.findGoalByUserIdAndDateAndStatus(user, date, Status.ACTIVE);
+    }
+
+    public List<Goal> findAllActiveGoalsByUser(User user) {
+        return goalRepository.findAllGoalsByUserAndStatus(user, Status.ACTIVE);
     }
 
     public List<Goal> findGoalsWithFilters(Long userId, String keyword, LocalDate searchDate) {
         return goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
     }
 
-    public List<Goal> findCompleteGoalByDate(LocalDate date) {
-        return goalRepository.findGoalByDateAndStatus(date, Status.INACTIVE);
-    }
-
-    public List<Goal> findAllActiveGoals() {
-        return goalRepository.findAllGoalsByStatus(Status.ACTIVE);
-    }
-
-    public List<Goal> findAllGoals() {
-        return goalRepository.findAll();
-    }
-
-    public Goal findActiveGoalById(Long goalId) {
-        return goalRepository.findGoalByGoalIdAndStatus(goalId, Status.ACTIVE);
+    public Goal findActiveGoalByUserAndGoalId(User user, Long goalId) {
+        return goalRepository.findGoalByUserAndGoalIdAndStatus(user, goalId, Status.ACTIVE);
     }
 
     @Transactional
@@ -59,9 +48,4 @@ public class GoalRepositoryFacade {
     public boolean existsActiveGoalById(Long goalId) {
         return goalRepository.existsGoalByGoalIdAndStatus(goalId, Status.ACTIVE);
     }
-
-    public boolean existsActiveGoalByTitleAndGoalIdNot(String title, Long goalId) {
-        return goalRepository.existsByTitleAndGoalIdNotAndStatus(title, goalId, Status.ACTIVE);
-    }
-
 }
