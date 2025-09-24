@@ -195,35 +195,24 @@ public class PlanServiceImpl implements PlanService {
 
             List<Plan> monthlyPlans = planRepositoryFacade.findActivePlansByMonth(year, month, userId);
 
-            // 날짜별로 그룹핑
             Map<LocalDate, List<Plan>> plansByDate = monthlyPlans.stream()
                     .collect(Collectors.groupingBy(plan -> plan.getStartDateTime().toLocalDate()));
 
-            // 해당 월의 모든 날짜 생성 (1일부터 마지막일까지)
             LocalDate startDate = LocalDate.of(year, month, 1);
             LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
 
             List<DailyPlanSummaryDTO> dailyPlans = new ArrayList<>();
 
-            // 각 날짜별로 DailyPlanSummaryDTO 생성
             for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
                 List<Plan> plansForDate = plansByDate.getOrDefault(date, Collections.emptyList());
                 List<PlanResponseDTO> planResponseDTOs = planConverter.toListPlanResponseDTO(plansForDate);
 
-                DailyPlanSummaryDTO dailySummary = DailyPlanSummaryDTO.builder()
-                        .date(date)
-                        .planCount(plansForDate.size())
-                        .plans(planResponseDTOs)
-                        .build();
+                DailyPlanSummaryDTO dailySummary = planConverter.toDailyPlanSummaryDTO(date, plansForDate, planResponseDTOs);
 
                 dailyPlans.add(dailySummary);
             }
 
-            return MonthlyPlanResponseDTO.builder()
-                    .year(year)
-                    .month(month)
-                    .dailyPlans(dailyPlans)
-                    .build();
+            return planConverter.toMonthlyPlanResponseDTO(year, month, dailyPlans);
         } catch (PlanException e) {
                 throw e;
         } catch (Exception e) {

@@ -134,6 +134,33 @@ public class PlanServiceTest {
             .build();
     }
 
+    // 헬퍼 메서드 추가
+    private void setupMonthlyPlanMocks() {
+        when(planConverter.toDailyPlanSummaryDTO(any(LocalDate.class), any(List.class), any(List.class)))
+                .thenAnswer(invocation -> {
+                    LocalDate date = invocation.getArgument(0);
+                    List<Plan> plans = invocation.getArgument(1);
+                    List<PlanResponseDTO> planDtos = invocation.getArgument(2);
+                    return DailyPlanSummaryDTO.builder()
+                            .date(date)
+                            .planCount(plans.size())
+                            .plans(planDtos)
+                            .build();
+                });
+
+        when(planConverter.toMonthlyPlanResponseDTO(anyInt(), anyInt(), any(List.class)))
+                .thenAnswer(invocation -> {
+                    int year = invocation.getArgument(0);
+                    int month = invocation.getArgument(1);
+                    List<DailyPlanSummaryDTO> dailyPlans = invocation.getArgument(2);
+                    return MonthlyPlanResponseDTO.builder()
+                            .year(year)
+                            .month(month)
+                            .dailyPlans(dailyPlans)
+                            .build();
+                });
+    }
+
     // ========== CREATE 테스트 ==========
 
     @Test
@@ -1456,6 +1483,8 @@ public class PlanServiceTest {
     @DisplayName("월별 일정 조회 성공 - 일정이 있는 경우")
     void getMonthlyPlans_Success_WithPlans() {
         // given
+        setupMonthlyPlanMocks();
+
         Long userId = 1L;
         int year = 2024;
         int month = 9;
@@ -1577,6 +1606,8 @@ public class PlanServiceTest {
     @DisplayName("월별 일정 조회 성공 - 일정이 없는 경우")
     void getMonthlyPlans_Success_NoPlans() {
         // given
+        setupMonthlyPlanMocks();
+
         Long userId = 1L;
         int year = 2024;
         int month = 2; // 2월 (윤년이므로 29일)
@@ -1616,6 +1647,8 @@ public class PlanServiceTest {
     @DisplayName("월별 일정 조회 성공 - 윤년이 아닌 2월")
     void getMonthlyPlans_Success_NonLeapYearFebruary() {
         // given
+        setupMonthlyPlanMocks();
+
         Long userId = 1L;
         int year = 2025; // 윤년이 아님
         int month = 2;
@@ -1641,6 +1674,8 @@ public class PlanServiceTest {
     @DisplayName("월별 일정 조회 성공 - 31일까지 있는 월")
     void getMonthlyPlans_Success_ThirtyOneDays() {
         // given
+        setupMonthlyPlanMocks();
+
         Long userId = 1L;
         int year = 2024;
         int month = 12; // 12월 (31일)
@@ -1667,6 +1702,8 @@ public class PlanServiceTest {
     @DisplayName("월별 일정 조회 성공 - allDay 일정 포함")
     void getMonthlyPlans_Success_WithAllDayPlans() {
         // given
+        setupMonthlyPlanMocks();
+
         Long userId = 1L;
         int year = 2024;
         int month = 8;
@@ -1725,6 +1762,8 @@ public class PlanServiceTest {
     @DisplayName("월별 일정 조회 성공 - 완료된 일정과 미완료 일정 혼재")
     void getMonthlyPlans_Success_MixedCompletionStatus() {
         // given
+        setupMonthlyPlanMocks();
+
         Long userId = 1L;
         int year = 2024;
         int month = 7;

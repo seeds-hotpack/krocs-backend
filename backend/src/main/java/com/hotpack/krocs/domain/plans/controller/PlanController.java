@@ -74,7 +74,7 @@ public class PlanController {
     @GetMapping("/monthly")
     public ApiResponse<MonthlyPlanResponseDTO> getMonthlyPlans(
             @Login UserSession user,
-            @RequestParam @Parameter(description = "년도", example = "2024") Integer year,
+            @RequestParam @Parameter(description = "년도", example = "2025") Integer year,
             @RequestParam @Parameter(description = "월", example = "9") Integer month
     ) {
         try {
