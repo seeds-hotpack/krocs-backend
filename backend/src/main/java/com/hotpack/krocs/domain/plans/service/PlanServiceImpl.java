@@ -224,7 +224,8 @@ public class PlanServiceImpl implements PlanService {
                     .month(month)
                     .dailyPlans(dailyPlans)
                     .build();
-
+        } catch (PlanException e) {
+                throw e;
         } catch (Exception e) {
             log.error("월별 일정 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
             throw new PlanException(PlanExceptionType.PLAN_FOUND_FAILED);

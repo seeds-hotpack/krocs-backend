@@ -9,9 +9,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PlanValidatorTest {
     private PlanValidator planValidator;
@@ -404,5 +408,294 @@ public class PlanValidatorTest {
         assertThatThrownBy(() -> planValidator.validateTitle(null))
             .isInstanceOf(PlanException.class)
             .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_TITLE_EMPTY);
+    }
+
+    // ========== VALIDATE MONTHLY PLAN REQUEST 테스트 ==========
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 성공 - 정상적인 년도와 월")
+    void validateMonthlyPlanRequest_Success_ValidYearAndMonth() {
+        // given
+        Integer year = 2024;
+        Integer month = 9;
+
+        // when & then - 예외가 발생하지 않아야 함
+        assertDoesNotThrow(() -> planValidator.validateMonthlyPlanRequest(year, month));
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 성공 - 경계값 (최소 년도)")
+    void validateMonthlyPlanRequest_Success_MinimumYear() {
+        // given
+        Integer year = 2000; // 최소 허용 년도
+        Integer month = 1;
+
+        assertDoesNotThrow(() -> planValidator.validateMonthlyPlanRequest(year, month));
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 성공 - 경계값 (최대 년도)")
+    void validateMonthlyPlanRequest_Success_MaximumYear() {
+        // given
+        Integer year = 3000; // 최대 허용 년도
+        Integer month = 12;
+
+        assertDoesNotThrow(() -> planValidator.validateMonthlyPlanRequest(year, month));
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 성공 - 경계값 (최소 월)")
+    void validateMonthlyPlanRequest_Success_MinimumMonth() {
+        // given
+        Integer year = 2024;
+        Integer month = 1; // 최소 허용 월
+
+        assertDoesNotThrow(() -> planValidator.validateMonthlyPlanRequest(year, month));
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 성공 - 경계값 (최대 월)")
+    void validateMonthlyPlanRequest_Success_MaximumMonth() {
+        // given
+        Integer year = 2024;
+        Integer month = 12; // 최대 허용 월
+
+        assertDoesNotThrow(() -> planValidator.validateMonthlyPlanRequest(year, month));
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - null year")
+    void validateMonthlyPlanRequest_Fail_NullYear() {
+        // given
+        Integer year = null;
+        Integer month = 9;
+
+        // when & then
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_REQUEST);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - null month")
+    void validateMonthlyPlanRequest_Fail_NullMonth() {
+        // given
+        Integer year = 2024;
+        Integer month = null;
+
+        // when & then
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_REQUEST);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - year와 month 모두 null")
+    void validateMonthlyPlanRequest_Fail_BothNull() {
+        // given
+        Integer year = null;
+        Integer month = null;
+
+        // when & then
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_REQUEST);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - year 범위 미만 (1999)")
+    void validateMonthlyPlanRequest_Fail_YearTooLow() {
+        // given
+        Integer year = 1999; // 2000 미만
+        Integer month = 9;
+
+        // when & then
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - year 범위 초과 (3001)")
+    void validateMonthlyPlanRequest_Fail_YearTooHigh() {
+        // given
+        Integer year = 3001; // 3000 초과
+        Integer month = 9;
+
+        // when & then
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - month 범위 미만 (0)")
+    void validateMonthlyPlanRequest_Fail_MonthTooLow() {
+        // given
+        Integer year = 2024;
+        Integer month = 0; // 1 미만
+
+        // when & then
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_MONTH);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - month 범위 초과 (13)")
+    void validateMonthlyPlanRequest_Fail_MonthTooHigh() {
+        // given
+        Integer year = 2024;
+        Integer month = 13; // 12 초과
+
+        // when & then
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_MONTH);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - 음수 year")
+    void validateMonthlyPlanRequest_Fail_NegativeYear() {
+        // given
+        Integer year = -2024;
+        Integer month = 9;
+
+        // when & then
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - 음수 month")
+    void validateMonthlyPlanRequest_Fail_NegativeMonth() {
+        // given
+        Integer year = 2024;
+        Integer month = -9;
+
+        // when & then
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_MONTH);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - year와 month 모두 범위 벗어남")
+    void validateMonthlyPlanRequest_Fail_BothOutOfRange() {
+        // given
+        Integer year = 1999; // 범위 벗어남
+        Integer month = 13;  // 범위 벗어남
+
+        // when & then - year가 먼저 검사되므로 INVALID_YEAR 예외가 발생해야 함
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 - 모든 유효한 월에 대해 성공")
+    void validateMonthlyPlanRequest_Success_AllValidMonths() {
+        // given
+        Integer year = 2024;
+
+        // when & then - 1월부터 12월까지 모든 월에 대해 검증
+        for (int month = 1; month <= 12; month++) {
+            final Integer testMonth = month;
+            assertDoesNotThrow(() -> planValidator.validateMonthlyPlanRequest(year, testMonth), "월 " + month + "에 대해 유효성 검사가 실패했습니다.");
+        }
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 - 여러 년도에 대해 성공")
+    void validateMonthlyPlanRequest_Success_MultipleYears() {
+        // given
+        Integer month = 6;
+        Integer[] testYears = {2000, 2010, 2020, 2024, 2030, 2050, 2100, 2500, 3000};
+
+        // when & then - 여러 년도에 대해 검증
+        for (Integer year : testYears) {
+            assertDoesNotThrow(() -> planValidator.validateMonthlyPlanRequest(year, month),
+                    "년도 " + year + "에 대해 유효성 검사가 실패했습니다.");
+        }
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - 경계값 테스트 (년도)")
+    void validateMonthlyPlanRequest_Fail_YearBoundaryTest() {
+        // given
+        Integer month = 6;
+
+        // when & then - 경계값 바로 밖의 값들 테스트
+        Integer[] invalidYears = {1999, 3001};
+
+        for (Integer invalidYear : invalidYears) {
+            assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(invalidYear, month))
+                    .isInstanceOf(PlanException.class)
+                    .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+        }
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 실패 - 경계값 테스트 (월)")
+    void validateMonthlyPlanRequest_Fail_MonthBoundaryTest() {
+        // given
+        Integer year = 2024;
+
+        // when & then - 경계값 바로 밖의 값들 테스트
+        Integer[] invalidMonths = {0, 13};
+
+        for (Integer invalidMonth : invalidMonths) {
+            assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, invalidMonth))
+                    .isInstanceOf(PlanException.class)
+                    .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_MONTH);
+        }
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 - 유효성 검사 순서 확인")
+    void validateMonthlyPlanRequest_ValidationOrder() {
+        // given - year와 month 둘 다 null인 경우
+        Integer year = null;
+        Integer month = null;
+
+        // when & then - INVALID_REQUEST가 먼저 체크되어야 함
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_REQUEST);
+
+        // given - year는 유효하지 않고 month는 null인 경우
+        Integer invalidYear = 1999;
+        Integer nullMonth = null;
+
+        // when & then - null 체크가 먼저이므로 INVALID_REQUEST가 발생해야 함
+        assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(invalidYear, nullMonth))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_REQUEST);
+    }
+
+    @Test
+    @DisplayName("월별 일정 요청 유효성 검사 성공 - 실제 사용 시나리오")
+    void validateMonthlyPlanRequest_Success_RealWorldScenarios() {
+        // given - 현재 년도와 월
+        Integer currentYear = java.time.LocalDate.now().getYear();
+        Integer currentMonth = java.time.LocalDate.now().getMonthValue();
+
+        // when & then - 현재 날짜로 테스트
+        if (currentYear >= 2000 && currentYear <= 3000) {
+            assertDoesNotThrow(() -> planValidator.validateMonthlyPlanRequest(currentYear, currentMonth));
+        }
+
+        // given - 일반적으로 많이 사용되는 년도들
+        Integer[] commonYears = {2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030};
+        Integer[] commonMonths = {1, 3, 6, 9, 12}; // 분기별 월
+
+        // when & then - 실제 자주 사용되는 년도/월 조합으로 테스트
+        for (Integer year : commonYears) {
+            for (Integer month : commonMonths) {
+                assertDoesNotThrow(() -> planValidator.validateMonthlyPlanRequest(year, month),
+                        "년도 " + year + ", 월 " + month + " 조합에 대해 유효성 검사가 실패했습니다.");
+            }
+        }
     }
 }
