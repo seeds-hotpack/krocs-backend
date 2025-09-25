@@ -16,18 +16,14 @@ public interface SubGoalRepository extends JpaRepository<SubGoal, Long> {
 
     SubGoal findSubGoalsBySubGoalIdAndStatus(Long subGoalId, Status status);
 
-    @Query(value = """
-        SELECT EXISTS (
-            SELECT 1
-            FROM sub_goal s
-            JOIN goals g ON s.goal_id = g.goal_id
-            JOIN users u ON g.user_id = u.user_id
-            WHERE s.sub_goal_id = :subGoalId
-              AND g.goal_id = :goalId
-              AND u.user_id = :userId
-              AND s.status = :status
-        )
-        """, nativeQuery = true)
+    @Query("""
+        SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END
+        FROM SubGoal s
+        WHERE s.subGoalId = :subGoalId
+          AND s.goal.goalId = :goalId
+          AND s.goal.user.userId = :userId
+          AND s.status = :status
+        """)
     boolean existsValidSubGoal(
         @Param("userId") Long userId,
         @Param("goalId") Long goalId,

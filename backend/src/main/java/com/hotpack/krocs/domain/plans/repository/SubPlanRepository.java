@@ -13,19 +13,15 @@ public interface SubPlanRepository extends JpaRepository<SubPlan, Long> {
     List<SubPlan> findSubPlansByPlanAndStatus(Plan plan, Status status);
 
     SubPlan findSubPlansBySubPlanIdAndStatus(Long subPlanId, Status status);
-
-    @Query(value = """
-        SELECT EXISTS (
-            SELECT 1
-            FROM sub_plans s
-            JOIN plans p ON s.plan_id = p.plan_id
-            JOIN users u ON p.user_id = u.user_id
-            WHERE s.sub_plan_id = :subPlanId
-              AND p.goal_id = :planId
-              AND u.user_id = :userId
-              AND s.status = :status
-        )
-        """, nativeQuery = true)
+    
+    @Query("""
+        SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END
+        FROM SubPlan s
+        WHERE s.subPlanId = :subPlanId
+          AND s.plan.planId = :planId
+          AND s.plan.user.userId = :userId
+          AND s.status = :status
+        """)
     boolean existsValidSubPlan(
         @Param("userId") Long userId,
         @Param("planId") Long planId,
