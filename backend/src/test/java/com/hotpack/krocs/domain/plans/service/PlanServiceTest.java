@@ -1874,13 +1874,13 @@ public class PlanServiceTest {
         int year = 1999; // 2000 미만
         int month = 9;
 
-        doThrow(new PlanException(PlanExceptionType.INVALID_YEAR))
+        doThrow(new PlanException(PlanExceptionType.PLAN_INVALID_YEAR))
                 .when(planValidator).validateMonthlyPlanRequest(year, month);
 
         // when & then
         assertThatThrownBy(() -> planService.getMonthlyPlans(year, month, userId))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_YEAR);
 
         verify(planValidator).validateMonthlyPlanRequest(year, month);
         verify(planRepositoryFacade, never()).findActivePlansByMonth(anyInt(), anyInt(), any());
@@ -1894,13 +1894,13 @@ public class PlanServiceTest {
         int year = 2024;
         int month = 13; // 12 초과
 
-        doThrow(new PlanException(PlanExceptionType.INVALID_MONTH))
+        doThrow(new PlanException(PlanExceptionType.PLAN_INVALID_MONTH))
                 .when(planValidator).validateMonthlyPlanRequest(year, month);
 
         // when & then
         assertThatThrownBy(() -> planService.getMonthlyPlans(year, month, userId))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_MONTH);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_MONTH);
 
         verify(planValidator).validateMonthlyPlanRequest(year, month);
         verify(planRepositoryFacade, never()).findActivePlansByMonth(anyInt(), anyInt(), any());

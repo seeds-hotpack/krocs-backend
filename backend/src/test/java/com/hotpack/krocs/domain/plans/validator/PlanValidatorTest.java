@@ -473,7 +473,7 @@ public class PlanValidatorTest {
         // when & then
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_REQUEST);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_REQUEST);
     }
 
     @Test
@@ -486,7 +486,7 @@ public class PlanValidatorTest {
         // when & then
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_REQUEST);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_REQUEST);
     }
 
     @Test
@@ -499,7 +499,7 @@ public class PlanValidatorTest {
         // when & then
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_REQUEST);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_REQUEST);
     }
 
     @Test
@@ -512,7 +512,7 @@ public class PlanValidatorTest {
         // when & then
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_YEAR);
     }
 
     @Test
@@ -525,7 +525,7 @@ public class PlanValidatorTest {
         // when & then
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_YEAR);
     }
 
     @Test
@@ -538,7 +538,7 @@ public class PlanValidatorTest {
         // when & then
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_MONTH);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_MONTH);
     }
 
     @Test
@@ -551,7 +551,7 @@ public class PlanValidatorTest {
         // when & then
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_MONTH);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_MONTH);
     }
 
     @Test
@@ -564,7 +564,7 @@ public class PlanValidatorTest {
         // when & then
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_YEAR);
     }
 
     @Test
@@ -577,7 +577,7 @@ public class PlanValidatorTest {
         // when & then
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_MONTH);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_MONTH);
     }
 
     @Test
@@ -590,7 +590,7 @@ public class PlanValidatorTest {
         // when & then - year가 먼저 검사되므로 INVALID_YEAR 예외가 발생해야 함
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_YEAR);
     }
 
     @Test
@@ -632,7 +632,7 @@ public class PlanValidatorTest {
         for (Integer invalidYear : invalidYears) {
             assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(invalidYear, month))
                     .isInstanceOf(PlanException.class)
-                    .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_YEAR);
+                    .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_YEAR);
         }
     }
 
@@ -648,7 +648,7 @@ public class PlanValidatorTest {
         for (Integer invalidMonth : invalidMonths) {
             assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, invalidMonth))
                     .isInstanceOf(PlanException.class)
-                    .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_MONTH);
+                    .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_MONTH);
         }
     }
 
@@ -662,7 +662,7 @@ public class PlanValidatorTest {
         // when & then - INVALID_REQUEST가 먼저 체크되어야 함
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(year, month))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_REQUEST);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_REQUEST);
 
         // given - year는 유효하지 않고 month는 null인 경우
         Integer invalidYear = 1999;
@@ -671,7 +671,7 @@ public class PlanValidatorTest {
         // when & then - null 체크가 먼저이므로 INVALID_REQUEST가 발생해야 함
         assertThatThrownBy(() -> planValidator.validateMonthlyPlanRequest(invalidYear, nullMonth))
                 .isInstanceOf(PlanException.class)
-                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.INVALID_REQUEST);
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_REQUEST);
     }
 
     @Test
