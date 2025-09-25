@@ -14,11 +14,14 @@ import com.hotpack.krocs.domain.goals.converter.GoalConverter;
 import com.hotpack.krocs.domain.goals.converter.SubGoalConverter;
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.domain.SubGoal;
-import com.hotpack.krocs.domain.goals.dto.request.*;
+import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.GoalSearchRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.SubGoalCreateRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.request.SubGoalRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
-import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import com.hotpack.krocs.domain.goals.exception.GoalException;
 import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
@@ -28,6 +31,7 @@ import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
+import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import com.hotpack.krocs.global.common.entity.Priority;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -51,10 +55,15 @@ class GoalServiceTest {
     @Mock
     private SubGoalRepositoryFacade subGoalRepositoryFacade;
     @Mock
+    private UserRepositoryFacade userRepositoryFacade;
+    @Mock
     private SubGoalConverter subGoalConverter;
 
     @InjectMocks
     private GoalServiceImpl goalService;
+    @InjectMocks
+    private SubGoalServiceImpl subGoalService;
+
 
     private GoalCreateRequestDTO validRequestDTO;
     private Goal validGoal;
@@ -63,7 +72,7 @@ class GoalServiceTest {
     @Mock
     private GoalConverter goalConverter;
 
-    //    private GoalServiceImpl goalService;
+    //    private GoalServiceImpl subGoalService;
     private GoalValidator goalValidator = new GoalValidator();
 
     private Goal existingGoal;
@@ -75,24 +84,26 @@ class GoalServiceTest {
     private SubGoalResponseDTO validSubGoalResponseDTO;
     private SubGoalRequestDTO validSubGoalRequestDTO;
 
-    private Goal createMockGoal(Long goalId, String title, LocalDate startDate, LocalDate endDate, boolean isCompleted) {
+    private Goal createMockGoal(Long goalId, String title, LocalDate startDate, LocalDate endDate,
+        boolean isCompleted) {
         return Goal.builder()
-                .goalId(goalId)
-                .title(title)
-                .startDate(startDate)
-                .endDate(endDate)
-                .isCompleted(isCompleted)
-                .priority(Priority.MEDIUM)
-                .user(user)
-                .build();
+            .goalId(goalId)
+            .title(title)
+            .startDate(startDate)
+            .endDate(endDate)
+            .isCompleted(isCompleted)
+            .priority(Priority.MEDIUM)
+            .user(user)
+            .build();
     }
+
     private GoalResponseDTO createMockGoalResponseDTO(Long goalId, String title) {
         return GoalResponseDTO.builder()
-                .goalId(goalId)
-                .title(title)
-                .priority(Priority.MEDIUM)
-                .isCompleted(false)
-                .build();
+            .goalId(goalId)
+            .title(title)
+            .priority(Priority.MEDIUM)
+            .isCompleted(false)
+            .build();
     }
 
     @BeforeEach
@@ -104,8 +115,8 @@ class GoalServiceTest {
             .accountType(AccountType.LOCAL)
             .build();
 
-        goalService = new GoalServiceImpl(subGoalRepositoryFacade, subGoalConverter,
-            goalRepositoryFacade, goalConverter, goalValidator);
+        goalService = new GoalServiceImpl(userRepositoryFacade, goalRepositoryFacade,
+            goalConverter, goalValidator);
 
         validRequestDTO = GoalCreateRequestDTO.builder()
             .title("테스트 목표")
@@ -150,18 +161,18 @@ class GoalServiceTest {
             .isCompleted(false)
             .build();
 
-        validSubGoalResponseDTO = SubGoalResponseDTO.builder()
-            .subGoalId(validSubGoal.getSubGoalId())
-            .title(validSubGoal.getTitle())
-            .isCompleted(validSubGoal.getIsCompleted())
-            .build();
-
         existingGoal = Goal.builder()
             .goalId(1L)
             .title("기존 제목")  // 원래 제목
             .priority(Priority.HIGH)
             .isCompleted(false)
             .subGoals(new ArrayList<>())
+            .build();
+
+        validSubGoalResponseDTO = SubGoalResponseDTO.builder()
+            .subGoalId(validSubGoal.getSubGoalId())
+            .title(validSubGoal.getTitle())
+            .isCompleted(validSubGoal.getIsCompleted())
             .build();
     }
 
@@ -171,11 +182,11 @@ class GoalServiceTest {
     @DisplayName("대목표 생성 성공 테스트")
     void createGoal_Success() {
         // given
-//        when(goalConverter.toEntity(validRequestDTO)).thenReturn(validGoal);
         when(goalRepositoryFacade.saveGoal(validGoal)).thenReturn(validGoal);
         when(goalConverter.toCreateResponseDTO(validGoal)).thenReturn(validResponseDTO);
         when(goalConverter.toEntity(eq(validRequestDTO), any(User.class))).thenReturn(
             validGoal);
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when
         GoalCreateResponseDTO result = goalService.createGoal(validRequestDTO, 1L);
@@ -195,7 +206,7 @@ class GoalServiceTest {
             validGoal);
         when(goalRepositoryFacade.saveGoal(validGoal)).thenReturn(validGoal);
         when(goalConverter.toCreateResponseDTO(any(Goal.class))).thenReturn(validResponseDTO);
-
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when
         GoalCreateResponseDTO result = goalService.createGoal(validRequestDTO, 1L);
 
@@ -257,7 +268,7 @@ class GoalServiceTest {
         // given
         when(goalConverter.toEntity(any())).thenReturn(validGoal);
         when(goalRepositoryFacade.saveGoal(any())).thenThrow(new RuntimeException("데이터베이스 오류"));
-
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when & then
         assertThatThrownBy(() -> goalService.createGoal(validRequestDTO, 1L))
             .isInstanceOf(GoalException.class)
@@ -270,7 +281,7 @@ class GoalServiceTest {
     void createGoal_ConvertorException() {
         // given
         when(goalConverter.toEntity(any())).thenThrow(new RuntimeException("변환 오류"));
-
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when & then
         assertThatThrownBy(() -> goalService.createGoal(validRequestDTO, 1L))
             .isInstanceOf(GoalException.class)
@@ -301,17 +312,13 @@ class GoalServiceTest {
             .isCompleted(false)
             .createdAt(LocalDateTime.now())
             .updatedAt(LocalDateTime.now())
-            .userId(user.getUserId())
             .build();
 
-        // when(goalConverter.toEntity(minimalRequest)).thenReturn(minimalGoal);
-        // when(goalRepositoryFacade.saveGoal(minimalGoal)).thenReturn(minimalGoal);
-        // when(goalConverter.toCreateResponseDTO(minimalGoal)).thenReturn(minimalResponse);
         when(goalConverter.toCreateResponseDTO(any(Goal.class))).thenReturn(minimalResponse);
         when(goalRepositoryFacade.saveGoal(validGoal)).thenReturn(validGoal);
         when(goalConverter.toEntity(eq(minimalRequest), any(User.class))).thenReturn(
             validGoal);
-
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         // when
         GoalCreateResponseDTO result = goalService.createGoal(minimalRequest, 1L);
 
@@ -346,8 +353,10 @@ class GoalServiceTest {
             .isCompleted(false)
             .build();
 
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenReturn(
+            existingGoal);
         when(goalConverter.toGoalResponseDTO((Goal) any())).thenReturn(expectedResponse);
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when
         GoalResponseDTO result = goalService.updateGoalById(goalId, updateRequest, 1L);
@@ -388,9 +397,11 @@ class GoalServiceTest {
             .isCompleted(false)
             .build();
 
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal)
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenReturn(
+                existingGoal)
             .thenReturn(updatedGoal);
         when(goalConverter.toGoalResponseDTO(updatedGoal)).thenReturn(expectedResponse);
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when
         GoalResponseDTO result = goalService.updateGoalById(goalId, updateRequest, 1L);
@@ -412,7 +423,8 @@ class GoalServiceTest {
             .title("수정된 제목")
             .build();
 
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenThrow(
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenThrow(
             new GoalException(GoalExceptionType.GOAL_NOT_FOUND));
 
         // when & then
@@ -430,7 +442,9 @@ class GoalServiceTest {
             .title("")
             .build();
 
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal);
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenReturn(
+            existingGoal);
 
         // when & then
         assertThatThrownBy(() -> goalService.updateGoalById(goalId, updateRequest, 1L))
@@ -449,7 +463,9 @@ class GoalServiceTest {
             .build();
 
         // when
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal);
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenReturn(
+            existingGoal);
 
         // when & then
         assertThatThrownBy(() -> goalService.updateGoalById(goalId, updateRequest, 1L))
@@ -472,7 +488,8 @@ class GoalServiceTest {
             .title("기존 제목")
             .build();
 
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenThrow(
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenThrow(
             new RuntimeException("데이터베이스 오류"));
 
         // when & then
@@ -490,8 +507,10 @@ class GoalServiceTest {
         Long goalId = 1L;
         Long userId = 1L;
 
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         when(goalRepositoryFacade.existsActiveGoalById(goalId)).thenReturn(true);
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenReturn(
+            existingGoal);
 
         // when & then
         assertThatCode(() -> goalService.deleteGoal(userId, goalId))
@@ -556,8 +575,10 @@ class GoalServiceTest {
             .isCompleted(false)
             .build();
 
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenReturn(
+            existingGoal);
         when(goalConverter.toGoalResponseDTO(existingGoal)).thenReturn(expectedResponse);
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when
         GoalResponseDTO result = goalService.getGoalByGoalId(userId, goalId);
@@ -590,7 +611,8 @@ class GoalServiceTest {
         Long goalId = 999L;
         Long userId = 1L;
 
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(null);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenReturn(null);
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
 
         // when & then
         assertThatThrownBy(() -> goalService.getGoalByGoalId(userId, goalId))
@@ -604,8 +626,8 @@ class GoalServiceTest {
         // given
         Long goalId = 1L;
         Long userId = 1L;
-
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenThrow(
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenThrow(
             new RuntimeException("데이터베이스 오류"));
 
         // when & then
@@ -624,28 +646,33 @@ class GoalServiceTest {
         String status = null;
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
         List<Goal> mockGoals = Arrays.asList(
-                createMockGoal(1L, "운동하기", LocalDate.now().minusDays(10), LocalDate.now().plusDays(20), false),
-                createMockGoal(2L, "독서하기", LocalDate.now().minusDays(5), LocalDate.now().plusDays(30), false)
+            createMockGoal(1L, "운동하기", LocalDate.now().minusDays(10), LocalDate.now().plusDays(20),
+                false),
+            createMockGoal(2L, "독서하기", LocalDate.now().minusDays(5), LocalDate.now().plusDays(30),
+                false)
         );
 
         // 정렬된 순서로 expectedResponse 생성 (독서하기가 먼저)
         List<GoalResponseDTO> expectedResponse = Arrays.asList(
-                createMockGoalResponseDTO(2L, "독서하기"), // ㄷ이 ㅇ보다 앞
-                createMockGoalResponseDTO(1L, "운동하기")
+            createMockGoalResponseDTO(2L, "독서하기"), // ㄷ이 ㅇ보다 앞
+            createMockGoalResponseDTO(1L, "운동하기")
         );
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
-        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(mockGoals);
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
+        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(
+            mockGoals);
         when(goalConverter.toGoalResponseDTO(mockGoals)).thenReturn(expectedResponse);
 
         // when
-        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword,
+            status);
 
         // then
         assertThat(result).isNotNull();
@@ -667,25 +694,29 @@ class GoalServiceTest {
         String status = null;
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
         List<Goal> mockGoals = Arrays.asList(
-                createMockGoal(1L, "특정 날짜 활성 목표", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), false)
+            createMockGoal(1L, "특정 날짜 활성 목표", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31),
+                false)
         );
 
         List<GoalResponseDTO> expectedResponse = Arrays.asList(
-                createMockGoalResponseDTO(1L, "특정 날짜 활성 목표")
+            createMockGoalResponseDTO(1L, "특정 날짜 활성 목표")
         );
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
-        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(mockGoals);
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
+        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(
+            mockGoals);
         when(goalConverter.toGoalResponseDTO(mockGoals)).thenReturn(expectedResponse);
 
         // when
-        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword,
+            status);
 
         // then
         assertThat(result).isNotNull();
@@ -703,17 +734,21 @@ class GoalServiceTest {
         String status = null;
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
-        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(Collections.emptyList());
-        when(goalConverter.toGoalResponseDTO(Collections.emptyList())).thenReturn(Collections.emptyList());
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
+        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(
+            Collections.emptyList());
+        when(goalConverter.toGoalResponseDTO(Collections.emptyList())).thenReturn(
+            Collections.emptyList());
 
         // when
-        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword,
+            status);
 
         // then
         assertThat(result).isNotNull();
@@ -730,19 +765,20 @@ class GoalServiceTest {
         String status = null;
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
         when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate))
-                .thenThrow(new RuntimeException("데이터베이스 오류"));
+            .thenThrow(new RuntimeException("데이터베이스 오류"));
 
         // when & then
         assertThatThrownBy(() -> goalService.getGoalsByUser(userId, searchDate, keyword, status))
-                .isInstanceOf(GoalException.class)
-                .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_FOUND_FAILED);
+            .isInstanceOf(GoalException.class)
+            .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_FOUND_FAILED);
     }
 
     @Test
@@ -755,27 +791,32 @@ class GoalServiceTest {
         String status = null;
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
         List<Goal> mockGoals = Arrays.asList(
-                createMockGoal(1L, "운동하기", LocalDate.now().minusDays(10), LocalDate.now().plusDays(20), false),
-                createMockGoal(2L, "헬스장 운동", LocalDate.now().minusDays(5), LocalDate.now().plusDays(15), false)
+            createMockGoal(1L, "운동하기", LocalDate.now().minusDays(10), LocalDate.now().plusDays(20),
+                false),
+            createMockGoal(2L, "헬스장 운동", LocalDate.now().minusDays(5), LocalDate.now().plusDays(15),
+                false)
         );
 
         List<GoalResponseDTO> expectedResponse = Arrays.asList(
-                createMockGoalResponseDTO(1L, "운동하기"),
-                createMockGoalResponseDTO(2L, "헬스장 운동")
+            createMockGoalResponseDTO(1L, "운동하기"),
+            createMockGoalResponseDTO(2L, "헬스장 운동")
         );
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
-        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(mockGoals);
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
+        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(
+            mockGoals);
         when(goalConverter.toGoalResponseDTO(mockGoals)).thenReturn(expectedResponse);
 
         // when
-        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword,
+            status);
 
         // then
         assertThat(result).isNotNull();
@@ -794,27 +835,32 @@ class GoalServiceTest {
         String status = null;
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
         List<Goal> mockGoals = Arrays.asList(
-                createMockGoal(1L, "목표1", LocalDate.now().minusDays(10), LocalDate.now().plusDays(20), false),
-                createMockGoal(2L, "목표2", LocalDate.now().minusDays(5), LocalDate.now().plusDays(30), false)
+            createMockGoal(1L, "목표1", LocalDate.now().minusDays(10), LocalDate.now().plusDays(20),
+                false),
+            createMockGoal(2L, "목표2", LocalDate.now().minusDays(5), LocalDate.now().plusDays(30),
+                false)
         );
 
         List<GoalResponseDTO> expectedResponse = Arrays.asList(
-                createMockGoalResponseDTO(1L, "목표1"),
-                createMockGoalResponseDTO(2L, "목표2")
+            createMockGoalResponseDTO(1L, "목표1"),
+            createMockGoalResponseDTO(2L, "목표2")
         );
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
-        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(mockGoals);
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
+        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(
+            mockGoals);
         when(goalConverter.toGoalResponseDTO(mockGoals)).thenReturn(expectedResponse);
 
         // when
-        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword,
+            status);
 
         // then
         assertThat(result).isNotNull();
@@ -831,28 +877,34 @@ class GoalServiceTest {
         String status = "COMPLETED";
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
         List<Goal> allGoals = Arrays.asList(
-                createMockGoal(1L, "완료된 목표1", LocalDate.now().minusDays(30), LocalDate.now().minusDays(1), true),
-                createMockGoal(2L, "완료된 목표2", LocalDate.now().minusDays(20), LocalDate.now().plusDays(10), true),
-                createMockGoal(3L, "진행중 목표", LocalDate.now().minusDays(10), LocalDate.now().plusDays(20), false)
+            createMockGoal(1L, "완료된 목표1", LocalDate.now().minusDays(30),
+                LocalDate.now().minusDays(1), true),
+            createMockGoal(2L, "완료된 목표2", LocalDate.now().minusDays(20),
+                LocalDate.now().plusDays(10), true),
+            createMockGoal(3L, "진행중 목표", LocalDate.now().minusDays(10),
+                LocalDate.now().plusDays(20), false)
         );
 
         List<GoalResponseDTO> expectedResponse = Arrays.asList(
-                createMockGoalResponseDTO(1L, "완료된 목표1"),
-                createMockGoalResponseDTO(2L, "완료된 목표2")
+            createMockGoalResponseDTO(1L, "완료된 목표1"),
+            createMockGoalResponseDTO(2L, "완료된 목표2")
         );
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
-        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(allGoals);
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
+        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(
+            allGoals);
         when(goalConverter.toGoalResponseDTO((List<Goal>) any())).thenReturn(expectedResponse);
 
         // when
-        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword,
+            status);
 
         // then
         assertThat(result).isNotNull();
@@ -871,27 +923,33 @@ class GoalServiceTest {
         String status = "IN_PROGRESS";
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
         List<Goal> allGoals = Arrays.asList(
-                createMockGoal(1L, "진행중 목표1", LocalDate.now().minusDays(10), LocalDate.now().plusDays(20), false),
-                createMockGoal(2L, "완료된 목표", LocalDate.now().minusDays(30), LocalDate.now().minusDays(1), true),
-                createMockGoal(3L, "기간만료 목표", LocalDate.now().minusDays(30), LocalDate.now().minusDays(1), false)
+            createMockGoal(1L, "진행중 목표1", LocalDate.now().minusDays(10),
+                LocalDate.now().plusDays(20), false),
+            createMockGoal(2L, "완료된 목표", LocalDate.now().minusDays(30),
+                LocalDate.now().minusDays(1), true),
+            createMockGoal(3L, "기간만료 목표", LocalDate.now().minusDays(30),
+                LocalDate.now().minusDays(1), false)
         );
 
         List<GoalResponseDTO> expectedResponse = Arrays.asList(
-                createMockGoalResponseDTO(1L, "진행중 목표1")
+            createMockGoalResponseDTO(1L, "진행중 목표1")
         );
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
-        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(allGoals);
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
+        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(
+            allGoals);
         when(goalConverter.toGoalResponseDTO((List<Goal>) any())).thenReturn(expectedResponse);
 
         // when
-        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword,
+            status);
 
         // then
         assertThat(result).isNotNull();
@@ -909,27 +967,33 @@ class GoalServiceTest {
         String status = "EXPIRED";
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
         List<Goal> allGoals = Arrays.asList(
-                createMockGoal(1L, "기간만료 목표1", LocalDate.now().minusDays(30), LocalDate.now().minusDays(1), false),
-                createMockGoal(2L, "완료된 목표", LocalDate.now().minusDays(20), LocalDate.now().minusDays(1), true),
-                createMockGoal(3L, "진행중 목표", LocalDate.now().minusDays(10), LocalDate.now().plusDays(20), false)
+            createMockGoal(1L, "기간만료 목표1", LocalDate.now().minusDays(30),
+                LocalDate.now().minusDays(1), false),
+            createMockGoal(2L, "완료된 목표", LocalDate.now().minusDays(20),
+                LocalDate.now().minusDays(1), true),
+            createMockGoal(3L, "진행중 목표", LocalDate.now().minusDays(10),
+                LocalDate.now().plusDays(20), false)
         );
 
         List<GoalResponseDTO> expectedResponse = Arrays.asList(
-                createMockGoalResponseDTO(1L, "기간만료 목표1")
+            createMockGoalResponseDTO(1L, "기간만료 목표1")
         );
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
-        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(allGoals);
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
+        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(
+            allGoals);
         when(goalConverter.toGoalResponseDTO((List<Goal>) any())).thenReturn(expectedResponse);
 
         // when
-        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword,
+            status);
 
         // then
         assertThat(result).isNotNull();
@@ -947,30 +1011,36 @@ class GoalServiceTest {
         String status = null;
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
         List<Goal> mockGoals = Arrays.asList(
-                createMockGoal(3L, "ABC영어", LocalDate.now().minusDays(10), LocalDate.of(2024, 12, 31), false),
-                createMockGoal(1L, "가나다", LocalDate.now().minusDays(5), LocalDate.of(2024, 6, 30), false),
-                createMockGoal(2L, "나다라", LocalDate.now().minusDays(3), LocalDate.of(2024, 6, 30), false)
+            createMockGoal(3L, "ABC영어", LocalDate.now().minusDays(10), LocalDate.of(2024, 12, 31),
+                false),
+            createMockGoal(1L, "가나다", LocalDate.now().minusDays(5), LocalDate.of(2024, 6, 30),
+                false),
+            createMockGoal(2L, "나다라", LocalDate.now().minusDays(3), LocalDate.of(2024, 6, 30),
+                false)
         );
 
         // 정렬된 순서로 ResponseDTO 생성 (endDate -> 한글우선제목 -> goalId)
         List<GoalResponseDTO> sortedResponse = Arrays.asList(
-                createMockGoalResponseDTO(1L, "가나다"), // 2024-06-30, 한글, goalId=1
-                createMockGoalResponseDTO(2L, "나다라"), // 2024-06-30, 한글, goalId=2
-                createMockGoalResponseDTO(3L, "ABC영어") // 2024-12-31, 영어
+            createMockGoalResponseDTO(1L, "가나다"), // 2024-06-30, 한글, goalId=1
+            createMockGoalResponseDTO(2L, "나다라"), // 2024-06-30, 한글, goalId=2
+            createMockGoalResponseDTO(3L, "ABC영어") // 2024-12-31, 영어
         );
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
-        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(mockGoals);
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
+        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(
+            mockGoals);
         when(goalConverter.toGoalResponseDTO(mockGoals)).thenReturn(sortedResponse);
 
         // when
-        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword,
+            status);
 
         // then
         assertThat(result).isNotNull();
@@ -991,28 +1061,35 @@ class GoalServiceTest {
         String status = "IN_PROGRESS";
 
         GoalSearchRequestDTO searchRequest = GoalSearchRequestDTO.builder()
-                .searchDate(searchDate)
-                .keyword(keyword)
-                .status(status)
-                .build();
+            .searchDate(searchDate)
+            .keyword(keyword)
+            .status(status)
+            .build();
 
         List<Goal> allGoals = Arrays.asList(
-                createMockGoal(1L, "운동하기", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), false), // 조건 만족
-                createMockGoal(2L, "운동완료", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), true),  // 완료됨
-                createMockGoal(3L, "독서하기", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), false), // 키워드 불일치
-                createMockGoal(4L, "운동기간만료", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 28), false) // 기간 불일치
+            createMockGoal(1L, "운동하기", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), false),
+            // 조건 만족
+            createMockGoal(2L, "운동완료", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), true),
+            // 완료됨
+            createMockGoal(3L, "독서하기", LocalDate.of(2024, 3, 1), LocalDate.of(2024, 3, 31), false),
+            // 키워드 불일치
+            createMockGoal(4L, "운동기간만료", LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 28), false)
+            // 기간 불일치
         );
 
         List<GoalResponseDTO> expectedResponse = Arrays.asList(
-                createMockGoalResponseDTO(1L, "운동하기")
+            createMockGoalResponseDTO(1L, "운동하기")
         );
 
-        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(searchRequest);
-        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(allGoals);
+        when(goalConverter.toGoalSearchRequestDTO(searchDate, keyword, status)).thenReturn(
+            searchRequest);
+        when(goalRepositoryFacade.findGoalsWithFilters(userId, keyword, searchDate)).thenReturn(
+            allGoals);
         when(goalConverter.toGoalResponseDTO((List<Goal>) any())).thenReturn(expectedResponse);
 
         // when
-        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+        List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword,
+            status);
 
         // then
         assertThat(result).isNotNull();
@@ -1028,9 +1105,9 @@ class GoalServiceTest {
     @DisplayName("소목표 생성 성공 테스트")
     void createSubGoals_Success() {
         // given
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         List<SubGoalResponseDTO> subGoalListResponseDTO = List.of(validSubGoalResponseDTO);
-        ;
-        when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L)).thenReturn(validGoal);
         when(subGoalRepositoryFacade.saveSubGoals(List.of(validSubGoal))).thenReturn(
             List.of(validSubGoal));
         when(subGoalConverter.toSubGoalResponseListDTO(any()))
@@ -1038,7 +1115,7 @@ class GoalServiceTest {
         when(subGoalConverter.toSubGoalEntityList(any(), any())).thenReturn(List.of(validSubGoal));
 
         // when
-        SubGoalCreateResponseDTO result = goalService.createSubGoals(1L,
+        SubGoalCreateResponseDTO result = subGoalService.createSubGoals(1L, 1L,
             validSubGoalCreateRequestDTO);
 
         // then
@@ -1056,11 +1133,13 @@ class GoalServiceTest {
     @DisplayName("소목표 생성 - GoalRepository에서 예외 발생")
     void createSubGoal_GoalsRepositoryException() {
         // given
-        when(goalRepositoryFacade.findActiveGoalById(any())).thenThrow(
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(any(), any())).thenThrow(
             new RuntimeException("데이터베이스 오류"));
 
         // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, validSubGoalCreateRequestDTO))
+        assertThatThrownBy(
+            () -> subGoalService.createSubGoals(1L, 1L, validSubGoalCreateRequestDTO))
             .isInstanceOf(SubGoalException.class)
             .hasFieldOrPropertyWithValue("subGoalExceptionType",
                 SubGoalExceptionType.SUB_GOAL_CREATE_FAILED);
@@ -1070,11 +1149,13 @@ class GoalServiceTest {
     @DisplayName("소목표 생성 - Goal 조회 실패")
     void createSubGoal_GoalsRepositoryNotFound() {
         // given
-        when(goalRepositoryFacade.findActiveGoalById(any()))
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(any(), any()))
             .thenThrow(new SubGoalException(SubGoalExceptionType.SUB_GOAL_GOAL_NOT_FOUND));
 
         // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, validSubGoalCreateRequestDTO))
+        assertThatThrownBy(
+            () -> subGoalService.createSubGoals(1L, 1L, validSubGoalCreateRequestDTO))
             .isInstanceOf(SubGoalException.class)
             .hasFieldOrPropertyWithValue("subGoalExceptionType",
                 SubGoalExceptionType.SUB_GOAL_GOAL_NOT_FOUND);
@@ -1090,7 +1171,8 @@ class GoalServiceTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, invalidSubGoalCreateRequestDTO))
+        assertThatThrownBy(
+            () -> subGoalService.createSubGoals(1L, 1L, invalidSubGoalCreateRequestDTO))
             .isInstanceOf(SubGoalException.class)
             .hasFieldOrPropertyWithValue("subGoalExceptionType",
                 SubGoalExceptionType.SUB_GOAL_CREATE_EMPTY);
@@ -1110,7 +1192,8 @@ class GoalServiceTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, invalidSubGoalCreateRequestDTO))
+        assertThatThrownBy(
+            () -> subGoalService.createSubGoals(1L, 1L, invalidSubGoalCreateRequestDTO))
             .isInstanceOf(SubGoalException.class)
             .hasFieldOrPropertyWithValue("subGoalExceptionType",
                 SubGoalExceptionType.SUB_GOAL_TITLE_EMPTY);
@@ -1131,7 +1214,8 @@ class GoalServiceTest {
             .build();
 
         // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, invalidSubGoalCreateRequestDTO))
+        assertThatThrownBy(
+            () -> subGoalService.createSubGoals(1L, 1L, invalidSubGoalCreateRequestDTO))
             .isInstanceOf(SubGoalException.class)
             .hasFieldOrPropertyWithValue("subGoalExceptionType",
                 SubGoalExceptionType.SUB_GOAL_TITLE_TOO_LONG);
@@ -1141,12 +1225,14 @@ class GoalServiceTest {
     @DisplayName("소목표 생성 - SubGoalRepository 저장 실패")
     void createSubGoal_SubGoalsRepositoryException() {
         // given
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         when(subGoalRepositoryFacade.saveSubGoals(any())).thenThrow(
             new RuntimeException("데이터베이스 오류"));
-        when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, 1L)).thenReturn(validGoal);
 
         // when & then
-        assertThatThrownBy(() -> goalService.createSubGoals(1L, validSubGoalCreateRequestDTO))
+        assertThatThrownBy(
+            () -> subGoalService.createSubGoals(1L, 1L, validSubGoalCreateRequestDTO))
             .isInstanceOf(SubGoalException.class)
             .hasFieldOrPropertyWithValue("subGoalExceptionType",
                 SubGoalExceptionType.SUB_GOAL_CREATE_FAILED);
@@ -1168,122 +1254,5 @@ class GoalServiceTest {
             validSubGoalResponseDTO,
             validSubGoalResponseDTO
         );
-
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(subGoals);
-        when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalConverter.toSubGoalResponseListDTO(any())).thenReturn(subGoalResponseDTOs);
-        // when
-        SubGoalListResponseDTO subGoalListResponseDTO = goalService.getAllSubGoals(1L);
-
-        // then
-        assertThat(subGoalListResponseDTO.getSubGoals().size()).isEqualTo(4);
-        assertThat(subGoalListResponseDTO.getSubGoals().getFirst().getSubGoalId()).isEqualTo(1L);
-        assertThat(subGoalListResponseDTO.getSubGoals().getFirst().getIsCompleted()).isEqualTo(
-            false);
-        assertThat(subGoalListResponseDTO.getSubGoals().getFirst().getTitle()).isEqualTo(
-            "테스트 소목표1");
-    }
-
-    @Test
-    @DisplayName("소목표 전체 조회 - goalId가 null인 경우")
-    void getAllSubGoals_goalIdIsNull() {
-        // when & then
-        assertThatThrownBy(() -> goalService.getAllSubGoals(null))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_GOAL_ID_IS_NULL);
-    }
-
-    @Test
-    @DisplayName("소목표 전체 조회 - SubGoalRepository에서 조회 중 예상치 못한 오류가 발생하는 경우")
-    void getAllSubGoals_SubGoalRepositoryException() {
-        // given
-        when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(any())).thenThrow(
-            new RuntimeException());
-
-        // when & then
-        assertThatThrownBy(() -> goalService.getAllSubGoals(1L))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_READ_FAILED);
-    }
-
-    @Test
-    @DisplayName("소목표 전체 조회 성공 - 해당하는 소목표가 없을 때 빈 리스트 반환")
-    void getAllSubGoals_whenNoSubGoalsExist_returnsEmptyList() {
-        // given
-        Long goalId = 1L;
-
-        when(goalRepositoryFacade.findActiveGoalById(goalId)).thenReturn(existingGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(existingGoal)).thenReturn(Collections.emptyList());
-        when(subGoalConverter.toSubGoalResponseListDTO(Collections.emptyList())).thenReturn(Collections.emptyList());
-
-        // when
-        SubGoalListResponseDTO response = goalService.getAllSubGoals(goalId);
-
-        // then
-        assertThat(response).isNotNull();
-        assertThat(response.getSubGoals()).isNotNull();
-        assertThat(response.getSubGoals()).isEmpty();
-    }
-
-    @Test
-    @DisplayName("소목표 단건 조회 성공")
-    void getSubGoal_Success() {
-        // given
-        when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(
-            List.of(validSubGoal));
-        when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(1L)).thenReturn(validSubGoal);
-
-        // when
-        SubGoalResponseDTO response = goalService.getSubGoal(1L, 1L);
-
-        // then
-        assertThat(response).isEqualTo(subGoalConverter.toSubGoalResponseDTO(validSubGoal));
-    }
-
-    @Test
-    @DisplayName("소목표 단건 조회 - subGoalId가 null인 경우")
-    void getSubGoal_subGoalIdIsNull() {
-        // when & then
-        assertThatThrownBy(() -> goalService.getSubGoal(1L, null))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_ID_IS_NULL);
-    }
-
-    @Test
-    @DisplayName("소목표 단건 조회 - SubGoalRepository 조회 결과 없는 경우")
-    void getSubGoal_subGoalRepositoryResultIsNull() {
-        // given
-        when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(
-            List.of(validSubGoal));
-        when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(1L)).thenThrow(
-            new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND));
-
-        // when & then
-        assertThatThrownBy(() -> goalService.getSubGoal(1L, 1L))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
-    }
-
-    @Test
-    @DisplayName("소목표 단건 조회 - 소목표가 해당 목표에 속하지 않음")
-    void getSubGoal_SubGoalNotBelongToGoal() {
-        // given
-        when(goalRepositoryFacade.findActiveGoalById(1L)).thenReturn(validGoal);
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(
-            new ArrayList<>());
-        when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(1L)).thenReturn(validSubGoal);
-
-        // when & then
-        assertThatThrownBy(() -> goalService.getSubGoal(1L, 1L))
-            .isInstanceOf(SubGoalException.class)
-            .hasFieldOrPropertyWithValue("subGoalExceptionType",
-                SubGoalExceptionType.SUB_GOAL_NOT_BELONG_TO_GOAL);
     }
 } 

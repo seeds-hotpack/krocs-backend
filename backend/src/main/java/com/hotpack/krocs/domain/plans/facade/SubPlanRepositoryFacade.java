@@ -32,9 +32,6 @@ public class SubPlanRepositoryFacade {
     public SubPlan findActiveSubPlanBySubPlanId(Long subPlanId) {
         SubPlan subPlan = subPlanRepository.findSubPlansBySubPlanIdAndStatus(subPlanId,
             Status.ACTIVE);
-        if (subPlan == null) {
-            throw new SubPlanException(SubPlanExceptionType.SUB_PLAN_NOT_FOUND);
-        }
         return subPlan;
     }
 
@@ -48,5 +45,8 @@ public class SubPlanRepositoryFacade {
         subPlan.delete();
     }
 
+    public boolean existsValidSubPlan(Long userId, Long planId, Long subPlanId) {
+        return subPlanRepository.existsValidSubPlan(userId, planId, subPlanId, Status.ACTIVE);
+    }
 
 }

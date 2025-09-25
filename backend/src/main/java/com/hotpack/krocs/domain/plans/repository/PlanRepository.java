@@ -29,4 +29,8 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
             @Param("userId") Long userId,
             @Param("status") Status status
     );
+
+    @Query("SELECT p FROM Plan p WHERE p.user.userId = :userId AND p.planId = :planId AND p.status = :status")
+    Plan findPlanByIdAndUserIdAndStatus(@Param("planId") Long planId, @Param("userId") Long userId,
+        @Param("status") Status status);
 }

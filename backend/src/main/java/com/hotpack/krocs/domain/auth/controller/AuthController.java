@@ -1,6 +1,6 @@
 package com.hotpack.krocs.domain.auth.controller;
 
-import com.hotpack.krocs.domain.auth.dto.UserSession;
+import com.hotpack.krocs.domain.auth.dto.response.UserResponseDTO;
 import com.hotpack.krocs.domain.auth.service.AuthService;
 import com.hotpack.krocs.domain.auth.service.RedisTokenService;
 import com.hotpack.krocs.global.common.response.ApiResponse;
@@ -8,7 +8,6 @@ import com.hotpack.krocs.global.security.annotation.Login;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,11 +23,13 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<UserSession>> me(@Login UserSession userSession) {
-        if (userSession == null) {
-            return ResponseEntity.status(401).body(ApiResponse.onFailure("GLOBAL401", "인증 실패"));
+    public ApiResponse<UserResponseDTO> me(@Login Long userId) {
+        if (userId == null) {
+            return ApiResponse.onFailure("GLOBAL401", "인증 실패");
         }
-        return ResponseEntity.ok(ApiResponse.success(userSession));
+
+        UserResponseDTO responseDto = authService.getUser(userId);
+        return ApiResponse.success(responseDto);
     }
 
     @PostMapping("/logout")

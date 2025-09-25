@@ -27,9 +27,11 @@ public enum PlanExceptionType implements BaseCode {
     PLAN_END_TIME_REQUIRED(HttpStatus.BAD_REQUEST, "PLAN400", "일정 종료시간을 입력해주세요."),
     PLAN_INVALID_ENERGY(HttpStatus.BAD_REQUEST, "PLAN400", "유효하지 않은 에너지 값입니다."),
     PLAN_SUB_PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN404", "세부일정을 찾을 수 없습니다."),
-    INVALID_REQUEST(HttpStatus.BAD_REQUEST, "PLAN400", "잘못된 요청입니다."),
-    INVALID_YEAR(HttpStatus.BAD_REQUEST, "PLAN400", "유효하지 않은 연도입니다. (2000-3000년 사이여야 합니다)"),
-    INVALID_MONTH(HttpStatus.BAD_REQUEST, "PLAN400", "유효하지 않은 월입니다. (1-12월 사이여야 합니다)");
+    PLAN_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "PLAN400", "잘못된 요청입니다."),
+    PLAN_INVALID_YEAR(HttpStatus.BAD_REQUEST, "PLAN400", "유효하지 않은 연도입니다. (2000-3000년 사이여야 합니다)"),
+    PLAN_INVALID_MONTH(HttpStatus.BAD_REQUEST, "PLAN400", "유효하지 않은 월입니다. (1-12월 사이여야 합니다)");
+    PLAN_ID_IS_NULL(HttpStatus.BAD_REQUEST, "PLAN400", "계획 ID가 null 입니다."),
+    PLAN_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "PLAN404", "사용자가 존재하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
@@ -38,21 +40,21 @@ public enum PlanExceptionType implements BaseCode {
     @Override
     public Reason getReason() {
         return Reason.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .data("")
-                .build();
+            .message(message)
+            .code(code)
+            .isSuccess(false)
+            .data("")
+            .build();
     }
 
     @Override
     public Reason getReasonHttpStatus() {
         return Reason.builder()
-                .message(message)
-                .code(code)
-                .isSuccess(false)
-                .httpStatus(httpStatus)
-                .data("")
-                .build();
+            .message(message)
+            .code(code)
+            .isSuccess(false)
+            .httpStatus(httpStatus)
+            .data("")
+            .build();
     }
 }

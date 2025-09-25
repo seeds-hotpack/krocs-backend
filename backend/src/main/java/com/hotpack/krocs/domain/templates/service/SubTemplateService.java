@@ -10,13 +10,13 @@ import java.util.List;
 public interface SubTemplateService {
 
     SubTemplateCreateResponseDTO createSubTemplates(Long templateId,
-        SubTemplateCreateRequestDTO requestDTO,
+        SubTemplateCreateRequestDTO requestDTO, Long userId);
+
+    List<SubTemplateResponseDTO> getSubTemplates(Long templateId, Long userId);
+
+    SubTemplateDeleteResponseDTO deleteSubTemplate(Long subTemplateId, Long templateId,
         Long userId);
 
-    List<SubTemplateResponseDTO> getSubTemplates(Long templateId);
-
-    SubTemplateDeleteResponseDTO deleteSubTemplate(Long subTemplateId);
-
-    SubTemplateResponseDTO updateSubTemplate(Long subTemplateId,
+    SubTemplateResponseDTO updateSubTemplate(Long subTemplateId, Long templateId, Long userId,
         SubTemplateUpdateRequestDTO requestDTO);
 }

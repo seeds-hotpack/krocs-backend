@@ -28,7 +28,7 @@ class AuthE2ETest {
     @BeforeEach
     void setup() {
         // 단순 문자열 JSON 저장으로 직렬화 이슈 제거
-        String json = "{\"userId\":\"u-123\",\"displayName\":\"Dev User\",\"roles\":[\"USER\"]}";
+        String json = "{\"userId\":\"1\",\"name\":\"Dev User\"}";
         stringRedisTemplate.opsForValue()
             .set("auth:token:" + TEST_TOKEN, json, Duration.ofHours(1));
     }
@@ -38,7 +38,7 @@ class AuthE2ETest {
         mockMvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + TEST_TOKEN))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.isSuccess").value(true))
-            .andExpect(jsonPath("$.result.userId").value("u-123"));
+            .andExpect(jsonPath("$.result.userId").value(1));
     }
 
     @Test

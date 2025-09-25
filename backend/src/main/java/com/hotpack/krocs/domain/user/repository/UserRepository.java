@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findUserByAccountIdAndStatus(String accountId, Status status);
+
+    User findUserByUserId(Long userId);
 }
 
 

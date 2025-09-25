@@ -9,10 +9,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TemplateRepository extends JpaRepository<Template, Long> {
 
-    List<Template> findTemplatesByTitleContainingIgnoreCaseAndStatus(String title, Status status);
+    List<Template> findTemplatesByTitleContainingIgnoreCaseAndUser_userIdAndStatus(String title,
+        Long userId, Status status);
 
-    List<Template> findAllTemplatesByStatus(Status status);
+    List<Template> findAllTemplatesByUser_UserIdAndStatus(Long userId, Status status);
 
-    Template findTemplateByTemplateIdAndStatus(Long templateId, Status status);
+    Template findTemplateByTemplateIdAndUser_UserIdAndStatus(Long templateId, Long userId,
+        Status status);
 
 }

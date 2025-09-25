@@ -1,7 +1,5 @@
 package com.hotpack.krocs.domain.plans.service;
 
-import com.hotpack.krocs.domain.goals.domain.Goal;
-import com.hotpack.krocs.domain.goals.domain.SubGoal;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.plans.converter.PlanConverter;
 import com.hotpack.krocs.domain.plans.domain.Plan;
@@ -16,6 +14,7 @@ import com.hotpack.krocs.domain.plans.exception.PlanExceptionType;
 import com.hotpack.krocs.domain.plans.facade.PlanRepositoryFacade;
 import com.hotpack.krocs.domain.plans.validator.PlanValidator;
 import com.hotpack.krocs.domain.user.domain.User;
+import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -37,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PlanServiceImpl implements PlanService {
 
     private final PlanRepositoryFacade planRepositoryFacade;
+    private final UserRepositoryFacade userRepositoryFacade;
     private final PlanConverter planConverter;
     private final SubGoalRepositoryFacade subGoalRepositoryFacade;
     private final PlanValidator planValidator;
@@ -46,16 +46,12 @@ public class PlanServiceImpl implements PlanService {
     public PlanResponseDTO createPlan(PlanCreateRequestDTO requestDTO, Long userId) {
         try {
             planValidator.validatePlanCreation(requestDTO);
-
-            Plan plan;
-            if (userId != null) {
-                User userRef = User.builder()
-                    .userId(userId)
-                    .build();
-                plan = planConverter.toEntity(requestDTO, userRef);
-            } else {
-                plan = planConverter.toEntity(requestDTO);
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new PlanException(PlanExceptionType.PLAN_USER_NOT_FOUND);
             }
+
+            Plan plan = planConverter.toEntity(requestDTO, user);
             Plan savedPlan = planRepositoryFacade.savePlan(plan);
 
             return planConverter.toEntity(savedPlan);
@@ -96,7 +92,7 @@ public class PlanServiceImpl implements PlanService {
     public PlanResponseDTO getPlanById(Long planId, Long userId) {
         try {
             planValidator.validateGetPlan(planId);
-            Plan plan = planRepositoryFacade.findActivePlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanByPlanIdAndUserId(planId, userId);
             if (plan == null) {
                 throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
             }
@@ -116,7 +112,7 @@ public class PlanServiceImpl implements PlanService {
         try {
             planValidator.validateUpdatePlan(planId);
 
-            Plan plan = planRepositoryFacade.findActivePlanById(planId);
+            Plan plan = planRepositoryFacade.findActivePlanByPlanIdAndUserId(planId, userId);
             if (plan == null) {
                 throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
             }
@@ -175,11 +171,11 @@ public class PlanServiceImpl implements PlanService {
     public void deletePlan(Long planId, Long userId) {
         try {
             planValidator.validateDeletePlan(planId);
-            if (planRepositoryFacade.findActivePlanById(planId) == null) {
+            if (planRepositoryFacade.findActivePlanByPlanIdAndUserId(planId, userId) == null) {
                 throw new PlanException(PlanExceptionType.PLAN_NOT_FOUND);
             }
 
-            planRepositoryFacade.deleteActivePlanByPlanId(planId);
+            planRepositoryFacade.deleteActivePlanByPlanId(planId, userId);
         } catch (PlanException e) {
             throw e;
         } catch (Exception e) {
