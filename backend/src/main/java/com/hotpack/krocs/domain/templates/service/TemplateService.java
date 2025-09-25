@@ -5,13 +5,16 @@ import com.hotpack.krocs.domain.templates.dto.request.TemplateUpdateRequestDTO;
 import com.hotpack.krocs.domain.templates.dto.response.TemplateCreateResponseDTO;
 import com.hotpack.krocs.domain.templates.dto.response.TemplateResponseDTO;
 
+import com.hotpack.krocs.global.common.response.PageResponseDTO;
 import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 public interface TemplateService {
 
     TemplateCreateResponseDTO createTemplate(TemplateCreateRequestDTO requestDTO, Long userId);
 
-    List<TemplateResponseDTO> getTemplatesByUserAndTitle(Long userId, String title);
+    PageResponseDTO<TemplateResponseDTO> getTemplatesByUserAndTitle(Long userId, String title,
+        Pageable pageable);
 
     TemplateResponseDTO updateTemplate(Long templateId, Long userId, TemplateUpdateRequestDTO requestDTO);
 

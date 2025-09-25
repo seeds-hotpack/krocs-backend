@@ -9,6 +9,7 @@ import com.hotpack.krocs.domain.templates.exception.TemplateException;
 import com.hotpack.krocs.domain.templates.exception.TemplateExceptionType;
 import com.hotpack.krocs.domain.templates.service.TemplateService;
 import com.hotpack.krocs.global.common.response.ApiResponse;
+import com.hotpack.krocs.global.common.response.PageResponseDTO;
 import com.hotpack.krocs.global.security.annotation.Login;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -16,6 +17,9 @@ import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,12 +62,14 @@ public class TemplateController {
 
     @Operation(summary = "템플릿 전체 조회 및 검색", description = "사용자 ID 기반으로 템플릿을 조회하며, title 키워드로 부분 검색이 가능합니다.")
     @GetMapping
-    public ApiResponse<List<TemplateResponseDTO>> getTemplates(
+    public ApiResponse<PageResponseDTO<TemplateResponseDTO>> getTemplates(
         @Login Long userId,
-        @RequestParam(required = false) String title) {
+        @RequestParam(required = false) String title,
+        @PageableDefault(size = 6, sort = "createdAt", direction = Sort.Direction.DESC)
+        Pageable pageable) {
         try {
-            List<TemplateResponseDTO> responseDTO = templateService.getTemplatesByUserAndTitle(
-                userId, title);
+            PageResponseDTO<TemplateResponseDTO> responseDTO = templateService.getTemplatesByUserAndTitle(
+                userId, title, pageable);
             return ApiResponse.success(responseDTO);
 
         } catch (TemplateException e) {

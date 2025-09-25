@@ -14,9 +14,12 @@ import com.hotpack.krocs.domain.templates.validator.TemplateValidator;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import com.hotpack.krocs.global.common.constant.ValidationConstants;
+import com.hotpack.krocs.global.common.response.PageResponseDTO;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -57,20 +60,21 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public List<TemplateResponseDTO> getTemplatesByUserAndTitle(Long userId, String title) {
+    public PageResponseDTO<TemplateResponseDTO> getTemplatesByUserAndTitle(Long userId,
+        String title, Pageable pageable) {
         try {
-
-            List<Template> templates;
+            Page<Template> templatePage;
             if (StringUtils.hasText(title) && title.length() <= ValidationConstants.TITLE_MAX) {
-                templates = templateRepositoryFacade.findActiveTemplatesByTitleAndUserId(title,
-                    userId);
+                templatePage = templateRepositoryFacade.findActiveTemplatesByTitleAndUserId(title,
+                    userId, pageable);
             } else {
-                templates = templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId);
+                templatePage = templateRepositoryFacade.findAllActiveTemplatesAndUserId(userId, pageable);
             }
 
-            return templates.stream()
-                .map(templateConverter::toTemplateResponseDTO)
-                .toList();
+            Page<TemplateResponseDTO> dtoPage = templatePage.map(templateConverter::toTemplateResponseDTO);
+
+            return PageResponseDTO.of(dtoPage);
+
         } catch (TemplateException e) {
             throw e;
         } catch (Exception e) {
