@@ -75,6 +75,8 @@ public class TemplateServiceImpl implements TemplateService {
 
             return PageResponseDTO.of(dtoPage);
 
+        } catch (TemplateException e) {
+            throw e;
         } catch (Exception e) {
             throw new TemplateException(TemplateExceptionType.TEMPLATE_FOUND_FAILED);
         }

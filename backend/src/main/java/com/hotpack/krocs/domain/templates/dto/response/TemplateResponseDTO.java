@@ -14,8 +14,6 @@ import java.util.List;
 public class TemplateResponseDTO {
     private Long templateId;
 
-    private Long userId;
-
     private String title;
 
     private Priority priority;
