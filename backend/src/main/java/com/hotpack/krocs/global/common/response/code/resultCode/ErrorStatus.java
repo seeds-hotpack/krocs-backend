@@ -23,7 +23,7 @@ public enum ErrorStatus implements BaseCode {
     // 검증 에러
     VALIDATION_ERROR(HttpStatus.BAD_REQUEST, "VALIDATION400", "입력값 검증 실패"),
     BAD_REQUEST_BODY(HttpStatus.BAD_REQUEST, "BAD_REQUEST_BODY400", "잘못된 데이터 타입"),
-    INVALID_SORT_PARAMETER(HttpStatus.BAD_REQUEST, "INVALID_SORT_PARAMETER400", "잘못된 정렬 기준입니다."),
+    INVALID_SORT_PARAMETER(HttpStatus.BAD_REQUEST, "INVALID_SORT_PARAMETER400", "'%s'은(는) 유효하지 않은 정렬 기준입니다."),
 
     // 비즈니스 로직 에러
     BUSINESS_LOGIC_ERROR(HttpStatus.BAD_REQUEST, "BUSINESS400", "비즈니스 로직 오류"),
@@ -31,6 +31,21 @@ public enum ErrorStatus implements BaseCode {
     DUPLICATE_RESOURCE(HttpStatus.CONFLICT, "DUPLICATE409", "중복된 리소스입니다"),
     OAUTH2_SESSION_SERIALIZE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "OAUTH2_500",
         "세션 직렬화에 실패했습니다.");
+
+    // 메시지를 포맷팅하는 메서드
+    public String formatMessage(Object... args) {
+        return String.format(this.message, args);
+    }
+
+    // 포맷된 메시지를 사용하여 Reason을 생성하는 메서드
+    public Reason getReasonWithArgs(Object... args) {
+        return Reason.builder()
+            .message(formatMessage(args))
+            .code(code)
+            .isSuccess(false)
+            .data("")
+            .build();
+    }
 
     private final HttpStatus httpStatus;
     private final String code;

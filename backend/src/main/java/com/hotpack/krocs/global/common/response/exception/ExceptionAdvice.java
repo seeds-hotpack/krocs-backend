@@ -200,7 +200,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
 
         ErrorStatus errorStatus = ErrorStatus.INVALID_SORT_PARAMETER;
 
-        String errorMessage = String.format("'%s'은(는) 유효하지 않은 정렬 기준입니다.", e.getPropertyName());
+        String errorMessage = errorStatus.formatMessage(e.getPropertyName());
 
         return handleExceptionInternalFalse(e, errorStatus, HttpHeaders.EMPTY, errorStatus.getHttpStatus(), request, errorMessage);
     }
