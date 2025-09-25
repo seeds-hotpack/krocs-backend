@@ -26,6 +26,7 @@ import com.hotpack.krocs.domain.user.domain.enums.AccountType;
 import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import com.hotpack.krocs.global.common.entity.Priority;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -80,6 +81,9 @@ class SubGoalServiceTest {
         validSubGoalUpdateRequestDTO = SubGoalUpdateRequestDTO.builder()
             .title("테스트 변경 소목표 제목")
             .isCompleted(true)
+            .isTimeSelected(true)
+            .startDateTime(LocalDateTime.of(2025, 9, 25, 10, 9))
+            .endDateTime(LocalDateTime.of(2025, 10, 25, 10, 9))
             .build();
 
         validGoal = Goal.builder()
@@ -400,6 +404,104 @@ class SubGoalServiceTest {
             .isInstanceOf(SubGoalException.class)
             .hasFieldOrPropertyWithValue("subGoalExceptionType",
                 SubGoalExceptionType.SUB_GOAL_UPDATE_FAILED);
+    }
+    
+    @Test
+    @DisplayName("소목표 수정 - requestDTO의 isTimeSelected가 null 일때")
+    void updateSubGoal_isTimeSelectedIsNull() {
+        // given
+        when(subGoalRepositoryFacade.existsValidSubGoal(1L, 1L, 1L)).thenReturn(true);
+        SubGoalUpdateRequestDTO invalidRequestDTO = SubGoalUpdateRequestDTO.builder()
+            .title("test")
+            .isCompleted(false)
+            .isTimeSelected(null)
+            .build();
+
+        // when & then
+        assertThatThrownBy(
+            () -> subGoalService.updateSubGoal(1L, 1L, 1L, invalidRequestDTO))
+            .isInstanceOf(SubGoalException.class)
+            .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                SubGoalExceptionType.SUB_GOAL_IS_TIME_SELECTED_IS_NULL);
+    }
+
+    @Test
+    @DisplayName("소목표 수정 - requestDTO의 isTimeSelected가 false 이면서 startDateTime이 not null 일때")
+    void updateSubGoal_isTimeSelectedIsFalseAndStartDateTimeIsNotNull() {
+        when(subGoalRepositoryFacade.existsValidSubGoal(1L, 1L, 1L)).thenReturn(true);
+        SubGoalUpdateRequestDTO invalidRequestDTO = SubGoalUpdateRequestDTO.builder()
+            .title("test")
+            .isCompleted(false)
+            .isTimeSelected(false)
+            .startDateTime(LocalDateTime.of(2025, 9, 25, 10, 9))
+            .endDateTime(LocalDateTime.of(2025, 10, 25, 10, 9))
+            .build();
+
+        // when & then
+        assertThatThrownBy(
+            () -> subGoalService.updateSubGoal(1L, 1L, 1L, invalidRequestDTO))
+            .isInstanceOf(SubGoalException.class)
+            .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                SubGoalExceptionType.SUB_GOAL_START_DATETIME_INVALID);
+    }
+
+    @Test
+    @DisplayName("소목표 수정 - requestDTO의 isTimeSelected가 false 이면서 endDateTime이 not null 일때")
+    void updateSubGoal_isTimeSelectedIsFalseAndEndDateTimeIsNotNull() {
+        when(subGoalRepositoryFacade.existsValidSubGoal(1L, 1L, 1L)).thenReturn(true);
+        SubGoalUpdateRequestDTO invalidRequestDTO = SubGoalUpdateRequestDTO.builder()
+            .title("test")
+            .isCompleted(false)
+            .isTimeSelected(false)
+            .endDateTime(LocalDateTime.of(2025, 10, 25, 10, 9))
+            .build();
+
+        // when & then
+        assertThatThrownBy(
+            () -> subGoalService.updateSubGoal(1L, 1L, 1L, invalidRequestDTO))
+            .isInstanceOf(SubGoalException.class)
+            .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                SubGoalExceptionType.SUB_GOAL_END_DATETIME_INVALID);
+    }
+
+    @Test
+    @DisplayName("소목표 수정 - requestDTO의 isTimeSelected가 true 이면서 startDateTime이 null 일때")
+    void updateSubGoal_isTimeSelectedIsTrueAndStartDateTimeIsNull() {
+        when(subGoalRepositoryFacade.existsValidSubGoal(1L, 1L, 1L)).thenReturn(true);
+        SubGoalUpdateRequestDTO invalidRequestDTO = SubGoalUpdateRequestDTO.builder()
+            .title("test")
+            .isCompleted(false)
+            .isTimeSelected(true)
+            .startDateTime(null)
+            .endDateTime(LocalDateTime.of(2025, 10, 25, 10, 9))
+            .build();
+
+        // when & then
+        assertThatThrownBy(
+            () -> subGoalService.updateSubGoal(1L, 1L, 1L, invalidRequestDTO))
+            .isInstanceOf(SubGoalException.class)
+            .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                SubGoalExceptionType.SUB_GOAL_START_DATETIME_IS_NULL);
+    }
+
+    @Test
+    @DisplayName("소목표 수정 - requestDTO의 isTimeSelected가 true 이면서 startDateTime이 null 일때")
+    void updateSubGoal_isTimeSelectedIsTrueAndEndDateTimeIsNull() {
+        when(subGoalRepositoryFacade.existsValidSubGoal(1L, 1L, 1L)).thenReturn(true);
+        SubGoalUpdateRequestDTO invalidRequestDTO = SubGoalUpdateRequestDTO.builder()
+            .title("test")
+            .isCompleted(false)
+            .isTimeSelected(true)
+            .startDateTime(LocalDateTime.of(2025, 10, 25, 10, 9))
+            .endDateTime(null)
+            .build();
+
+        // when & then
+        assertThatThrownBy(
+            () -> subGoalService.updateSubGoal(1L, 1L, 1L, invalidRequestDTO))
+            .isInstanceOf(SubGoalException.class)
+            .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                SubGoalExceptionType.SUB_GOAL_END_DATETIME_IS_NULL);
     }
 
     @Test

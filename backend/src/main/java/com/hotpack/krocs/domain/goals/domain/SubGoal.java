@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,9 +40,19 @@ public class SubGoal extends BaseTimeEntity {
     @Column(name = "title", nullable = false, length = 200)
     private String title;
 
-    @Column(name = "is_completed", nullable = false)
     @Builder.Default
+    @Column(name = "is_completed", nullable = false)
     private Boolean isCompleted = false;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isTimeSelected = false;
+
+    @Column(name = "start_datetime")
+    private LocalDateTime startDateTime;
+
+    @Column(name = "end_datetime")
+    private LocalDateTime endDateTime;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
@@ -55,6 +66,22 @@ public class SubGoal extends BaseTimeEntity {
 
         if (requestDTO.getIsCompleted() != null) {
             this.isCompleted = requestDTO.getIsCompleted();
+        }
+
+        if (requestDTO.getStartDateTime() != null) {
+            this.startDateTime = requestDTO.getStartDateTime();
+        }
+
+        if (requestDTO.getEndDateTime() != null) {
+            this.endDateTime = requestDTO.getEndDateTime();
+        }
+
+        if (requestDTO.getIsTimeSelected() != null) {
+            this.isTimeSelected = requestDTO.getIsTimeSelected();
+            if (!this.isTimeSelected) {
+                this.startDateTime = null;
+                this.endDateTime = null;
+            }
         }
     }
 

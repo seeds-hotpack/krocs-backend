@@ -15,46 +15,52 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class SubGoalConverter {
 
-  public SubGoal toSubGoalEntity(Goal goal, SubGoalRequestDTO requestDTO) {
-    return SubGoal.builder()
-        .goal(goal)
-        .title(requestDTO.getTitle())
-        .build();
-  }
-
-  public List<SubGoal> toSubGoalEntityList(Goal goal,
-      SubGoalCreateRequestDTO subGoalCreateRequestDTO) {
-    List<SubGoal> subGoals = new ArrayList<>();
-    for (SubGoalRequestDTO subGoalRequestDTO : subGoalCreateRequestDTO.getSubGoals()) {
-      subGoals.add(toSubGoalEntity(goal, subGoalRequestDTO));
+    public SubGoal toSubGoalEntity(Goal goal, SubGoalRequestDTO requestDTO) {
+        return SubGoal.builder()
+            .goal(goal)
+            .title(requestDTO.getTitle())
+            .build();
     }
-    return subGoals;
-  }
 
-  public SubGoalResponseDTO toSubGoalResponseDTO(SubGoal subGoal) {
-    return SubGoalResponseDTO.builder()
-        .subGoalId(subGoal.getSubGoalId())
-        .title(subGoal.getTitle())
-        .isCompleted(subGoal.getIsCompleted())
-        .build();
-  }
-
-  public static SubGoalUpdateResponseDTO toSubGoalUpdateResponseDTO(SubGoal subGoal) {
-    return SubGoalUpdateResponseDTO.builder()
-        .subGoalId(subGoal.getSubGoalId())
-        .goalId(subGoal.getGoal().getGoalId())
-        .title(subGoal.getTitle())
-        .isCompleted(subGoal.getIsCompleted())
-        .createdAt(subGoal.getCreatedAt())
-        .updatedAt(subGoal.getUpdatedAt())
-        .build();
-  }
-
-  public List<SubGoalResponseDTO> toSubGoalResponseListDTO(List<SubGoal> subGoals) {
-    List<SubGoalResponseDTO> subGoalResponseDTOs = new ArrayList<>();
-    for (SubGoal subGoal : subGoals) {
-      subGoalResponseDTOs.add(toSubGoalResponseDTO(subGoal));
+    public List<SubGoal> toSubGoalEntityList(Goal goal,
+        SubGoalCreateRequestDTO subGoalCreateRequestDTO) {
+        List<SubGoal> subGoals = new ArrayList<>();
+        for (SubGoalRequestDTO subGoalRequestDTO : subGoalCreateRequestDTO.getSubGoals()) {
+            subGoals.add(toSubGoalEntity(goal, subGoalRequestDTO));
+        }
+        return subGoals;
     }
-    return subGoalResponseDTOs;
-  }
+
+    public SubGoalResponseDTO toSubGoalResponseDTO(SubGoal subGoal) {
+        return SubGoalResponseDTO.builder()
+            .subGoalId(subGoal.getSubGoalId())
+            .title(subGoal.getTitle())
+            .isCompleted(subGoal.getIsCompleted())
+            .isTimeSelected(subGoal.isTimeSelected())
+            .startDateTime(subGoal.getStartDateTime())
+            .endDateTime(subGoal.getEndDateTime())
+            .build();
+    }
+
+    public static SubGoalUpdateResponseDTO toSubGoalUpdateResponseDTO(SubGoal subGoal) {
+        return SubGoalUpdateResponseDTO.builder()
+            .subGoalId(subGoal.getSubGoalId())
+            .goalId(subGoal.getGoal().getGoalId())
+            .title(subGoal.getTitle())
+            .isCompleted(subGoal.getIsCompleted())
+            .isTimeSelected(subGoal.isTimeSelected())
+            .startDateTime(subGoal.getStartDateTime())
+            .endDateTime(subGoal.getEndDateTime())
+            .createdAt(subGoal.getCreatedAt())
+            .updatedAt(subGoal.getUpdatedAt())
+            .build();
+    }
+
+    public List<SubGoalResponseDTO> toSubGoalResponseListDTO(List<SubGoal> subGoals) {
+        List<SubGoalResponseDTO> subGoalResponseDTOs = new ArrayList<>();
+        for (SubGoal subGoal : subGoals) {
+            subGoalResponseDTOs.add(toSubGoalResponseDTO(subGoal));
+        }
+        return subGoalResponseDTOs;
+    }
 }
