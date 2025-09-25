@@ -5,6 +5,8 @@ import com.hotpack.krocs.domain.plans.exception.PlanException;
 import com.hotpack.krocs.domain.plans.exception.PlanExceptionType;
 import com.hotpack.krocs.domain.plans.repository.PlanRepository;
 import com.hotpack.krocs.global.common.entity.Status;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -46,4 +48,12 @@ public class PlanRepositoryFacade {
         plan.delete();
     }
 
+    public List<Plan> findActivePlansByMonth(int year, int month, Long userId) {
+        LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
+        LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusNanos(1);
+
+        return planRepository.findPlansByMonthAndStatus(
+                startOfMonth, endOfMonth, userId, Status.ACTIVE
+        );
+    }
 }

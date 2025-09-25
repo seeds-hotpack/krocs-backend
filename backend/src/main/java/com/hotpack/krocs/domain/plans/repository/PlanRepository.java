@@ -20,6 +20,16 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
         @Param("status") Status status
     );
 
+    Plan findPlanByPlanIdAndStatus(Long id, Status status);
+
+    @Query("SELECT p FROM Plan p WHERE p.user.userId = :userId AND p.startDateTime <= :endOfMonth AND p.endDateTime >= :startOfMonth AND p.status = :status")
+    List<Plan> findPlansByMonthAndStatus(
+            @Param("startOfMonth") LocalDateTime startOfMonth,
+            @Param("endOfMonth") LocalDateTime endOfMonth,
+            @Param("userId") Long userId,
+            @Param("status") Status status
+    );
+
     @Query("SELECT p FROM Plan p WHERE p.user.userId = :userId AND p.planId = :planId AND p.status = :status")
     Plan findPlanByIdAndUserIdAndStatus(@Param("planId") Long planId, @Param("userId") Long userId,
         @Param("status") Status status);

@@ -2,6 +2,7 @@ package com.hotpack.krocs.domain.plans.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
@@ -18,6 +19,8 @@ import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.domain.plans.domain.PlanCategory;
 import com.hotpack.krocs.domain.plans.dto.request.PlanCreateRequestDTO;
 import com.hotpack.krocs.domain.plans.dto.request.PlanUpdateRequestDTO;
+import com.hotpack.krocs.domain.plans.dto.response.DailyPlanSummaryDTO;
+import com.hotpack.krocs.domain.plans.dto.response.MonthlyPlanResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.PlanListResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.PlanResponseDTO;
 import com.hotpack.krocs.domain.plans.exception.PlanException;
@@ -131,6 +134,33 @@ public class PlanServiceTest {
             .build();
 
         validPlanResponseList = Arrays.asList(validResponseDTO, responseDTO2);
+    }
+
+    // 헬퍼 메서드 추가
+    private void setupMonthlyPlanMocks() {
+        when(planConverter.toDailyPlanSummaryDTO(any(LocalDate.class), any(List.class), any(List.class)))
+                .thenAnswer(invocation -> {
+                    LocalDate date = invocation.getArgument(0);
+                    List<Plan> plans = invocation.getArgument(1);
+                    List<PlanResponseDTO> planDtos = invocation.getArgument(2);
+                    return DailyPlanSummaryDTO.builder()
+                            .date(date)
+                            .planCount(plans.size())
+                            .plans(planDtos)
+                            .build();
+                });
+
+        when(planConverter.toMonthlyPlanResponseDTO(anyInt(), anyInt(), any(List.class)))
+                .thenAnswer(invocation -> {
+                    int year = invocation.getArgument(0);
+                    int month = invocation.getArgument(1);
+                    List<DailyPlanSummaryDTO> dailyPlans = invocation.getArgument(2);
+                    return MonthlyPlanResponseDTO.builder()
+                            .year(year)
+                            .month(month)
+                            .dailyPlans(dailyPlans)
+                            .build();
+                });
     }
 
     // ========== CREATE 테스트 ==========
@@ -1473,5 +1503,457 @@ public class PlanServiceTest {
         verify(planValidator).validateDeletePlan(planId);
         verify(planRepositoryFacade).findActivePlanByPlanIdAndUserId(planId, userId);
         verify(planRepositoryFacade, never()).deleteActivePlanByPlanId(any(), any());
+    }
+
+    // ========== GET MONTHLY PLANS 테스트 ==========
+
+    @Test
+    @DisplayName("월별 일정 조회 성공 - 일정이 있는 경우")
+    void getMonthlyPlans_Success_WithPlans() {
+        // given
+        setupMonthlyPlanMocks();
+
+        Long userId = 1L;
+        int year = 2024;
+        int month = 9;
+
+        // 9월의 여러 날짜에 일정들 생성
+        Plan plan1 = Plan.builder()
+                .planId(1L)
+                .title("9월 1일 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.BLUE)
+                .startDateTime(LocalDateTime.of(2024, 9, 1, 9, 0))
+                .endDateTime(LocalDateTime.of(2024, 9, 1, 10, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        Plan plan2 = Plan.builder()
+                .planId(2L)
+                .title("9월 1일 또 다른 일정")
+                .planCategory(PlanCategory.STUDY)
+                .color(Color.GREEN)
+                .startDateTime(LocalDateTime.of(2024, 9, 1, 14, 0))
+                .endDateTime(LocalDateTime.of(2024, 9, 1, 15, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        Plan plan3 = Plan.builder()
+                .planId(3L)
+                .title("9월 15일 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.RED)
+                .startDateTime(LocalDateTime.of(2024, 9, 15, 16, 0))
+                .endDateTime(LocalDateTime.of(2024, 9, 15, 17, 0))
+                .allDay(false)
+                .isCompleted(true)
+                .build();
+
+        List<Plan> monthlyPlans = Arrays.asList(plan1, plan2, plan3);
+
+        PlanResponseDTO responseDTO1 = PlanResponseDTO.builder()
+                .planId(1L)
+                .title("9월 1일 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.BLUE)
+                .startDateTime(LocalDateTime.of(2024, 9, 1, 9, 0))
+                .endDateTime(LocalDateTime.of(2024, 9, 1, 10, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        PlanResponseDTO responseDTO2 = PlanResponseDTO.builder()
+                .planId(2L)
+                .title("9월 1일 또 다른 일정")
+                .planCategory(PlanCategory.STUDY)
+                .color(Color.GREEN)
+                .startDateTime(LocalDateTime.of(2024, 9, 1, 14, 0))
+                .endDateTime(LocalDateTime.of(2024, 9, 1, 15, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        PlanResponseDTO responseDTO3 = PlanResponseDTO.builder()
+                .planId(3L)
+                .title("9월 15일 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.RED)
+                .startDateTime(LocalDateTime.of(2024, 9, 15, 16, 0))
+                .endDateTime(LocalDateTime.of(2024, 9, 15, 17, 0))
+                .allDay(false)
+                .isCompleted(true)
+                .build();
+
+        doNothing().when(planValidator).validateMonthlyPlanRequest(year, month);
+        when(planRepositoryFacade.findActivePlansByMonth(year, month, userId))
+                .thenReturn(monthlyPlans);
+        when(planConverter.toListPlanResponseDTO(Arrays.asList(plan1, plan2)))
+                .thenReturn(Arrays.asList(responseDTO1, responseDTO2));
+        when(planConverter.toListPlanResponseDTO(Arrays.asList(plan3)))
+                .thenReturn(Arrays.asList(responseDTO3));
+        when(planConverter.toListPlanResponseDTO(Collections.emptyList()))
+                .thenReturn(Collections.emptyList());
+
+        // when
+        MonthlyPlanResponseDTO result = planService.getMonthlyPlans(year, month, userId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getYear()).isEqualTo(year);
+        assertThat(result.getMonth()).isEqualTo(month);
+        assertThat(result.getDailyPlans()).hasSize(30); // 9월은 30일
+
+        // 9월 1일 확인 (2개의 일정)
+        DailyPlanSummaryDTO september1st = result.getDailyPlans().get(0);
+        assertThat(september1st.getDate()).isEqualTo(LocalDate.of(2024, 9, 1));
+        assertThat(september1st.getPlanCount()).isEqualTo(2);
+        assertThat(september1st.getPlans()).hasSize(2);
+        assertThat(september1st.getPlans().get(0).getTitle()).isEqualTo("9월 1일 일정");
+        assertThat(september1st.getPlans().get(1).getTitle()).isEqualTo("9월 1일 또 다른 일정");
+
+        // 9월 15일 확인 (1개의 일정)
+        DailyPlanSummaryDTO september15th = result.getDailyPlans().get(14);
+        assertThat(september15th.getDate()).isEqualTo(LocalDate.of(2024, 9, 15));
+        assertThat(september15th.getPlanCount()).isEqualTo(1);
+        assertThat(september15th.getPlans()).hasSize(1);
+        assertThat(september15th.getPlans().get(0).getTitle()).isEqualTo("9월 15일 일정");
+
+        // 일정이 없는 날 확인 (예: 9월 2일)
+        DailyPlanSummaryDTO september2nd = result.getDailyPlans().get(1);
+        assertThat(september2nd.getDate()).isEqualTo(LocalDate.of(2024, 9, 2));
+        assertThat(september2nd.getPlanCount()).isEqualTo(0);
+        assertThat(september2nd.getPlans()).isEmpty();
+
+        verify(planValidator).validateMonthlyPlanRequest(year, month);
+        verify(planRepositoryFacade).findActivePlansByMonth(year, month, userId);
+    }
+
+    @Test
+    @DisplayName("월별 일정 조회 성공 - 일정이 없는 경우")
+    void getMonthlyPlans_Success_NoPlans() {
+        // given
+        setupMonthlyPlanMocks();
+
+        Long userId = 1L;
+        int year = 2024;
+        int month = 2; // 2월 (윤년이므로 29일)
+
+        List<Plan> emptyPlans = Collections.emptyList();
+
+        doNothing().when(planValidator).validateMonthlyPlanRequest(year, month);
+        when(planRepositoryFacade.findActivePlansByMonth(year, month, userId))
+                .thenReturn(emptyPlans);
+        when(planConverter.toListPlanResponseDTO(Collections.emptyList()))
+                .thenReturn(Collections.emptyList());
+
+        // when
+        MonthlyPlanResponseDTO result = planService.getMonthlyPlans(year, month, userId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getYear()).isEqualTo(year);
+        assertThat(result.getMonth()).isEqualTo(month);
+        assertThat(result.getDailyPlans()).hasSize(29); // 2024년 2월은 윤년이므로 29일
+
+        // 모든 날짜에 일정이 없어야 함
+        for (DailyPlanSummaryDTO dailyPlan : result.getDailyPlans()) {
+            assertThat(dailyPlan.getPlanCount()).isEqualTo(0);
+            assertThat(dailyPlan.getPlans()).isEmpty();
+        }
+
+        // 첫째 날과 마지막 날 확인
+        assertThat(result.getDailyPlans().get(0).getDate()).isEqualTo(LocalDate.of(2024, 2, 1));
+        assertThat(result.getDailyPlans().get(28).getDate()).isEqualTo(LocalDate.of(2024, 2, 29));
+
+        verify(planValidator).validateMonthlyPlanRequest(year, month);
+        verify(planRepositoryFacade).findActivePlansByMonth(year, month, userId);
+    }
+
+    @Test
+    @DisplayName("월별 일정 조회 성공 - 윤년이 아닌 2월")
+    void getMonthlyPlans_Success_NonLeapYearFebruary() {
+        // given
+        setupMonthlyPlanMocks();
+
+        Long userId = 1L;
+        int year = 2025; // 윤년이 아님
+        int month = 2;
+
+        doNothing().when(planValidator).validateMonthlyPlanRequest(year, month);
+        when(planRepositoryFacade.findActivePlansByMonth(year, month, userId))
+                .thenReturn(Collections.emptyList());
+        when(planConverter.toListPlanResponseDTO(Collections.emptyList()))
+                .thenReturn(Collections.emptyList());
+
+        // when
+        MonthlyPlanResponseDTO result = planService.getMonthlyPlans(year, month, userId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getDailyPlans()).hasSize(28); // 2025년 2월은 28일
+        assertThat(result.getDailyPlans().get(27).getDate()).isEqualTo(LocalDate.of(2025, 2, 28));
+
+        verify(planValidator).validateMonthlyPlanRequest(year, month);
+    }
+
+    @Test
+    @DisplayName("월별 일정 조회 성공 - 31일까지 있는 월")
+    void getMonthlyPlans_Success_ThirtyOneDays() {
+        // given
+        setupMonthlyPlanMocks();
+
+        Long userId = 1L;
+        int year = 2024;
+        int month = 12; // 12월 (31일)
+
+        doNothing().when(planValidator).validateMonthlyPlanRequest(year, month);
+        when(planRepositoryFacade.findActivePlansByMonth(year, month, userId))
+                .thenReturn(Collections.emptyList());
+        when(planConverter.toListPlanResponseDTO(Collections.emptyList()))
+                .thenReturn(Collections.emptyList());
+
+        // when
+        MonthlyPlanResponseDTO result = planService.getMonthlyPlans(year, month, userId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getDailyPlans()).hasSize(31); // 12월은 31일
+        assertThat(result.getDailyPlans().get(0).getDate()).isEqualTo(LocalDate.of(2024, 12, 1));
+        assertThat(result.getDailyPlans().get(30).getDate()).isEqualTo(LocalDate.of(2024, 12, 31));
+
+        verify(planValidator).validateMonthlyPlanRequest(year, month);
+    }
+
+    @Test
+    @DisplayName("월별 일정 조회 성공 - allDay 일정 포함")
+    void getMonthlyPlans_Success_WithAllDayPlans() {
+        // given
+        setupMonthlyPlanMocks();
+
+        Long userId = 1L;
+        int year = 2024;
+        int month = 8;
+
+        Plan allDayPlan = Plan.builder()
+                .planId(1L)
+                .title("하루 종일 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.PURPLE)
+                .startDateTime(LocalDateTime.of(2024, 8, 15, 0, 0))
+                .endDateTime(LocalDateTime.of(2024, 8, 15, 23, 59, 59))
+                .allDay(true)
+                .isCompleted(false)
+                .build();
+
+        List<Plan> monthlyPlans = Arrays.asList(allDayPlan);
+
+        PlanResponseDTO allDayResponse = PlanResponseDTO.builder()
+                .planId(1L)
+                .title("하루 종일 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.PURPLE)
+                .startDateTime(LocalDateTime.of(2024, 8, 15, 0, 0))
+                .endDateTime(LocalDateTime.of(2024, 8, 15, 23, 59, 59))
+                .allDay(true)
+                .isCompleted(false)
+                .build();
+
+        doNothing().when(planValidator).validateMonthlyPlanRequest(year, month);
+        when(planRepositoryFacade.findActivePlansByMonth(year, month, userId))
+                .thenReturn(monthlyPlans);
+        when(planConverter.toListPlanResponseDTO(Arrays.asList(allDayPlan)))
+                .thenReturn(Arrays.asList(allDayResponse));
+        when(planConverter.toListPlanResponseDTO(Collections.emptyList()))
+                .thenReturn(Collections.emptyList());
+
+        // when
+        MonthlyPlanResponseDTO result = planService.getMonthlyPlans(year, month, userId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getDailyPlans()).hasSize(31); // 8월은 31일
+
+        // 8월 15일 확인
+        DailyPlanSummaryDTO august15th = result.getDailyPlans().get(14);
+        assertThat(august15th.getDate()).isEqualTo(LocalDate.of(2024, 8, 15));
+        assertThat(august15th.getPlanCount()).isEqualTo(1);
+        assertThat(august15th.getPlans().get(0).getAllDay()).isTrue();
+        assertThat(august15th.getPlans().get(0).getTitle()).isEqualTo("하루 종일 일정");
+
+        verify(planValidator).validateMonthlyPlanRequest(year, month);
+        verify(planRepositoryFacade).findActivePlansByMonth(year, month, userId);
+    }
+
+    @Test
+    @DisplayName("월별 일정 조회 성공 - 완료된 일정과 미완료 일정 혼재")
+    void getMonthlyPlans_Success_MixedCompletionStatus() {
+        // given
+        setupMonthlyPlanMocks();
+
+        Long userId = 1L;
+        int year = 2024;
+        int month = 7;
+
+        Plan completedPlan = Plan.builder()
+                .planId(1L)
+                .title("완료된 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.GREEN)
+                .startDateTime(LocalDateTime.of(2024, 7, 10, 9, 0))
+                .endDateTime(LocalDateTime.of(2024, 7, 10, 10, 0))
+                .allDay(false)
+                .isCompleted(true)
+                .completedAt(LocalDateTime.now())
+                .build();
+
+        Plan incompletePlan = Plan.builder()
+                .planId(2L)
+                .title("미완료 일정")
+                .planCategory(PlanCategory.STUDY)
+                .color(Color.BLUE)
+                .startDateTime(LocalDateTime.of(2024, 7, 10, 14, 0))
+                .endDateTime(LocalDateTime.of(2024, 7, 10, 15, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        List<Plan> monthlyPlans = Arrays.asList(completedPlan, incompletePlan);
+
+        PlanResponseDTO completedResponse = PlanResponseDTO.builder()
+                .planId(1L)
+                .title("완료된 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.GREEN)
+                .startDateTime(LocalDateTime.of(2024, 7, 10, 9, 0))
+                .endDateTime(LocalDateTime.of(2024, 7, 10, 10, 0))
+                .allDay(false)
+                .isCompleted(true)
+                .build();
+
+        PlanResponseDTO incompleteResponse = PlanResponseDTO.builder()
+                .planId(2L)
+                .title("미완료 일정")
+                .planCategory(PlanCategory.STUDY)
+                .color(Color.BLUE)
+                .startDateTime(LocalDateTime.of(2024, 7, 10, 14, 0))
+                .endDateTime(LocalDateTime.of(2024, 7, 10, 15, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        doNothing().when(planValidator).validateMonthlyPlanRequest(year, month);
+        when(planRepositoryFacade.findActivePlansByMonth(year, month, userId))
+                .thenReturn(monthlyPlans);
+        when(planConverter.toListPlanResponseDTO(monthlyPlans))
+                .thenReturn(Arrays.asList(completedResponse, incompleteResponse));
+        when(planConverter.toListPlanResponseDTO(Collections.emptyList()))
+                .thenReturn(Collections.emptyList());
+
+        // when
+        MonthlyPlanResponseDTO result = planService.getMonthlyPlans(year, month, userId);
+
+        // then
+        DailyPlanSummaryDTO july10th = result.getDailyPlans().get(9);
+        assertThat(july10th.getPlanCount()).isEqualTo(2);
+        assertThat(july10th.getPlans()).hasSize(2);
+
+        // 완료 상태 확인
+        PlanResponseDTO firstPlan = july10th.getPlans().get(0);
+        PlanResponseDTO secondPlan = july10th.getPlans().get(1);
+        assertThat(firstPlan.getIsCompleted()).isTrue();
+        assertThat(secondPlan.getIsCompleted()).isFalse();
+    }
+
+    @Test
+    @DisplayName("월별 일정 조회 실패 - 유효하지 않은 year")
+    void getMonthlyPlans_Fail_InvalidYear() {
+        // given
+        Long userId = 1L;
+        int year = 1999; // 2000 미만
+        int month = 9;
+
+        doThrow(new PlanException(PlanExceptionType.PLAN_INVALID_YEAR))
+                .when(planValidator).validateMonthlyPlanRequest(year, month);
+
+        // when & then
+        assertThatThrownBy(() -> planService.getMonthlyPlans(year, month, userId))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_YEAR);
+
+        verify(planValidator).validateMonthlyPlanRequest(year, month);
+        verify(planRepositoryFacade, never()).findActivePlansByMonth(anyInt(), anyInt(), any());
+    }
+
+    @Test
+    @DisplayName("월별 일정 조회 실패 - 유효하지 않은 month")
+    void getMonthlyPlans_Fail_InvalidMonth() {
+        // given
+        Long userId = 1L;
+        int year = 2024;
+        int month = 13; // 12 초과
+
+        doThrow(new PlanException(PlanExceptionType.PLAN_INVALID_MONTH))
+                .when(planValidator).validateMonthlyPlanRequest(year, month);
+
+        // when & then
+        assertThatThrownBy(() -> planService.getMonthlyPlans(year, month, userId))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_INVALID_MONTH);
+
+        verify(planValidator).validateMonthlyPlanRequest(year, month);
+        verify(planRepositoryFacade, never()).findActivePlansByMonth(anyInt(), anyInt(), any());
+    }
+
+    @Test
+    @DisplayName("월별 일정 조회 실패 - Repository에서 예외 발생")
+    void getMonthlyPlans_Fail_RepositoryException() {
+        // given
+        Long userId = 1L;
+        int year = 2024;
+        int month = 9;
+
+        doNothing().when(planValidator).validateMonthlyPlanRequest(year, month);
+        when(planRepositoryFacade.findActivePlansByMonth(year, month, userId))
+                .thenThrow(new RuntimeException("데이터베이스 오류"));
+
+        // when & then
+        assertThatThrownBy(() -> planService.getMonthlyPlans(year, month, userId))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_FOUND_FAILED);
+
+        verify(planValidator).validateMonthlyPlanRequest(year, month);
+        verify(planRepositoryFacade).findActivePlansByMonth(year, month, userId);
+    }
+
+    @Test
+    @DisplayName("월별 일정 조회 실패 - Converter에서 예외 발생")
+    void getMonthlyPlans_Fail_ConverterException() {
+        // given
+        Long userId = 1L;
+        int year = 2024;
+        int month = 9;
+
+        Plan plan = Plan.builder()
+                .planId(1L)
+                .title("테스트 일정")
+                .startDateTime(LocalDateTime.of(2024, 9, 1, 9, 0))
+                .endDateTime(LocalDateTime.of(2024, 9, 1, 10, 0))
+                .build();
+
+        doNothing().when(planValidator).validateMonthlyPlanRequest(year, month);
+        when(planRepositoryFacade.findActivePlansByMonth(year, month, userId))
+                .thenReturn(Arrays.asList(plan));
+        when(planConverter.toListPlanResponseDTO(any()))
+                .thenThrow(new RuntimeException("변환 오류"));
+
+        // when & then
+        assertThatThrownBy(() -> planService.getMonthlyPlans(year, month, userId))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_FOUND_FAILED);
+
+        verify(planValidator).validateMonthlyPlanRequest(year, month);
+        verify(planRepositoryFacade).findActivePlansByMonth(year, month, userId);
     }
 }

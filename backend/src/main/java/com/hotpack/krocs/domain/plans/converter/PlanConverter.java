@@ -3,9 +3,13 @@ package com.hotpack.krocs.domain.plans.converter;
 import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.domain.plans.dto.request.PlanCreateRequestDTO;
 import com.hotpack.krocs.domain.plans.dto.request.PlanUpdateRequestDTO;
+import com.hotpack.krocs.domain.plans.dto.response.DailyPlanSummaryDTO;
+import com.hotpack.krocs.domain.plans.dto.response.MonthlyPlanResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.PlanResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.SubPlanResponseDTO;
 import com.hotpack.krocs.domain.user.domain.User;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -110,5 +114,21 @@ public class PlanConverter {
             .allDay(allDay)
             .isCompleted(request.getIsCompleted())
             .build();
+    }
+
+    public DailyPlanSummaryDTO toDailyPlanSummaryDTO(LocalDate date, List<Plan> plansForDate, List<PlanResponseDTO> planResponseDTOs) {
+        return DailyPlanSummaryDTO.builder()
+                .date(date)
+                .planCount(plansForDate.size())
+                .plans(planResponseDTOs)
+                .build();
+    }
+
+    public MonthlyPlanResponseDTO toMonthlyPlanResponseDTO(int year, int month, List<DailyPlanSummaryDTO> dailyPlans) {
+        return MonthlyPlanResponseDTO.builder()
+                .year(year)
+                .month(month)
+                .dailyPlans(dailyPlans)
+                .build();
     }
 }

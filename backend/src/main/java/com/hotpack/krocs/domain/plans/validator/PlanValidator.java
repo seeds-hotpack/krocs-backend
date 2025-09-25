@@ -89,4 +89,18 @@ public class PlanValidator {
             throw new PlanException(PlanExceptionType.INVALID_PLAN_DATE_RANGE);
         }
     }
+
+    public void validateMonthlyPlanRequest(Integer year, Integer month) {
+        if (year == null || month == null) {
+            throw new PlanException(PlanExceptionType.PLAN_INVALID_REQUEST);
+        }
+
+        if (year < 2000 || year > 3000) {
+            throw new PlanException(PlanExceptionType.PLAN_INVALID_YEAR);
+        }
+
+        if (month < 1 || month > 12) {
+            throw new PlanException(PlanExceptionType.PLAN_INVALID_MONTH);
+        }
+    }
 }

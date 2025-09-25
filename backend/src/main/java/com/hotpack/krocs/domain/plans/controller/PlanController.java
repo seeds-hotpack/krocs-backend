@@ -2,6 +2,7 @@ package com.hotpack.krocs.domain.plans.controller;
 
 import com.hotpack.krocs.domain.plans.dto.request.PlanCreateRequestDTO;
 import com.hotpack.krocs.domain.plans.dto.request.PlanUpdateRequestDTO;
+import com.hotpack.krocs.domain.plans.dto.response.MonthlyPlanResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.PlanListResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.PlanResponseDTO;
 import com.hotpack.krocs.domain.plans.exception.PlanException;
@@ -13,6 +14,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +65,23 @@ public class PlanController {
     ) {
         try {
             PlanListResponseDTO response = planService.getPlans(date, userId);
+            return ApiResponse.success(response);
+        } catch (PlanException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new PlanException(PlanExceptionType.PLAN_FOUND_FAILED);
+        }
+    }
+
+    @Operation(summary = "월별 일정 조회", description = "특정 년월의 모든 일정을 일자별로 조회합니다.")
+    @GetMapping("/monthly")
+    public ApiResponse<MonthlyPlanResponseDTO> getMonthlyPlans(
+            @Login Long userId,
+            @RequestParam @Parameter(description = "년도", example = "2025") Integer year,
+            @RequestParam @Parameter(description = "월", example = "9") Integer month
+    ) {
+        try {
+            MonthlyPlanResponseDTO response = planService.getMonthlyPlans(year, month, userId);
             return ApiResponse.success(response);
         } catch (PlanException e) {
             throw e;
