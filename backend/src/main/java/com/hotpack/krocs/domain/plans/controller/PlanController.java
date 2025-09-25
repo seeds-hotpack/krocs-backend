@@ -76,12 +76,11 @@ public class PlanController {
     @Operation(summary = "월별 일정 조회", description = "특정 년월의 모든 일정을 일자별로 조회합니다.")
     @GetMapping("/monthly")
     public ApiResponse<MonthlyPlanResponseDTO> getMonthlyPlans(
-            @Login UserSession user,
+            @Login Long userId,
             @RequestParam @Parameter(description = "년도", example = "2025") Integer year,
             @RequestParam @Parameter(description = "월", example = "9") Integer month
     ) {
         try {
-            Long userId = user != null ? Long.valueOf(user.getUserId()) : null;
             MonthlyPlanResponseDTO response = planService.getMonthlyPlans(year, month, userId);
             return ApiResponse.success(response);
         } catch (PlanException e) {
