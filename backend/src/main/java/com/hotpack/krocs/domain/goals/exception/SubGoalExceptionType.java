@@ -27,7 +27,18 @@ public enum SubGoalExceptionType implements BaseCode {
     SUB_GOAL_GOAL_ID_IS_NULL(HttpStatus.BAD_REQUEST, "SUBGOAL400", "대목표 ID가 null 입니다."),
     SUB_GOAL_ID_IS_NULL(HttpStatus.BAD_REQUEST, "SUBGOAL400", "소목표 ID가 null 입니다."),
     SUB_GOAL_NOT_BELONG_TO_GOAL(HttpStatus.BAD_REQUEST, "SUBGOAL400", "소목표가 해당 목표에 속하지 않습니다."),
-    SUB_GOAL_ACCESS_DENIED(HttpStatus.NOT_FOUND, "SUBGOAL404", "해당 소목표에 접근할 수 없습니다.");
+    SUB_GOAL_ACCESS_DENIED(HttpStatus.NOT_FOUND, "SUBGOAL404", "해당 소목표에 접근할 수 없습니다."),
+    SUB_GOAL_START_DATETIME_IS_NULL(HttpStatus.BAD_REQUEST, "SUBGOAL400", "소목표의 시작 날짜가 null 입니다."),
+    SUB_GOAL_END_DATETIME_IS_NULL(HttpStatus.BAD_REQUEST, "SUBGOAL400", "소목표의 종료 날짜가 null 입니다."),
+    SUB_GOAL_START_DATETIME_INVALID(HttpStatus.BAD_REQUEST, "SUBGOAL400",
+        "시간 선택이 해제된 상태에서는 startDateTime을 지정할 수 없습니다."),
+    SUB_GOAL_END_DATETIME_INVALID(HttpStatus.BAD_REQUEST, "SUBGOAL400",
+        "시간 선택이 해제된 상태에서는 endDateTime을 지정할 수 없습니다."),
+    SUB_GOAL_DATETIME_RANGE_INVALID(HttpStatus.BAD_REQUEST, "SUBGOAL400",
+        "시작 날짜는 종료 날짜보다 늦을 수 없습니다."),
+    SUB_GOAL_IS_TIME_SELECTED_IS_NULL(HttpStatus.BAD_REQUEST, "SUBGOAL400",
+        "is_time_selected가 null 입니다.");
+
 
     private final HttpStatus httpStatus;
     private final String code;
