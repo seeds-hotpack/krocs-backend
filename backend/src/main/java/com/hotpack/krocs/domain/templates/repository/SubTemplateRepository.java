@@ -16,18 +16,14 @@ public interface SubTemplateRepository extends JpaRepository<SubTemplate, Long> 
 
     SubTemplate findSubTemplateBySubTemplateIdAndStatus(Long subTemplateId, Status status);
 
-    @Query(value = """
-        SELECT EXISTS (
-            SELECT 1
-            FROM sub_templates s
-            JOIN templates t ON s.template_id = t.template_id
-            JOIN users u ON t.user_id = u.user_id
-            WHERE s.sub_template_id = :subTemplateId
-              AND t.template_id = :templateId
-              AND u.user_id = :userId
-              AND s.status = :status
-        )
-        """, nativeQuery = true)
+    @Query("""
+        SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END
+        FROM SubTemplate s
+        WHERE s.subTemplateId = :subTemplateId
+          AND s.template.templateId = :templateId
+          AND s.template.user.userId = :userId
+          AND s.status = :status
+        """)
     boolean existsValidSubTemplate(
         @Param("userId") Long userId,
         @Param("templateId") Long templateId,

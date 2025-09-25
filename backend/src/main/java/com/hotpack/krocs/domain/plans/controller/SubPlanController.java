@@ -68,7 +68,7 @@ public class SubPlanController {
     }
 
     @Operation(summary = "특정 소계획 수정", description = "특정 소계획을 수정합니다")
-    @PatchMapping("/{planId}/subgoals/{subPlanId}")
+    @PatchMapping("/{planId}/subplans/{subPlanId}")
     public ApiResponse<SubPlanUpdateResponseDTO> updateSubPlan(
         @Login Long userId,
         @PathVariable @Parameter(description = "Plan ID", example = "1") @Positive(message = "{common.id.positive}") Long planId,
