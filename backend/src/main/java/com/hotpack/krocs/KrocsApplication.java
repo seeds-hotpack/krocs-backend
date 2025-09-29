@@ -9,8 +9,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication
 @EnableJpaAuditing
 public class KrocsApplication {
-  public static void main(String[] args) {
-    TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
-    SpringApplication.run(KrocsApplication.class, args);
-  }
+
+    public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
+        SpringApplication.run(KrocsApplication.class, args);
+        // 메롱
+    }
 }
