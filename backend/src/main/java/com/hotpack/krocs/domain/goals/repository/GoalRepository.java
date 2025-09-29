@@ -28,7 +28,8 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     @Query(value = "SELECT * FROM goals g WHERE g.status = 'ACTIVE' " +
             "AND (:userId IS NULL OR g.user_id = :userId) " +
             "AND (:keyword IS NULL OR LOWER(g.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-            "AND (CAST(:searchDate AS DATE) IS NULL OR (g.start_date <= CAST(:searchDate AS DATE) AND g.end_date >= CAST(:searchDate AS DATE)))",
+            "AND (CAST(:searchDate AS DATE) IS NULL OR " +
+            "(g.start_date <= CAST(:searchDate AS DATE) AND (g.end_date IS NULL OR g.end_date >= CAST(:searchDate AS DATE))))",
             nativeQuery = true)
     List<Goal> findGoalsWithFilters(
             @Param("userId") Long userId,
