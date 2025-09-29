@@ -60,7 +60,7 @@ public class GoalController {
     @GetMapping
     public ApiResponse<List<GoalResponseDTO>> getGoal(
         @Login Long userId,
-            @RequestParam(required = false) @Parameter(description = "검색일", example = "2024-01-01")
+            @RequestParam(required = false) @Parameter(description = "검색일", example = "2025-01-01")
             LocalDate searchDate,
             @RequestParam(required = false) @Parameter(description = "제목 키워드", example = "운동")
             String keyword,
