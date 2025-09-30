@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SubGoalServiceImpl implements SubGoalService {
 
     private final SubGoalRepositoryFacade subGoalRepositoryFacade;
