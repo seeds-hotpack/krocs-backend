@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.hotpack.krocs.domain.plans.converter.PlanConverter;
-import com.hotpack.krocs.domain.plans.domain.Color;
+import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.domain.plans.domain.PlanCategory;
 import com.hotpack.krocs.domain.plans.dto.request.PlanCreateRequestDTO;

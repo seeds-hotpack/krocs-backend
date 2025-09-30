@@ -1,4 +1,4 @@
-package com.hotpack.krocs.domain.plans.domain;
+package com.hotpack.krocs.global.common.entity;
 
 
 public enum Color {

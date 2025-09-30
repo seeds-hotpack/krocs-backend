@@ -18,7 +18,13 @@ import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.goals.validator.SubGoalValidator;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -144,6 +150,49 @@ public class SubGoalServiceImpl implements SubGoalService {
         } catch (Exception e) {
             log.error("소목표 삭제 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
             throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_DELETE_FAILED);
+        }
+    }
+
+    @Override
+    public List<SubGoalResponseDTO> getSubGoalsInDateRange(LocalDate startDate, LocalDate endDate, Long userId) {
+        try {
+            LocalDateTime startDateTime = startDate.atStartOfDay();
+            LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
+
+            List<Goal> goals = goalRepositoryFacade.findAllActiveGoalsByUser(user);
+
+            List<SubGoal> allSubGoals = new ArrayList<>();
+            for (Goal goal : goals) {
+                List<SubGoal> subGoals = subGoalRepositoryFacade.findActiveSubGoalsByGoal(goal);
+
+                List<SubGoal> filteredSubGoals = subGoals.stream()
+                        .filter(subGoal -> {
+                            if (subGoal.getStartDateTime() == null || subGoal.getEndDateTime() == null) {
+                                return false;
+                            }
+                            LocalDateTime subGoalStart = subGoal.getStartDateTime();
+                            LocalDateTime subGoalEnd = subGoal.getEndDateTime();
+
+                            return (subGoalStart.isBefore(endDateTime) || subGoalStart.isEqual(endDateTime))
+                                    && (subGoalEnd.isAfter(startDateTime) || subGoalEnd.isEqual(startDateTime));
+                        })
+                        .collect(Collectors.toList());
+
+                allSubGoals.addAll(filteredSubGoals);
+            }
+
+            return subGoalConverter.toSubGoalResponseListDTO(allSubGoals);
+
+        } catch (GoalException | SubGoalException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("날짜 범위 소목표 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_READ_FAILED);
         }
     }
 

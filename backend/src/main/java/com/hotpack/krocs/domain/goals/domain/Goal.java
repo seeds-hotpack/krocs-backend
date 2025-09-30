@@ -1,6 +1,7 @@
 package com.hotpack.krocs.domain.goals.domain;
 
 import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
+import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.global.common.entity.BaseTimeEntity;
 import com.hotpack.krocs.global.common.entity.Priority;
@@ -55,6 +56,11 @@ public class Goal extends BaseTimeEntity {
     @Column(name = "priority", nullable = false, length = 10)
     @Builder.Default
     private Priority priority = Priority.MEDIUM;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "color", nullable = false)
+    @Builder.Default
+    private Color color = Color.BLUE;
 
     @Column(name = "start_date")
     private LocalDate startDate;

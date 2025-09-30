@@ -2,7 +2,7 @@ package com.hotpack.krocs.domain.plans.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.hotpack.krocs.domain.plans.domain.Color;
+import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.domain.plans.domain.PlanCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.EnumType;

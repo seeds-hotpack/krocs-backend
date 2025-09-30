@@ -7,6 +7,7 @@ import com.hotpack.krocs.domain.plans.dto.response.PlanListResponseDTO;
 import com.hotpack.krocs.domain.plans.dto.response.PlanResponseDTO;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface PlanService {
     PlanResponseDTO createPlan(PlanCreateRequestDTO requestDTO, Long userId);
@@ -20,4 +21,6 @@ public interface PlanService {
     void deletePlan(Long planId, Long userId);
 
     MonthlyPlanResponseDTO getMonthlyPlans(int year, int month, Long userId);
+
+    List<PlanResponseDTO> getPlansInDateRange(LocalDate startDate, LocalDate endDate, Long userId);
 }

@@ -3,7 +3,7 @@ package com.hotpack.krocs.domain.timeline.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.hotpack.krocs.domain.plans.domain.Color;
+import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.domain.plans.domain.PlanCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.EnumType;
@@ -24,6 +24,10 @@ public class TimelineItemDTO {
     @JsonProperty("is_completed")
     private Boolean isCompleted;
 
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private Color color = Color.BLUE;
+
     @Schema(
             description = "시작 일시",
             pattern = "yyyy-MM-dd'T'HH:mm",
@@ -43,16 +47,9 @@ public class TimelineItemDTO {
     private LocalDateTime endDateTime;
 
     // === Plan 전용 필드 ===
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private Color color = Color.BLUE;
-
     @JsonProperty("all_day")
     private Boolean allDay;
 
     @JsonProperty("plan_category")
     private PlanCategory planCategory;
-
-    // === Subgoal 전용 필드 ===
-
 }

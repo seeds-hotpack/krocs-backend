@@ -1,5 +1,6 @@
 package com.hotpack.krocs.domain.timeline.service;
 
+import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import com.hotpack.krocs.domain.goals.service.SubGoalService;
 import com.hotpack.krocs.domain.plans.dto.response.PlanResponseDTO;
@@ -32,19 +33,17 @@ public class TimelineServiceImpl implements TimelineService {
         List<TimelineItemDTO> plans = new ArrayList<>();
         List<TimelineItemDTO> subgoals = new ArrayList<>();
 
-        // Plan 데이터 처리
         if (types.contains("plan")) {
-            List<PlanResponseDTO> planDtos = planService.getPlansInDateRange(startDate, endDate);
+            List<PlanResponseDTO> planDtos = planService.getPlansInDateRange(startDate, endDate, userId);
             plans = planDtos.stream()
-                    .map(this::convertPlanToTimelineItem)
+                    .map(timelineConverter::convertPlanToTimelineItem)
                     .collect(Collectors.toList());
         }
 
-        // SubGoal 데이터 처리
         if (types.contains("subgoal")) {
-            List<SubGoalResponseDTO> subGoalDtos = subGoalService.getSubGoalsInDateRange(startDate, endDate);
+            List<SubGoalResponseDTO> subGoalDtos = subGoalService.getSubGoalsInDateRange(startDate, endDate, userId);
             subgoals = subGoalDtos.stream()
-                    .map(this::convertSubGoalToTimelineItem)
+                    .map(timelineConverter::convertSubGoalToTimelineItem)
                     .collect(Collectors.toList());
         }
 
