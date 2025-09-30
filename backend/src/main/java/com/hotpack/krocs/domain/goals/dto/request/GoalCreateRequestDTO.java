@@ -29,7 +29,7 @@ public class GoalCreateRequestDTO {
   private Priority priority = Priority.MEDIUM;
 
   @Builder.Default
-  private Color color = Color.BLUE;
+  private Color color = Color.GOAL_BLUE;
 
   @NotNull(message = "{goal.date.startRequired}")
   @JsonFormat(pattern = "yyyy-MM-dd")

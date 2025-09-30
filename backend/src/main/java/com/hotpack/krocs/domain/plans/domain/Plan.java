@@ -60,7 +60,7 @@ public class Plan extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "color", nullable = false)
     @Builder.Default
-    private Color color = Color.BLUE;
+    private Color color = Color.PLAN_BLUE;
 
     @Column(name = "start_datetime")
     private LocalDateTime startDateTime;

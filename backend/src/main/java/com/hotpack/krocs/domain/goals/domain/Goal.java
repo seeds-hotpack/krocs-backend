@@ -60,7 +60,7 @@ public class Goal extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "color", nullable = false)
     @Builder.Default
-    private Color color = Color.BLUE;
+    private Color color = Color.GOAL_BLUE;
 
     @Column(name = "start_date")
     private LocalDate startDate;

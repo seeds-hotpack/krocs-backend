@@ -26,7 +26,7 @@ public class TimelineItemDTO {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Color color = Color.BLUE;
+    private Color color;
 
     @Schema(
             description = "시작 일시",
