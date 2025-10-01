@@ -177,8 +177,8 @@ public class SubGoalServiceImpl implements SubGoalService {
                             LocalDateTime subGoalStart = subGoal.getStartDateTime();
                             LocalDateTime subGoalEnd = subGoal.getEndDateTime();
 
-                            return (subGoalStart.isBefore(endDateTime) || subGoalStart.isEqual(endDateTime))
-                                    && (subGoalEnd.isAfter(startDateTime) || subGoalEnd.isEqual(startDateTime));
+                            return !subGoalStart.isAfter(endDateTime)
+                                    && !subGoalEnd.isBefore(startDateTime);
                         })
                         .collect(Collectors.toList());
 
