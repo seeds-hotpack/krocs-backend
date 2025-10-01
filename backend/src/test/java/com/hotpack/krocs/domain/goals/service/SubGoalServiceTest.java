@@ -2,6 +2,7 @@ package com.hotpack.krocs.domain.goals.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -700,10 +701,15 @@ class SubGoalServiceTest {
 
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(null);
 
-        // when & then
-        assertThatThrownBy(() -> subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L))
-                .isInstanceOf(GoalException.class)
-                .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_USER_NOT_FOUND);
+        // when
+        SubGoalException exception = catchThrowableOfType(
+                () -> subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L), SubGoalException.class
+        );
+
+        // then
+        assertThat(exception).isNotNull();
+        assertThat(exception.getSubGoalExceptionType())
+                .isEqualTo(SubGoalExceptionType.SUB_GOAL_USER_NOT_FOUND);
 
         verify(userRepositoryFacade).findActiveUserByUserId(1L);
         verify(goalRepositoryFacade, never()).findAllActiveGoalsByUser(any());
