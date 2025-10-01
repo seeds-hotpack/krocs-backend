@@ -3,9 +3,7 @@ package com.hotpack.krocs.domain.goals.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import com.hotpack.krocs.domain.goals.converter.SubGoalConverter;
 import com.hotpack.krocs.domain.goals.domain.Goal;
@@ -17,6 +15,8 @@ import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalUpdateResponseDTO;
+import com.hotpack.krocs.domain.goals.exception.GoalException;
+import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
 import com.hotpack.krocs.domain.goals.exception.SubGoalException;
 import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
@@ -552,4 +552,176 @@ class SubGoalServiceTest {
                 SubGoalExceptionType.SUB_GOAL_DELETE_FAILED);
     }
 
+    @Test
+    @DisplayName("날짜 범위 소목표 조회 성공")
+    void getSubGoalsInDateRange_Success() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 9, 1);
+        LocalDate endDate = LocalDate.of(2025, 9, 30);
+
+        SubGoal subGoal1 = SubGoal.builder()
+                .subGoalId(1L)
+                .goal(validGoal)
+                .title("9월 초 소목표")
+                .isCompleted(false)
+                .startDateTime(LocalDateTime.of(2025, 9, 5, 9, 0))
+                .endDateTime(LocalDateTime.of(2025, 9, 5, 10, 0))
+                .isTimeSelected(true)
+                .build();
+
+        SubGoal subGoal2 = SubGoal.builder()
+                .subGoalId(2L)
+                .goal(validGoal)
+                .title("9월 중순 소목표")
+                .isCompleted(false)
+                .startDateTime(LocalDateTime.of(2025, 9, 15, 14, 0))
+                .endDateTime(LocalDateTime.of(2025, 9, 15, 16, 0))
+                .isTimeSelected(true)
+                .build();
+
+        List<SubGoal> subGoals = List.of(subGoal1, subGoal2);
+        List<SubGoalResponseDTO> expectedResponse = List.of(
+                SubGoalResponseDTO.builder()
+                        .subGoalId(1L)
+                        .title("9월 초 소목표")
+                        .isCompleted(false)
+                        .startDateTime(LocalDateTime.of(2025, 9, 5, 9, 0))
+                        .endDateTime(LocalDateTime.of(2025, 9, 5, 10, 0))
+                        .isTimeSelected(true)
+                        .build(),
+                SubGoalResponseDTO.builder()
+                        .subGoalId(2L)
+                        .title("9월 중순 소목표")
+                        .isCompleted(false)
+                        .startDateTime(LocalDateTime.of(2025, 9, 15, 14, 0))
+                        .endDateTime(LocalDateTime.of(2025, 9, 15, 16, 0))
+                        .isTimeSelected(true)
+                        .build()
+        );
+
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findAllActiveGoalsByUser(user)).thenReturn(List.of(validGoal));
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(subGoals);
+        when(subGoalConverter.toSubGoalResponseListDTO(subGoals)).thenReturn(expectedResponse);
+
+        // when
+        List<SubGoalResponseDTO> result = subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getTitle()).isEqualTo("9월 초 소목표");
+        assertThat(result.get(1).getTitle()).isEqualTo("9월 중순 소목표");
+
+        verify(userRepositoryFacade).findActiveUserByUserId(1L);
+        verify(goalRepositoryFacade).findAllActiveGoalsByUser(user);
+        verify(subGoalRepositoryFacade).findActiveSubGoalsByGoal(validGoal);
+    }
+
+    @Test
+    @DisplayName("날짜 범위 소목표 조회 성공 - 시간이 null인 소목표는 제외")
+    void getSubGoalsInDateRange_Success_ExcludeNullDateTime() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 9, 1);
+        LocalDate endDate = LocalDate.of(2025, 9, 30);
+
+        SubGoal subGoalWithTime = SubGoal.builder()
+                .subGoalId(1L)
+                .goal(validGoal)
+                .title("시간이 있는 소목표")
+                .isCompleted(false)
+                .startDateTime(LocalDateTime.of(2025, 9, 15, 14, 0))
+                .endDateTime(LocalDateTime.of(2025, 9, 15, 16, 0))
+                .isTimeSelected(true)
+                .build();
+
+        SubGoal subGoalWithoutTime = SubGoal.builder()
+                .subGoalId(2L)
+                .goal(validGoal)
+                .title("시간이 없는 소목표")
+                .isCompleted(false)
+                .startDateTime(null)
+                .endDateTime(null)
+                .isTimeSelected(false)
+                .build();
+
+        List<SubGoal> allSubGoals = List.of(subGoalWithTime, subGoalWithoutTime);
+        List<SubGoalResponseDTO> expectedResponse = List.of(
+                SubGoalResponseDTO.builder()
+                        .subGoalId(1L)
+                        .title("시간이 있는 소목표")
+                        .isCompleted(false)
+                        .startDateTime(LocalDateTime.of(2025, 9, 15, 14, 0))
+                        .endDateTime(LocalDateTime.of(2025, 9, 15, 16, 0))
+                        .isTimeSelected(true)
+                        .build()
+        );
+
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findAllActiveGoalsByUser(user)).thenReturn(List.of(validGoal));
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(allSubGoals);
+        when(subGoalConverter.toSubGoalResponseListDTO(List.of(subGoalWithTime))).thenReturn(expectedResponse);
+
+        // when
+        List<SubGoalResponseDTO> result = subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitle()).isEqualTo("시간이 있는 소목표");
+    }
+
+    @Test
+    @DisplayName("날짜 범위 소목표 조회 성공 - 빈 리스트 반환")
+    void getSubGoalsInDateRange_Success_EmptyList() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 9, 1);
+        LocalDate endDate = LocalDate.of(2025, 9, 30);
+
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findAllActiveGoalsByUser(user)).thenReturn(List.of(validGoal));
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(Collections.emptyList());
+        when(subGoalConverter.toSubGoalResponseListDTO(Collections.emptyList())).thenReturn(Collections.emptyList());
+
+        // when
+        List<SubGoalResponseDTO> result = subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("날짜 범위 소목표 조회 실패 - 사용자를 찾을 수 없음")
+    void getSubGoalsInDateRange_Fail_UserNotFound() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 9, 1);
+        LocalDate endDate = LocalDate.of(2025, 9, 30);
+
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(null);
+
+        // when & then
+        assertThatThrownBy(() -> subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L))
+                .isInstanceOf(GoalException.class)
+                .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_USER_NOT_FOUND);
+
+        verify(userRepositoryFacade).findActiveUserByUserId(1L);
+        verify(goalRepositoryFacade, never()).findAllActiveGoalsByUser(any());
+    }
+
+    @Test
+    @DisplayName("날짜 범위 소목표 조회 실패 - Repository에서 예외 발생")
+    void getSubGoalsInDateRange_Fail_RepositoryException() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 9, 1);
+        LocalDate endDate = LocalDate.of(2025, 9, 30);
+
+        when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
+        when(goalRepositoryFacade.findAllActiveGoalsByUser(user)).thenThrow(new RuntimeException("데이터베이스 오류"));
+
+        // when & then
+        assertThatThrownBy(() -> subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L))
+                .isInstanceOf(SubGoalException.class)
+                .hasFieldOrPropertyWithValue("subGoalExceptionType", SubGoalExceptionType.SUB_GOAL_READ_FAILED);
+    }
 }

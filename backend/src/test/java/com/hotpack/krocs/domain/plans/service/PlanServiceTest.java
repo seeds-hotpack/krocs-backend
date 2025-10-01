@@ -1956,4 +1956,171 @@ public class PlanServiceTest {
         verify(planValidator).validateMonthlyPlanRequest(year, month);
         verify(planRepositoryFacade).findActivePlansByMonth(year, month, userId);
     }
+
+    @Test
+    @DisplayName("날짜 범위 플랜 조회 성공")
+    void getPlansInDateRange_Success() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 8, 1);
+        LocalDate endDate = LocalDate.of(2025, 8, 31);
+        Long userId = 1L;
+
+        Plan plan1 = Plan.builder()
+                .planId(1L)
+                .title("8월 초 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.PLAN_BLUE)
+                .startDateTime(LocalDateTime.of(2025, 8, 5, 9, 0))
+                .endDateTime(LocalDateTime.of(2025, 8, 5, 10, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        Plan plan2 = Plan.builder()
+                .planId(2L)
+                .title("8월 중순 일정")
+                .planCategory(PlanCategory.STUDY)
+                .color(Color.PLAN_GREEN)
+                .startDateTime(LocalDateTime.of(2025, 8, 15, 14, 0))
+                .endDateTime(LocalDateTime.of(2025, 8, 15, 16, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        List<Plan> plans = List.of(plan1, plan2);
+
+        PlanResponseDTO responseDTO1 = PlanResponseDTO.builder()
+                .planId(1L)
+                .title("8월 초 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.PLAN_BLUE)
+                .startDateTime(LocalDateTime.of(2025, 8, 5, 9, 0))
+                .endDateTime(LocalDateTime.of(2025, 8, 5, 10, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        PlanResponseDTO responseDTO2 = PlanResponseDTO.builder()
+                .planId(2L)
+                .title("8월 중순 일정")
+                .planCategory(PlanCategory.STUDY)
+                .color(Color.PLAN_GREEN)
+                .startDateTime(LocalDateTime.of(2025, 8, 15, 14, 0))
+                .endDateTime(LocalDateTime.of(2025, 8, 15, 16, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        List<PlanResponseDTO> expectedResponse = List.of(responseDTO1, responseDTO2);
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(user);
+        when(planRepositoryFacade.findActivePlansByDateRange(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                eq(userId)
+        )).thenReturn(plans);
+        when(planConverter.toListPlanResponseDTO(plans)).thenReturn(expectedResponse);
+
+        // when
+        List<PlanResponseDTO> result = planService.getPlansInDateRange(startDate, endDate, userId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getTitle()).isEqualTo("8월 초 일정");
+        assertThat(result.get(1).getTitle()).isEqualTo("8월 중순 일정");
+
+        verify(userRepositoryFacade).findActiveUserByUserId(userId);
+        verify(planRepositoryFacade).findActivePlansByDateRange(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                eq(userId)
+        );
+    }
+
+    @Test
+    @DisplayName("날짜 범위 플랜 조회 성공 - 빈 리스트 반환")
+    void getPlansInDateRange_Success_EmptyList() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 8, 1);
+        LocalDate endDate = LocalDate.of(2025, 8, 31);
+        Long userId = 1L;
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(user);
+        when(planRepositoryFacade.findActivePlansByDateRange(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                eq(userId)
+        )).thenReturn(Collections.emptyList());
+        when(planConverter.toListPlanResponseDTO(Collections.emptyList())).thenReturn(Collections.emptyList());
+
+        // when
+        List<PlanResponseDTO> result = planService.getPlansInDateRange(startDate, endDate, userId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("날짜 범위 플랜 조회 실패 - 사용자를 찾을 수 없음")
+    void getPlansInDateRange_Fail_UserNotFound() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 8, 1);
+        LocalDate endDate = LocalDate.of(2025, 8, 31);
+        Long userId = 1L;
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(null);
+
+        // when & then
+        assertThatThrownBy(() -> planService.getPlansInDateRange(startDate, endDate, userId))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_USER_NOT_FOUND);
+
+        verify(userRepositoryFacade).findActiveUserByUserId(userId);
+        verify(planRepositoryFacade, never()).findActivePlansByDateRange(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("날짜 범위 플랜 조회 실패 - Repository에서 예외 발생")
+    void getPlansInDateRange_Fail_RepositoryException() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 8, 1);
+        LocalDate endDate = LocalDate.of(2025, 8, 31);
+        Long userId = 1L;
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(user);
+        when(planRepositoryFacade.findActivePlansByDateRange(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                eq(userId)
+        )).thenThrow(new RuntimeException("데이터베이스 오류"));
+
+        // when & then
+        assertThatThrownBy(() -> planService.getPlansInDateRange(startDate, endDate, userId))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_FOUND_FAILED);
+    }
+
+    @Test
+    @DisplayName("날짜 범위 플랜 조회 실패 - Converter에서 예외 발생")
+    void getPlansInDateRange_Fail_ConverterException() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 8, 1);
+        LocalDate endDate = LocalDate.of(2025, 8, 31);
+        Long userId = 1L;
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(user);
+        when(planRepositoryFacade.findActivePlansByDateRange(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                eq(userId)
+        )).thenReturn(validPlanList);
+        when(planConverter.toListPlanResponseDTO(validPlanList)).thenThrow(new RuntimeException("변환 오류"));
+
+        // when & then
+        assertThatThrownBy(() -> planService.getPlansInDateRange(startDate, endDate, userId))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_FOUND_FAILED);
+    }
 }
