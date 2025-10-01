@@ -25,7 +25,6 @@ public class TimelineItemDTO {
     private Boolean isCompleted;
 
     @Enumerated(EnumType.STRING)
-    @Builder.Default
     private Color color;
 
     @Schema(
