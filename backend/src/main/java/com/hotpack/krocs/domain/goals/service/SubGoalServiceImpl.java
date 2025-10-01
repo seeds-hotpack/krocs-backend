@@ -9,8 +9,6 @@ import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalUpdateResponseDTO;
-import com.hotpack.krocs.domain.goals.exception.GoalException;
-import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
 import com.hotpack.krocs.domain.goals.exception.SubGoalException;
 import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
@@ -53,7 +51,7 @@ public class SubGoalServiceImpl implements SubGoalService {
 
             User user = userRepositoryFacade.findActiveUserByUserId(userId);
             if (user == null) {
-                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_USER_NOT_FOUND);
             }
 
             Goal goal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
@@ -114,7 +112,7 @@ public class SubGoalServiceImpl implements SubGoalService {
 
             User user = userRepositoryFacade.findActiveUserByUserId(userId);
             if (user == null) {
-                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_USER_NOT_FOUND);
             }
 
             Goal goal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
@@ -162,7 +160,7 @@ public class SubGoalServiceImpl implements SubGoalService {
 
             User user = userRepositoryFacade.findActiveUserByUserId(userId);
             if (user == null) {
-                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_USER_NOT_FOUND);
             }
 
             List<Goal> goals = goalRepositoryFacade.findAllActiveGoalsByUser(user);
@@ -189,7 +187,7 @@ public class SubGoalServiceImpl implements SubGoalService {
 
             return subGoalConverter.toSubGoalResponseListDTO(allSubGoals);
 
-        } catch (GoalException | SubGoalException e) {
+        } catch (SubGoalException e) {
             throw e;
         } catch (Exception e) {
             log.error("날짜 범위 소목표 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);

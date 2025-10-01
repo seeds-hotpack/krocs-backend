@@ -15,6 +15,7 @@ public enum SubGoalExceptionType implements BaseCode {
     SUB_GOAL_TITLE_EMPTY(HttpStatus.BAD_REQUEST, "SUBGOAL400", "소목표 제목은 필수입니다."),
     SUB_GOAL_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SUBGOAL500", "소목표 생성에 실패했습니다."),
     SUB_GOAL_TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "SUBGOAL400", "목표 제목이 너무 깁니다."),
+    SUB_GOAL_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "SUBGOAL404", "사용자를 찾을 수 없습니다."),
     SUB_GOAL_GOAL_ID_MISSING(HttpStatus.BAD_REQUEST, "SUBGOAL400", "상위 목표(goalId)는 필수입니다."),
     SUB_GOAL_UNAUTHORIZED_ACCESS(HttpStatus.UNAUTHORIZED, "SUBGOAL401", "소목표에 대한 접근 권한이 없습니다."),
     SUB_GOAL_CREATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SUBGOAL500", "소목표 생성에 실패했습니다."),
