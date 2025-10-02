@@ -171,7 +171,7 @@ public class SubGoalServiceImpl implements SubGoalService {
 
                 List<SubGoal> filteredSubGoals = subGoals.stream()
                         .filter(subGoal -> {
-                            if (subGoal.getStartDateTime() == null || subGoal.getEndDateTime() == null) {
+                            if (subGoal.getStartDateTime() == null || subGoal.getEndDateTime() == null || !subGoal.isTimeSelected()) {
                                 return false;
                             }
                             LocalDateTime subGoalStart = subGoal.getStartDateTime();
