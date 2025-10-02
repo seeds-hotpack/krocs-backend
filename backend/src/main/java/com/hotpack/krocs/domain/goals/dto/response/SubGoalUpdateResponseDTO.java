@@ -3,6 +3,8 @@ package com.hotpack.krocs.domain.goals.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
+
+import com.hotpack.krocs.global.common.entity.Color;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,8 +19,11 @@ public class SubGoalUpdateResponseDTO {
     private Long goalId;
 
     private String title;
+
     @JsonProperty("is_completed")
     private Boolean isCompleted;
+
+    private Color color;
 
     @JsonProperty("is_time_selected")
     private final Boolean isTimeSelected;

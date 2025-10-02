@@ -2,7 +2,7 @@ package com.hotpack.krocs.domain.plans.converter;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.domain.SubGoal;
-import com.hotpack.krocs.domain.plans.domain.Color;
+import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.domain.plans.domain.PlanCategory;
 import com.hotpack.krocs.domain.plans.dto.request.PlanCreateRequestDTO;
@@ -57,7 +57,7 @@ public class PlanConverterTest {
         validRequestDTO = PlanCreateRequestDTO.builder()
             .title("테스트 일정")
             .planCategory(PlanCategory.STUDY)
-            .color(Color.BLUE)
+            .color(Color.PLAN_BLUE)
             .startDateTime(LocalDateTime.of(2025, 8, 1, 9, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 1, 10, 0))
             .allDay(false)
@@ -67,7 +67,7 @@ public class PlanConverterTest {
             .planId(1L)
             .title("테스트 일정")
             .planCategory(PlanCategory.STUDY)
-            .color(Color.BLUE)
+            .color(Color.PLAN_BLUE)
             .startDateTime(LocalDateTime.of(2025, 8, 1, 9, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 1, 10, 0))
             .allDay(false)
@@ -86,7 +86,7 @@ public class PlanConverterTest {
         // then
         assertThat(result.getTitle()).isEqualTo("테스트 일정");
         assertThat(result.getPlanCategory()).isEqualTo(PlanCategory.STUDY);
-        assertThat(result.getColor()).isEqualTo(Color.BLUE);
+        assertThat(result.getColor()).isEqualTo(Color.PLAN_BLUE);
         assertThat(result.getStartDateTime()).isEqualTo(LocalDateTime.of(2025, 8, 1, 9, 0));
         assertThat(result.getEndDateTime()).isEqualTo(LocalDateTime.of(2025, 8, 1, 10, 0));
         assertThat(result.getAllDay()).isFalse();
@@ -138,7 +138,7 @@ public class PlanConverterTest {
         PlanCreateRequestDTO request = PlanCreateRequestDTO.builder()
             .title("allDay null 일정")
             .planCategory(PlanCategory.ETC)
-            .color(Color.BLUE)
+            .color(Color.PLAN_BLUE)
             .startDateTime(LocalDateTime.of(2025, 8, 1, 9, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 1, 17, 0))
             .allDay(null)
@@ -160,7 +160,7 @@ public class PlanConverterTest {
         PlanCreateRequestDTO request = PlanCreateRequestDTO.builder()
             .title("하루 종일 일정")
             .planCategory(PlanCategory.ETC)
-            .color(Color.BLUE)
+            .color(Color.PLAN_BLUE)
             .startDateTime(LocalDateTime.of(2025, 8, 1, 15, 30))
             .endDateTime(LocalDateTime.of(2025, 8, 1, 20, 45))
             .allDay(true)
@@ -195,7 +195,7 @@ public class PlanConverterTest {
         assertThat(result.getPlanId()).isEqualTo(1L);
         assertThat(result.getTitle()).isEqualTo("테스트 일정");
         assertThat(result.getPlanCategory()).isEqualTo(PlanCategory.STUDY);
-        assertThat(result.getColor()).isEqualTo(Color.BLUE);
+        assertThat(result.getColor()).isEqualTo(Color.PLAN_BLUE);
         assertThat(result.getStartDateTime()).isEqualTo(LocalDateTime.of(2025, 8, 1, 9, 0));
         assertThat(result.getEndDateTime()).isEqualTo(LocalDateTime.of(2025, 8, 1, 10, 0));
         assertThat(result.getAllDay()).isFalse();
@@ -240,7 +240,7 @@ public class PlanConverterTest {
             .subPlans(List.of())
             .title("SubPlans 빈 리스트인 일정")
             .planCategory(PlanCategory.ETC)
-            .color(Color.GREEN)
+            .color(Color.PLAN_GREEN)
             .allDay(false)
             .isCompleted(false)
             .build();
@@ -262,7 +262,7 @@ public class PlanConverterTest {
             .planId(1L)
             .title("완료된 일정")
             .planCategory(PlanCategory.ETC)
-            .color(Color.GREEN)
+            .color(Color.PLAN_GREEN)
             .allDay(false)
             .isCompleted(true)
             .completedAt(completedTime)
@@ -286,7 +286,7 @@ public class PlanConverterTest {
             .planId(1L)
             .title("일정 1")
             .planCategory(PlanCategory.ETC)
-            .color(Color.GREEN)
+            .color(Color.PLAN_GREEN)
             .allDay(false)
             .isCompleted(false)
             .build();
@@ -295,7 +295,7 @@ public class PlanConverterTest {
             .planId(2L)
             .title("일정 2")
             .planCategory(PlanCategory.ETC)
-            .color(Color.GREEN)
+            .color(Color.PLAN_GREEN)
             .allDay(true)
             .isCompleted(true)
             .build();
@@ -461,7 +461,7 @@ public class PlanConverterTest {
         PlanUpdateRequestDTO originalRequest = PlanUpdateRequestDTO.builder()
             .title("완전히 새로운 제목")
             .planCategory(PlanCategory.WORK)
-            .color(Color.GREEN)
+            .color(Color.PLAN_GREEN)
             .startDateTime(LocalDateTime.of(2025, 8, 3, 10, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 3, 12, 0))
             .allDay(true)
@@ -479,7 +479,7 @@ public class PlanConverterTest {
         // then
         assertThat(result.getTitle()).isEqualTo("완전히 새로운 제목");
         assertThat(result.getPlanCategory()).isEqualTo(PlanCategory.WORK);
-        assertThat(result.getColor()).isEqualTo(Color.GREEN);
+        assertThat(result.getColor()).isEqualTo(Color.PLAN_GREEN);
         assertThat(result.getStartDateTime()).isEqualTo(normalizedStartDateTime);
         assertThat(result.getEndDateTime()).isEqualTo(normalizedEndDateTime);
         assertThat(result.getAllDay()).isTrue();

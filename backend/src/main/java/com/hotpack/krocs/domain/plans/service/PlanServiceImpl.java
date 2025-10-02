@@ -216,4 +216,31 @@ public class PlanServiceImpl implements PlanService {
             throw new PlanException(PlanExceptionType.PLAN_FOUND_FAILED);
         }
     }
+
+    @Override
+    public List<PlanResponseDTO> getPlansInDateRange(LocalDate startDate, LocalDate endDate, Long userId) {
+        try {
+            LocalDateTime startDateTime = startDate.atStartOfDay();
+            LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new PlanException(PlanExceptionType.PLAN_USER_NOT_FOUND);
+            }
+
+            List<Plan> filteredPlans = planRepositoryFacade.findActivePlansByDateRange(
+                    startDateTime,
+                    endDateTime,
+                    userId
+            );
+
+            return planConverter.toListPlanResponseDTO(filteredPlans);
+
+        } catch (PlanException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("날짜 범위 플랜 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            throw new PlanException(PlanExceptionType.PLAN_FOUND_FAILED);
+        }
+    }
 }

@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.hotpack.krocs.domain.plans.converter.PlanConverter;
-import com.hotpack.krocs.domain.plans.domain.Color;
+import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.domain.plans.domain.PlanCategory;
 import com.hotpack.krocs.domain.plans.dto.request.PlanCreateRequestDTO;
@@ -81,7 +81,7 @@ public class PlanServiceTest {
         validRequestDTO = PlanCreateRequestDTO.builder()
             .title("테스트 일정")
             .planCategory(PlanCategory.WORK)
-            .color(Color.BLUE)
+            .color(Color.PLAN_BLUE)
             .startDateTime(LocalDateTime.of(2025, 8, 1, 9, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 1, 10, 0))
             .allDay(false)
@@ -91,7 +91,7 @@ public class PlanServiceTest {
             .planId(1L)
             .title("테스트 일정")
             .planCategory(PlanCategory.WORK)
-            .color(Color.BLUE)
+            .color(Color.PLAN_BLUE)
             .startDateTime(LocalDateTime.of(2025, 8, 1, 9, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 1, 10, 0))
             .allDay(false)
@@ -102,7 +102,7 @@ public class PlanServiceTest {
             .planId(1L)
             .title("테스트 일정")
             .planCategory(PlanCategory.WORK)
-            .color(Color.BLUE)
+            .color(Color.PLAN_BLUE)
             .startDateTime(LocalDateTime.of(2025, 8, 1, 9, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 1, 10, 0))
             .allDay(false)
@@ -113,7 +113,7 @@ public class PlanServiceTest {
             .planId(2L)
             .title("독립 일정")
             .planCategory(PlanCategory.STUDY)
-            .color(Color.GREEN)
+            .color(Color.PLAN_GREEN)
             .startDateTime(LocalDateTime.of(2025, 8, 2, 14, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 2, 15, 0))
             .allDay(false)
@@ -126,7 +126,7 @@ public class PlanServiceTest {
             .planId(2L)
             .title("독립 일정")
             .planCategory(PlanCategory.STUDY)
-            .color(Color.GREEN)
+            .color(Color.PLAN_GREEN)
             .startDateTime(LocalDateTime.of(2025, 8, 2, 14, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 2, 15, 0))
             .allDay(false)
@@ -185,7 +185,7 @@ public class PlanServiceTest {
         assertThat(result.getPlanId()).isEqualTo(1L);
         assertThat(result.getTitle()).isEqualTo("테스트 일정");
         assertThat(result.getPlanCategory()).isEqualTo(PlanCategory.WORK);
-        assertThat(result.getColor()).isEqualTo(Color.BLUE);
+        assertThat(result.getColor()).isEqualTo(Color.PLAN_BLUE);
     }
 
     @Test
@@ -212,14 +212,14 @@ public class PlanServiceTest {
         PlanCreateRequestDTO allDayRequest = PlanCreateRequestDTO.builder()
             .title("하루 종일 일정")
             .planCategory(PlanCategory.WORK)
-            .color(Color.RED)
+            .color(Color.PLAN_RED)
             .allDay(true)
             .build();
 
         Plan allDayPlan = Plan.builder()
             .planId(1L)
             .planCategory(PlanCategory.WORK)
-            .color(Color.RED)
+            .color(Color.PLAN_RED)
             .title("하루 종일 일정")
             .allDay(true)
             .isCompleted(false)
@@ -228,7 +228,7 @@ public class PlanServiceTest {
         PlanResponseDTO allDayResponse = PlanResponseDTO.builder()
             .planId(1L)
             .planCategory(PlanCategory.WORK)
-            .color(Color.RED)
+            .color(Color.PLAN_RED)
             .title("하루 종일 일정")
             .allDay(true)
             .isCompleted(false)
@@ -247,7 +247,7 @@ public class PlanServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getTitle()).isEqualTo("하루 종일 일정");
         assertThat(result.getPlanCategory()).isEqualTo(PlanCategory.WORK);
-        assertThat(result.getColor()).isEqualTo(Color.RED);
+        assertThat(result.getColor()).isEqualTo(Color.PLAN_RED);
         assertThat(result.getAllDay()).isTrue();
         assertThat(result.getStartDateTime()).isNull();  // allDay = true면 시간은 null
         assertThat(result.getEndDateTime()).isNull();
@@ -344,14 +344,14 @@ public class PlanServiceTest {
         PlanResponseDTO firstPlan = result.getPlans().getFirst();
         assertThat(firstPlan.getPlanId()).isEqualTo(1L);
         assertThat(firstPlan.getTitle()).isEqualTo("테스트 일정");
-        assertThat(firstPlan.getColor()).isEqualTo(Color.BLUE);
+        assertThat(firstPlan.getColor()).isEqualTo(Color.PLAN_BLUE);
         assertThat(firstPlan.getIsCompleted()).isFalse();
 
         // 두 번째 일정
         PlanResponseDTO secondPlan = result.getPlans().get(1);
         assertThat(secondPlan.getPlanId()).isEqualTo(2L);
         assertThat(secondPlan.getTitle()).isEqualTo("독립 일정");
-        assertThat(secondPlan.getColor()).isEqualTo(Color.GREEN);
+        assertThat(secondPlan.getColor()).isEqualTo(Color.PLAN_GREEN);
         assertThat(secondPlan.getIsCompleted()).isFalse();
     }
 
@@ -429,7 +429,7 @@ public class PlanServiceTest {
             .planId(2L)
             .title("독립 일정")
             .planCategory(PlanCategory.ETC)
-            .color(Color.NAVY)
+            .color(Color.PLAN_NAVY)
             .allDay(true)
             .isCompleted(false)
             .build();
@@ -438,7 +438,7 @@ public class PlanServiceTest {
             .planId(2L)
             .title("독립 일정")
             .planCategory(PlanCategory.ETC)
-            .color(Color.NAVY)
+            .color(Color.PLAN_NAVY)
             .allDay(true)
             .isCompleted(false)
             .build();
@@ -456,7 +456,7 @@ public class PlanServiceTest {
         assertThat(result.getPlanId()).isEqualTo(2L);
         assertThat(result.getTitle()).isEqualTo("독립 일정");
         assertThat(result.getPlanCategory()).isEqualTo(PlanCategory.ETC);
-        assertThat(result.getColor()).isEqualTo(Color.NAVY);
+        assertThat(result.getColor()).isEqualTo(Color.PLAN_NAVY);
         assertThat(result.getAllDay()).isTrue();
         verify(planValidator).validateGetPlan(planId);
     }
@@ -675,7 +675,7 @@ public class PlanServiceTest {
         // given
         Long planId = 1L;
         Long userId = 1L;
-        Color newColor = Color.ORANGE; // 새로운 색상
+        Color newColor = Color.PLAN_ORANGE; // 새로운 색상
 
         PlanUpdateRequestDTO updateRequest = PlanUpdateRequestDTO.builder()
             .color(newColor)
@@ -1194,7 +1194,7 @@ public class PlanServiceTest {
             .planId(2L)
             .title("독립 일정")
             .planCategory(PlanCategory.STUDY)
-            .color(Color.PINK)
+            .color(Color.PLAN_PINK)
             .startDateTime(LocalDateTime.of(2025, 8, 2, 14, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 2, 15, 0))
             .allDay(false)
@@ -1226,7 +1226,7 @@ public class PlanServiceTest {
             .planId(1L)
             .title("완료된 일정")
             .planCategory(PlanCategory.WORK)
-            .color(Color.PINK)
+            .color(Color.PLAN_PINK)
             .startDateTime(LocalDateTime.of(2025, 8, 1, 9, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 1, 10, 0))
             .allDay(false)
@@ -1259,7 +1259,7 @@ public class PlanServiceTest {
             .planId(1L)
             .title("하루 종일 일정")
             .planCategory(PlanCategory.WORK)
-            .color(Color.PINK)
+            .color(Color.PLAN_PINK)
             .startDateTime(LocalDateTime.of(2025, 8, 1, 0, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 1, 23, 59, 59))
             .allDay(true)
@@ -1440,7 +1440,7 @@ public class PlanServiceTest {
             .planId(1L)
             .title("SubPlan이 있는 일정")
             .planCategory(PlanCategory.WORK)
-            .color(Color.PINK)
+            .color(Color.PLAN_PINK)
             .startDateTime(LocalDateTime.of(2025, 8, 1, 9, 0))
             .endDateTime(LocalDateTime.of(2025, 8, 1, 10, 0))
             .allDay(false)
@@ -1522,7 +1522,7 @@ public class PlanServiceTest {
                 .planId(1L)
                 .title("9월 1일 일정")
                 .planCategory(PlanCategory.WORK)
-                .color(Color.BLUE)
+                .color(Color.PLAN_BLUE)
                 .startDateTime(LocalDateTime.of(2024, 9, 1, 9, 0))
                 .endDateTime(LocalDateTime.of(2024, 9, 1, 10, 0))
                 .allDay(false)
@@ -1533,7 +1533,7 @@ public class PlanServiceTest {
                 .planId(2L)
                 .title("9월 1일 또 다른 일정")
                 .planCategory(PlanCategory.STUDY)
-                .color(Color.GREEN)
+                .color(Color.PLAN_GREEN)
                 .startDateTime(LocalDateTime.of(2024, 9, 1, 14, 0))
                 .endDateTime(LocalDateTime.of(2024, 9, 1, 15, 0))
                 .allDay(false)
@@ -1544,7 +1544,7 @@ public class PlanServiceTest {
                 .planId(3L)
                 .title("9월 15일 일정")
                 .planCategory(PlanCategory.WORK)
-                .color(Color.RED)
+                .color(Color.PLAN_RED)
                 .startDateTime(LocalDateTime.of(2024, 9, 15, 16, 0))
                 .endDateTime(LocalDateTime.of(2024, 9, 15, 17, 0))
                 .allDay(false)
@@ -1557,7 +1557,7 @@ public class PlanServiceTest {
                 .planId(1L)
                 .title("9월 1일 일정")
                 .planCategory(PlanCategory.WORK)
-                .color(Color.BLUE)
+                .color(Color.PLAN_BLUE)
                 .startDateTime(LocalDateTime.of(2024, 9, 1, 9, 0))
                 .endDateTime(LocalDateTime.of(2024, 9, 1, 10, 0))
                 .allDay(false)
@@ -1568,7 +1568,7 @@ public class PlanServiceTest {
                 .planId(2L)
                 .title("9월 1일 또 다른 일정")
                 .planCategory(PlanCategory.STUDY)
-                .color(Color.GREEN)
+                .color(Color.PLAN_GREEN)
                 .startDateTime(LocalDateTime.of(2024, 9, 1, 14, 0))
                 .endDateTime(LocalDateTime.of(2024, 9, 1, 15, 0))
                 .allDay(false)
@@ -1579,7 +1579,7 @@ public class PlanServiceTest {
                 .planId(3L)
                 .title("9월 15일 일정")
                 .planCategory(PlanCategory.WORK)
-                .color(Color.RED)
+                .color(Color.PLAN_RED)
                 .startDateTime(LocalDateTime.of(2024, 9, 15, 16, 0))
                 .endDateTime(LocalDateTime.of(2024, 9, 15, 17, 0))
                 .allDay(false)
@@ -1740,7 +1740,7 @@ public class PlanServiceTest {
                 .planId(1L)
                 .title("하루 종일 일정")
                 .planCategory(PlanCategory.WORK)
-                .color(Color.PURPLE)
+                .color(Color.PLAN_PURPLE)
                 .startDateTime(LocalDateTime.of(2024, 8, 15, 0, 0))
                 .endDateTime(LocalDateTime.of(2024, 8, 15, 23, 59, 59))
                 .allDay(true)
@@ -1753,7 +1753,7 @@ public class PlanServiceTest {
                 .planId(1L)
                 .title("하루 종일 일정")
                 .planCategory(PlanCategory.WORK)
-                .color(Color.PURPLE)
+                .color(Color.PLAN_PURPLE)
                 .startDateTime(LocalDateTime.of(2024, 8, 15, 0, 0))
                 .endDateTime(LocalDateTime.of(2024, 8, 15, 23, 59, 59))
                 .allDay(true)
@@ -1800,7 +1800,7 @@ public class PlanServiceTest {
                 .planId(1L)
                 .title("완료된 일정")
                 .planCategory(PlanCategory.WORK)
-                .color(Color.GREEN)
+                .color(Color.PLAN_GREEN)
                 .startDateTime(LocalDateTime.of(2024, 7, 10, 9, 0))
                 .endDateTime(LocalDateTime.of(2024, 7, 10, 10, 0))
                 .allDay(false)
@@ -1812,7 +1812,7 @@ public class PlanServiceTest {
                 .planId(2L)
                 .title("미완료 일정")
                 .planCategory(PlanCategory.STUDY)
-                .color(Color.BLUE)
+                .color(Color.PLAN_BLUE)
                 .startDateTime(LocalDateTime.of(2024, 7, 10, 14, 0))
                 .endDateTime(LocalDateTime.of(2024, 7, 10, 15, 0))
                 .allDay(false)
@@ -1825,7 +1825,7 @@ public class PlanServiceTest {
                 .planId(1L)
                 .title("완료된 일정")
                 .planCategory(PlanCategory.WORK)
-                .color(Color.GREEN)
+                .color(Color.PLAN_GREEN)
                 .startDateTime(LocalDateTime.of(2024, 7, 10, 9, 0))
                 .endDateTime(LocalDateTime.of(2024, 7, 10, 10, 0))
                 .allDay(false)
@@ -1836,7 +1836,7 @@ public class PlanServiceTest {
                 .planId(2L)
                 .title("미완료 일정")
                 .planCategory(PlanCategory.STUDY)
-                .color(Color.BLUE)
+                .color(Color.PLAN_BLUE)
                 .startDateTime(LocalDateTime.of(2024, 7, 10, 14, 0))
                 .endDateTime(LocalDateTime.of(2024, 7, 10, 15, 0))
                 .allDay(false)
@@ -1955,5 +1955,172 @@ public class PlanServiceTest {
 
         verify(planValidator).validateMonthlyPlanRequest(year, month);
         verify(planRepositoryFacade).findActivePlansByMonth(year, month, userId);
+    }
+
+    @Test
+    @DisplayName("날짜 범위 플랜 조회 성공")
+    void getPlansInDateRange_Success() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 8, 1);
+        LocalDate endDate = LocalDate.of(2025, 8, 31);
+        Long userId = 1L;
+
+        Plan plan1 = Plan.builder()
+                .planId(1L)
+                .title("8월 초 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.PLAN_BLUE)
+                .startDateTime(LocalDateTime.of(2025, 8, 5, 9, 0))
+                .endDateTime(LocalDateTime.of(2025, 8, 5, 10, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        Plan plan2 = Plan.builder()
+                .planId(2L)
+                .title("8월 중순 일정")
+                .planCategory(PlanCategory.STUDY)
+                .color(Color.PLAN_GREEN)
+                .startDateTime(LocalDateTime.of(2025, 8, 15, 14, 0))
+                .endDateTime(LocalDateTime.of(2025, 8, 15, 16, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        List<Plan> plans = List.of(plan1, plan2);
+
+        PlanResponseDTO responseDTO1 = PlanResponseDTO.builder()
+                .planId(1L)
+                .title("8월 초 일정")
+                .planCategory(PlanCategory.WORK)
+                .color(Color.PLAN_BLUE)
+                .startDateTime(LocalDateTime.of(2025, 8, 5, 9, 0))
+                .endDateTime(LocalDateTime.of(2025, 8, 5, 10, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        PlanResponseDTO responseDTO2 = PlanResponseDTO.builder()
+                .planId(2L)
+                .title("8월 중순 일정")
+                .planCategory(PlanCategory.STUDY)
+                .color(Color.PLAN_GREEN)
+                .startDateTime(LocalDateTime.of(2025, 8, 15, 14, 0))
+                .endDateTime(LocalDateTime.of(2025, 8, 15, 16, 0))
+                .allDay(false)
+                .isCompleted(false)
+                .build();
+
+        List<PlanResponseDTO> expectedResponse = List.of(responseDTO1, responseDTO2);
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(user);
+        when(planRepositoryFacade.findActivePlansByDateRange(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                eq(userId)
+        )).thenReturn(plans);
+        when(planConverter.toListPlanResponseDTO(plans)).thenReturn(expectedResponse);
+
+        // when
+        List<PlanResponseDTO> result = planService.getPlansInDateRange(startDate, endDate, userId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getTitle()).isEqualTo("8월 초 일정");
+        assertThat(result.get(1).getTitle()).isEqualTo("8월 중순 일정");
+
+        verify(userRepositoryFacade).findActiveUserByUserId(userId);
+        verify(planRepositoryFacade).findActivePlansByDateRange(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                eq(userId)
+        );
+    }
+
+    @Test
+    @DisplayName("날짜 범위 플랜 조회 성공 - 빈 리스트 반환")
+    void getPlansInDateRange_Success_EmptyList() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 8, 1);
+        LocalDate endDate = LocalDate.of(2025, 8, 31);
+        Long userId = 1L;
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(user);
+        when(planRepositoryFacade.findActivePlansByDateRange(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                eq(userId)
+        )).thenReturn(Collections.emptyList());
+        when(planConverter.toListPlanResponseDTO(Collections.emptyList())).thenReturn(Collections.emptyList());
+
+        // when
+        List<PlanResponseDTO> result = planService.getPlansInDateRange(startDate, endDate, userId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("날짜 범위 플랜 조회 실패 - 사용자를 찾을 수 없음")
+    void getPlansInDateRange_Fail_UserNotFound() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 8, 1);
+        LocalDate endDate = LocalDate.of(2025, 8, 31);
+        Long userId = 1L;
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(null);
+
+        // when & then
+        assertThatThrownBy(() -> planService.getPlansInDateRange(startDate, endDate, userId))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_USER_NOT_FOUND);
+
+        verify(userRepositoryFacade).findActiveUserByUserId(userId);
+        verify(planRepositoryFacade, never()).findActivePlansByDateRange(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("날짜 범위 플랜 조회 실패 - Repository에서 예외 발생")
+    void getPlansInDateRange_Fail_RepositoryException() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 8, 1);
+        LocalDate endDate = LocalDate.of(2025, 8, 31);
+        Long userId = 1L;
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(user);
+        when(planRepositoryFacade.findActivePlansByDateRange(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                eq(userId)
+        )).thenThrow(new RuntimeException("데이터베이스 오류"));
+
+        // when & then
+        assertThatThrownBy(() -> planService.getPlansInDateRange(startDate, endDate, userId))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_FOUND_FAILED);
+    }
+
+    @Test
+    @DisplayName("날짜 범위 플랜 조회 실패 - Converter에서 예외 발생")
+    void getPlansInDateRange_Fail_ConverterException() {
+        // given
+        LocalDate startDate = LocalDate.of(2025, 8, 1);
+        LocalDate endDate = LocalDate.of(2025, 8, 31);
+        Long userId = 1L;
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(user);
+        when(planRepositoryFacade.findActivePlansByDateRange(
+                any(LocalDateTime.class),
+                any(LocalDateTime.class),
+                eq(userId)
+        )).thenReturn(validPlanList);
+        when(planConverter.toListPlanResponseDTO(validPlanList)).thenThrow(new RuntimeException("변환 오류"));
+
+        // when & then
+        assertThatThrownBy(() -> planService.getPlansInDateRange(startDate, endDate, userId))
+                .isInstanceOf(PlanException.class)
+                .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_FOUND_FAILED);
     }
 }

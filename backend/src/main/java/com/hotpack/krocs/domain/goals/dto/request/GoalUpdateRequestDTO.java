@@ -1,6 +1,7 @@
 package com.hotpack.krocs.domain.goals.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.global.common.entity.Priority;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +21,8 @@ public class GoalUpdateRequestDTO {
   private String title;
 
   private Priority priority;
+
+  private Color color;
 
   @JsonFormat(pattern = "yyyy-MM-dd")
   private LocalDate startDate;

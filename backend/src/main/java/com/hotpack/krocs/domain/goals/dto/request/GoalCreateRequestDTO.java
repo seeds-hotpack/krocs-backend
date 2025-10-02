@@ -2,6 +2,7 @@ package com.hotpack.krocs.domain.goals.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hotpack.krocs.global.common.constant.ValidationConstants;
+import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.global.common.entity.Priority;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -26,6 +27,9 @@ public class GoalCreateRequestDTO {
 
   @Builder.Default
   private Priority priority = Priority.MEDIUM;
+
+  @Builder.Default
+  private Color color = Color.GOAL_BLUE;
 
   @NotNull(message = "{goal.date.startRequired}")
   @JsonFormat(pattern = "yyyy-MM-dd")

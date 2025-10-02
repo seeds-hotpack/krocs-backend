@@ -2,13 +2,10 @@ package com.hotpack.krocs.domain.plans.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.hotpack.krocs.domain.plans.domain.Color;
+import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.domain.plans.domain.PlanCategory;
 import com.hotpack.krocs.global.common.constant.ValidationConstants;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,7 +30,7 @@ public class PlanCreateRequestDTO {
     private PlanCategory planCategory = PlanCategory.ETC;
 
     @Builder.Default
-    private Color color = Color.BLUE;
+    private Color color = Color.PLAN_BLUE;
 
     @Schema(
         description = "시작 일시",

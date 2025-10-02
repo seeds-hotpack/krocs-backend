@@ -1,10 +1,9 @@
 package com.hotpack.krocs.domain.plans.domain;
 
-import com.hotpack.krocs.domain.goals.domain.Goal;
-import com.hotpack.krocs.domain.goals.domain.SubGoal;
 import com.hotpack.krocs.domain.plans.dto.request.PlanUpdateRequestDTO;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.global.common.entity.BaseTimeEntity;
+import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.global.common.entity.Status;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -61,7 +60,7 @@ public class Plan extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "color", nullable = false)
     @Builder.Default
-    private Color color = Color.BLUE;
+    private Color color = Color.PLAN_BLUE;
 
     @Column(name = "start_datetime")
     private LocalDateTime startDateTime;
