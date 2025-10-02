@@ -32,6 +32,7 @@ services:
       - "8080:8080"  # 내부 통신용
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - SPRING_DATASOURCE_URL=${DB_URL}
