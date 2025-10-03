@@ -24,11 +24,14 @@ public class SubGoalRequestDTO {
     private String title;
 
     @JsonProperty("is_time_selected")
+    @Schema(description = "SubGoal 시간 추가 여부", example = "true")
     private Boolean isTimeSelected;
 
     @JsonProperty("start_date_time")
+    @Schema(description = "SubGoal 시작 시간", example = "2025-10-03T10:03")
     private LocalDateTime startDateTime;
 
     @JsonProperty("end_date_time")
+    @Schema(description = "SubGoal 종료 시간", example = "2025-10-03T10:30")
     private LocalDateTime endDateTime;
 }
