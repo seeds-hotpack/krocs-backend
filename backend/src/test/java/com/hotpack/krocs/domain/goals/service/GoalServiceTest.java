@@ -148,6 +148,9 @@ class GoalServiceTest {
 
         validSubGoalRequestDTO = SubGoalRequestDTO.builder()
             .title("테스트 소목표1")
+            .isTimeSelected(true)
+            .startDateTime(LocalDateTime.of(2025, 10, 3, 0, 0))
+            .endDateTime(LocalDateTime.of(2025, 10, 4, 0, 0))
             .build();
 
         validSubGoalCreateRequestDTO = SubGoalCreateRequestDTO.builder()

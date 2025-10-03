@@ -15,12 +15,42 @@ public class SubGoalValidator {
             throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_CREATE_EMPTY);
         }
 
-        for (SubGoalRequestDTO subGoalRequestDTO : subGoalCreateRequestDTO.getSubGoals()) {
-            if (subGoalRequestDTO.getTitle().isBlank()) {
+        for (SubGoalRequestDTO requestDTO : subGoalCreateRequestDTO.getSubGoals()) {
+            if (requestDTO.getTitle().isBlank()) {
                 throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_TITLE_EMPTY);
             }
-            if (subGoalRequestDTO.getTitle().length() > ValidationConstants.TITLE_MAX) {
+            if (requestDTO.getTitle().length() > ValidationConstants.TITLE_MAX) {
                 throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_TITLE_TOO_LONG);
+            }
+
+            if (requestDTO.getIsTimeSelected() == null) {
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_IS_TIME_SELECTED_IS_NULL);
+            }
+
+            if (requestDTO.getIsTimeSelected() && requestDTO.getStartDateTime() == null) {
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_START_DATETIME_IS_NULL);
+            }
+
+            if (requestDTO.getIsTimeSelected() && requestDTO.getEndDateTime() == null) {
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_END_DATETIME_IS_NULL);
+            }
+
+            if (!requestDTO.getIsTimeSelected() && requestDTO.getStartDateTime() != null) {
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_START_DATETIME_INVALID);
+            }
+
+            if (!requestDTO.getIsTimeSelected() && requestDTO.getEndDateTime() != null) {
+                throw new SubGoalException(SubGoalExceptionType.SUB_GOAL_END_DATETIME_INVALID);
+            }
+
+            if (requestDTO.getIsTimeSelected()) {
+                LocalDateTime startDateTime = requestDTO.getStartDateTime();
+                LocalDateTime endDataTime = requestDTO.getEndDateTime();
+
+                if (startDateTime.isAfter(endDataTime)) {
+                    throw new SubGoalException(
+                        SubGoalExceptionType.SUB_GOAL_DATETIME_RANGE_INVALID);
+                }
             }
         }
     }
