@@ -17,8 +17,9 @@ import lombok.NoArgsConstructor;
 @Getter
 public class SubGoalCreateRequestDTO {
 
-  @NotEmpty(message = "{subgoal.list.notEmpty}")
-  @JsonProperty("sub_goals")
-  @Schema(description = "SubGoal 리스트")
-  private List<@Valid SubGoalRequestDTO> subGoals;
+    @NotEmpty(message = "{subgoal.list.notEmpty}")
+    @JsonProperty("sub_goals")
+    @Schema(description = "SubGoal 리스트")
+    private List<@Valid SubGoalRequestDTO> subGoals;
+
 }
