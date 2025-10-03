@@ -4,7 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.catchThrowableOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.hotpack.krocs.domain.goals.converter.SubGoalConverter;
 import com.hotpack.krocs.domain.goals.domain.Goal;
@@ -16,8 +19,6 @@ import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalListResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalUpdateResponseDTO;
-import com.hotpack.krocs.domain.goals.exception.GoalException;
-import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
 import com.hotpack.krocs.domain.goals.exception.SubGoalException;
 import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
@@ -73,6 +74,9 @@ class SubGoalServiceTest {
 
         validSubGoalRequestDTO = SubGoalRequestDTO.builder()
             .title("테스트 소목표1")
+            .isTimeSelected(true)
+            .startDateTime(LocalDateTime.of(2025, 10, 3, 0, 0))
+            .endDateTime(LocalDateTime.of(2025, 10, 4, 0, 0))
             .build();
 
         validSubGoalCreateRequestDTO = SubGoalCreateRequestDTO.builder()
@@ -101,6 +105,9 @@ class SubGoalServiceTest {
             .goal(validGoal)
             .title("테스트 소목표1")
             .isCompleted(false)
+            .isTimeSelected(true)
+            .startDateTime(LocalDateTime.of(2025, 10, 3, 0, 0))
+            .endDateTime(LocalDateTime.of(2025, 10, 4, 0, 0))
             .build();
 
         existingGoal = Goal.builder()
@@ -115,6 +122,9 @@ class SubGoalServiceTest {
             .subGoalId(validSubGoal.getSubGoalId())
             .title(validSubGoal.getTitle())
             .isCompleted(validSubGoal.getIsCompleted())
+            .isTimeSelected(validSubGoal.isTimeSelected())
+            .startDateTime(validSubGoal.getStartDateTime())
+            .endDateTime(validSubGoal.getEndDateTime())
             .build();
     }
 
@@ -141,10 +151,15 @@ class SubGoalServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getGoalId()).isEqualTo(1L);
         assertThat(result.getCreatedSubGoals()).isNotEmpty();
-        for (SubGoalResponseDTO subGoalRequestDTO : result.getCreatedSubGoals()) {
-            assertThat(subGoalRequestDTO.getSubGoalId()).isEqualTo(1L);
-            assertThat(subGoalRequestDTO.getTitle()).isEqualTo("테스트 소목표1");
-            assertThat(subGoalRequestDTO.getIsCompleted()).isEqualTo(false);
+        for (SubGoalResponseDTO responseDTO : result.getCreatedSubGoals()) {
+            assertThat(responseDTO.getSubGoalId()).isEqualTo(1L);
+            assertThat(responseDTO.getTitle()).isEqualTo("테스트 소목표1");
+            assertThat(responseDTO.getIsTimeSelected()).isEqualTo(true);
+            assertThat(responseDTO.getStartDateTime()).isEqualTo(
+                LocalDateTime.of(2025, 10, 3, 0, 0));
+            assertThat(responseDTO.getEndDateTime()).isEqualTo(
+                LocalDateTime.of(2025, 10, 4, 0, 0));
+            assertThat(responseDTO.getIsCompleted()).isEqualTo(false);
         }
     }
 
@@ -239,6 +254,103 @@ class SubGoalServiceTest {
             .hasFieldOrPropertyWithValue("subGoalExceptionType",
                 SubGoalExceptionType.SUB_GOAL_TITLE_TOO_LONG);
     }
+
+    @Test
+    @DisplayName("소목표 생성 - isTimeSelected()는 true, endDateTime 이 null 일때")
+    void createSubGoal_SubGoalRequestDTOInvalid() {
+        // given
+        SubGoalRequestDTO invalidSubGoalRequestDTO = SubGoalRequestDTO
+            .builder()
+            .title("타이틀")
+            .isTimeSelected(true)
+            .startDateTime(LocalDateTime.of(2025, 10, 3, 0, 0))
+            .endDateTime(null)
+            .build();
+        SubGoalCreateRequestDTO invalidSubGoalCreateRequestDTO = SubGoalCreateRequestDTO
+            .builder()
+            .subGoals(List.of(invalidSubGoalRequestDTO))
+            .build();
+
+        // when & then
+        assertThatThrownBy(
+            () -> subGoalService.createSubGoals(1L, 1L, invalidSubGoalCreateRequestDTO))
+            .isInstanceOf(SubGoalException.class)
+            .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                SubGoalExceptionType.SUB_GOAL_END_DATETIME_IS_NULL);
+    }
+
+    @Test
+    @DisplayName("소목표 생성 - isTimeSelected()는 true, startDateTime 이 null 일때")
+    void createSubGoal_isTimeSelectedIsTrueAndStartDateTimeIsNull() {
+        // given
+        SubGoalRequestDTO invalidSubGoalRequestDTO = SubGoalRequestDTO
+            .builder()
+            .title("타이틀")
+            .isTimeSelected(true)
+            .startDateTime(null)
+            .endDateTime(LocalDateTime.of(2025, 10, 3, 0, 0))
+            .build();
+        SubGoalCreateRequestDTO invalidSubGoalCreateRequestDTO = SubGoalCreateRequestDTO
+            .builder()
+            .subGoals(List.of(invalidSubGoalRequestDTO))
+            .build();
+
+        // when & then
+        assertThatThrownBy(
+            () -> subGoalService.createSubGoals(1L, 1L, invalidSubGoalCreateRequestDTO))
+            .isInstanceOf(SubGoalException.class)
+            .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                SubGoalExceptionType.SUB_GOAL_START_DATETIME_IS_NULL);
+    }
+
+    @Test
+    @DisplayName("소목표 생성 - isTimeSelected()는 true, startDateTime 이 null 일때")
+    void createSubGoal_isTimeSelectedIsFalseAndStartDateTimeIsNotNull() {
+        // given
+        SubGoalRequestDTO invalidSubGoalRequestDTO = SubGoalRequestDTO
+            .builder()
+            .title("타이틀")
+            .isTimeSelected(false)
+            .startDateTime(LocalDateTime.of(2025, 10, 3, 0, 0))
+            .endDateTime(LocalDateTime.of(2025, 10, 4, 0, 0))
+            .build();
+        SubGoalCreateRequestDTO invalidSubGoalCreateRequestDTO = SubGoalCreateRequestDTO
+            .builder()
+            .subGoals(List.of(invalidSubGoalRequestDTO))
+            .build();
+
+        // when & then
+        assertThatThrownBy(
+            () -> subGoalService.createSubGoals(1L, 1L, invalidSubGoalCreateRequestDTO))
+            .isInstanceOf(SubGoalException.class)
+            .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                SubGoalExceptionType.SUB_GOAL_START_DATETIME_INVALID);
+    }
+
+    @Test
+    @DisplayName("소목표 생성 - isTimeSelected()는 true, startDateTime 이 null 일때")
+    void createSubGoal_isTimeSelectedIsFalseAndEndDateTimeIsNotNull() {
+        // given
+        SubGoalRequestDTO invalidSubGoalRequestDTO = SubGoalRequestDTO
+            .builder()
+            .title("타이틀")
+            .isTimeSelected(false)
+            .startDateTime(null)
+            .endDateTime(LocalDateTime.of(2025, 10, 4, 0, 0))
+            .build();
+        SubGoalCreateRequestDTO invalidSubGoalCreateRequestDTO = SubGoalCreateRequestDTO
+            .builder()
+            .subGoals(List.of(invalidSubGoalRequestDTO))
+            .build();
+
+        // when & then
+        assertThatThrownBy(
+            () -> subGoalService.createSubGoals(1L, 1L, invalidSubGoalCreateRequestDTO))
+            .isInstanceOf(SubGoalException.class)
+            .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                SubGoalExceptionType.SUB_GOAL_END_DATETIME_INVALID);
+    }
+
 
     @Test
     @DisplayName("소목표 생성 - SubGoalRepository 저장 실패")
@@ -406,7 +518,7 @@ class SubGoalServiceTest {
             .hasFieldOrPropertyWithValue("subGoalExceptionType",
                 SubGoalExceptionType.SUB_GOAL_UPDATE_FAILED);
     }
-    
+
     @Test
     @DisplayName("소목표 수정 - requestDTO의 isTimeSelected가 null 일때")
     void updateSubGoal_isTimeSelectedIsNull() {
@@ -561,43 +673,43 @@ class SubGoalServiceTest {
         LocalDate endDate = LocalDate.of(2025, 9, 30);
 
         SubGoal subGoal1 = SubGoal.builder()
+            .subGoalId(1L)
+            .goal(validGoal)
+            .title("9월 초 소목표")
+            .isCompleted(false)
+            .startDateTime(LocalDateTime.of(2025, 9, 5, 9, 0))
+            .endDateTime(LocalDateTime.of(2025, 9, 5, 10, 0))
+            .isTimeSelected(true)
+            .build();
+
+        SubGoal subGoal2 = SubGoal.builder()
+            .subGoalId(2L)
+            .goal(validGoal)
+            .title("9월 중순 소목표")
+            .isCompleted(false)
+            .startDateTime(LocalDateTime.of(2025, 9, 15, 14, 0))
+            .endDateTime(LocalDateTime.of(2025, 9, 15, 16, 0))
+            .isTimeSelected(true)
+            .build();
+
+        List<SubGoal> subGoals = List.of(subGoal1, subGoal2);
+        List<SubGoalResponseDTO> expectedResponse = List.of(
+            SubGoalResponseDTO.builder()
                 .subGoalId(1L)
-                .goal(validGoal)
                 .title("9월 초 소목표")
                 .isCompleted(false)
                 .startDateTime(LocalDateTime.of(2025, 9, 5, 9, 0))
                 .endDateTime(LocalDateTime.of(2025, 9, 5, 10, 0))
                 .isTimeSelected(true)
-                .build();
-
-        SubGoal subGoal2 = SubGoal.builder()
+                .build(),
+            SubGoalResponseDTO.builder()
                 .subGoalId(2L)
-                .goal(validGoal)
                 .title("9월 중순 소목표")
                 .isCompleted(false)
                 .startDateTime(LocalDateTime.of(2025, 9, 15, 14, 0))
                 .endDateTime(LocalDateTime.of(2025, 9, 15, 16, 0))
                 .isTimeSelected(true)
-                .build();
-
-        List<SubGoal> subGoals = List.of(subGoal1, subGoal2);
-        List<SubGoalResponseDTO> expectedResponse = List.of(
-                SubGoalResponseDTO.builder()
-                        .subGoalId(1L)
-                        .title("9월 초 소목표")
-                        .isCompleted(false)
-                        .startDateTime(LocalDateTime.of(2025, 9, 5, 9, 0))
-                        .endDateTime(LocalDateTime.of(2025, 9, 5, 10, 0))
-                        .isTimeSelected(true)
-                        .build(),
-                SubGoalResponseDTO.builder()
-                        .subGoalId(2L)
-                        .title("9월 중순 소목표")
-                        .isCompleted(false)
-                        .startDateTime(LocalDateTime.of(2025, 9, 15, 14, 0))
-                        .endDateTime(LocalDateTime.of(2025, 9, 15, 16, 0))
-                        .isTimeSelected(true)
-                        .build()
+                .build()
         );
 
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
@@ -606,7 +718,8 @@ class SubGoalServiceTest {
         when(subGoalConverter.toSubGoalResponseListDTO(subGoals)).thenReturn(expectedResponse);
 
         // when
-        List<SubGoalResponseDTO> result = subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L);
+        List<SubGoalResponseDTO> result = subGoalService.getSubGoalsInDateRange(startDate, endDate,
+            1L);
 
         // then
         assertThat(result).isNotNull();
@@ -627,44 +740,46 @@ class SubGoalServiceTest {
         LocalDate endDate = LocalDate.of(2025, 9, 30);
 
         SubGoal subGoalWithTime = SubGoal.builder()
+            .subGoalId(1L)
+            .goal(validGoal)
+            .title("시간이 있는 소목표")
+            .isCompleted(false)
+            .startDateTime(LocalDateTime.of(2025, 9, 15, 14, 0))
+            .endDateTime(LocalDateTime.of(2025, 9, 15, 16, 0))
+            .isTimeSelected(true)
+            .build();
+
+        SubGoal subGoalWithoutTime = SubGoal.builder()
+            .subGoalId(2L)
+            .goal(validGoal)
+            .title("시간이 없는 소목표")
+            .isCompleted(false)
+            .startDateTime(null)
+            .endDateTime(null)
+            .isTimeSelected(false)
+            .build();
+
+        List<SubGoal> allSubGoals = List.of(subGoalWithTime, subGoalWithoutTime);
+        List<SubGoalResponseDTO> expectedResponse = List.of(
+            SubGoalResponseDTO.builder()
                 .subGoalId(1L)
-                .goal(validGoal)
                 .title("시간이 있는 소목표")
                 .isCompleted(false)
                 .startDateTime(LocalDateTime.of(2025, 9, 15, 14, 0))
                 .endDateTime(LocalDateTime.of(2025, 9, 15, 16, 0))
                 .isTimeSelected(true)
-                .build();
-
-        SubGoal subGoalWithoutTime = SubGoal.builder()
-                .subGoalId(2L)
-                .goal(validGoal)
-                .title("시간이 없는 소목표")
-                .isCompleted(false)
-                .startDateTime(null)
-                .endDateTime(null)
-                .isTimeSelected(false)
-                .build();
-
-        List<SubGoal> allSubGoals = List.of(subGoalWithTime, subGoalWithoutTime);
-        List<SubGoalResponseDTO> expectedResponse = List.of(
-                SubGoalResponseDTO.builder()
-                        .subGoalId(1L)
-                        .title("시간이 있는 소목표")
-                        .isCompleted(false)
-                        .startDateTime(LocalDateTime.of(2025, 9, 15, 14, 0))
-                        .endDateTime(LocalDateTime.of(2025, 9, 15, 16, 0))
-                        .isTimeSelected(true)
-                        .build()
+                .build()
         );
 
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         when(goalRepositoryFacade.findAllActiveGoalsByUser(user)).thenReturn(List.of(validGoal));
         when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(allSubGoals);
-        when(subGoalConverter.toSubGoalResponseListDTO(List.of(subGoalWithTime))).thenReturn(expectedResponse);
+        when(subGoalConverter.toSubGoalResponseListDTO(List.of(subGoalWithTime))).thenReturn(
+            expectedResponse);
 
         // when
-        List<SubGoalResponseDTO> result = subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L);
+        List<SubGoalResponseDTO> result = subGoalService.getSubGoalsInDateRange(startDate, endDate,
+            1L);
 
         // then
         assertThat(result).isNotNull();
@@ -681,11 +796,14 @@ class SubGoalServiceTest {
 
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
         when(goalRepositoryFacade.findAllActiveGoalsByUser(user)).thenReturn(List.of(validGoal));
-        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(Collections.emptyList());
-        when(subGoalConverter.toSubGoalResponseListDTO(Collections.emptyList())).thenReturn(Collections.emptyList());
+        when(subGoalRepositoryFacade.findActiveSubGoalsByGoal(validGoal)).thenReturn(
+            Collections.emptyList());
+        when(subGoalConverter.toSubGoalResponseListDTO(Collections.emptyList())).thenReturn(
+            Collections.emptyList());
 
         // when
-        List<SubGoalResponseDTO> result = subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L);
+        List<SubGoalResponseDTO> result = subGoalService.getSubGoalsInDateRange(startDate, endDate,
+            1L);
 
         // then
         assertThat(result).isNotNull();
@@ -703,13 +821,14 @@ class SubGoalServiceTest {
 
         // when
         SubGoalException exception = catchThrowableOfType(
-                () -> subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L), SubGoalException.class
+            () -> subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L),
+            SubGoalException.class
         );
 
         // then
         assertThat(exception).isNotNull();
         assertThat(exception.getSubGoalExceptionType())
-                .isEqualTo(SubGoalExceptionType.SUB_GOAL_USER_NOT_FOUND);
+            .isEqualTo(SubGoalExceptionType.SUB_GOAL_USER_NOT_FOUND);
 
         verify(userRepositoryFacade).findActiveUserByUserId(1L);
         verify(goalRepositoryFacade, never()).findAllActiveGoalsByUser(any());
@@ -723,11 +842,13 @@ class SubGoalServiceTest {
         LocalDate endDate = LocalDate.of(2025, 9, 30);
 
         when(userRepositoryFacade.findActiveUserByUserId(1L)).thenReturn(user);
-        when(goalRepositoryFacade.findAllActiveGoalsByUser(user)).thenThrow(new RuntimeException("데이터베이스 오류"));
+        when(goalRepositoryFacade.findAllActiveGoalsByUser(user)).thenThrow(
+            new RuntimeException("데이터베이스 오류"));
 
         // when & then
         assertThatThrownBy(() -> subGoalService.getSubGoalsInDateRange(startDate, endDate, 1L))
-                .isInstanceOf(SubGoalException.class)
-                .hasFieldOrPropertyWithValue("subGoalExceptionType", SubGoalExceptionType.SUB_GOAL_READ_FAILED);
+            .isInstanceOf(SubGoalException.class)
+            .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                SubGoalExceptionType.SUB_GOAL_READ_FAILED);
     }
 }
