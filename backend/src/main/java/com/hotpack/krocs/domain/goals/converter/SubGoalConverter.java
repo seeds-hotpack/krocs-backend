@@ -19,6 +19,9 @@ public class SubGoalConverter {
         return SubGoal.builder()
             .goal(goal)
             .title(requestDTO.getTitle())
+            .isTimeSelected(requestDTO.getIsTimeSelected())
+            .startDateTime(requestDTO.getStartDateTime())
+            .endDateTime(requestDTO.getEndDateTime())
             .build();
     }
 
