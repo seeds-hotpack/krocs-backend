@@ -113,7 +113,7 @@ public class GoalConverter {
             .build();
   }
 
-  private int calculateCompletionPercentage(Goal goal) {
+  public int calculateCompletionPercentage(Goal goal) {
     if (goal.getSubGoals() == null || goal.getSubGoals().isEmpty()) {
       return goal.getIsCompleted() ? 100 : 0;
     }

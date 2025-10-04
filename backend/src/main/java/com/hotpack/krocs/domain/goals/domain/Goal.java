@@ -1,6 +1,7 @@
 package com.hotpack.krocs.domain.goals.domain;
 
 import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
+import com.hotpack.krocs.domain.retrospectives.domain.Retrospective;
 import com.hotpack.krocs.global.common.entity.Color;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.global.common.entity.BaseTimeEntity;
@@ -74,6 +75,9 @@ public class Goal extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "goal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<SubGoal> subGoals;
+
+    @OneToMany(mappedBy = "goal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Retrospective> retrospectives;
 
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
