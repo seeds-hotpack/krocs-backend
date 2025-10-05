@@ -21,9 +21,6 @@ public class RetrospectiveCreateResponseDTO {
 
     private RetrospectiveOutcome outcome;
 
-    @JsonProperty("is_success")
-    private boolean isSuccess;
-
     private List<FactorDTO> factors;
 
     private String content;

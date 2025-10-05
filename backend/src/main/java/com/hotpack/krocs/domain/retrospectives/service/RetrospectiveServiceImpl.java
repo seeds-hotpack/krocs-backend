@@ -6,6 +6,7 @@ import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.retrospectives.converter.RetrospectiveConverter;
 import com.hotpack.krocs.domain.retrospectives.domain.Retrospective;
+import com.hotpack.krocs.domain.retrospectives.domain.RetrospectiveOutcome;
 import com.hotpack.krocs.domain.retrospectives.dto.request.RetrospectiveCreateRequestDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCreateResponseDTO;
 import com.hotpack.krocs.domain.retrospectives.exception.RetrospectiveException;
@@ -43,12 +44,11 @@ public class RetrospectiveServiceImpl implements RetrospectiveService {
             if (goal == null) {
                 throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_GOAL_NOT_FOUND);
             }
-            retrospectiveValidator.validateCreate(goal, requestDTO);
-            validateIsSuccess(goal, requestDTO.isSuccess());
+            retrospectiveValidator.validateCreate(requestDTO);
             Retrospective retro = retrospectiveConverter.toEntity(requestDTO, user, goal);
             Retrospective saveRetro = retrospectiveRepositoryFacade.saveRetrospective(retro);
 
-            return retrospectiveConverter.toCreateResponseDTO(retro);
+            return retrospectiveConverter.toCreateResponseDTO(saveRetro);
         } catch (RetrospectiveException e) {
             throw e;
         } catch (Exception e) {
@@ -56,19 +56,4 @@ public class RetrospectiveServiceImpl implements RetrospectiveService {
         }
     }
 
-    private Boolean validateIsSuccess(Goal goal, Boolean isSuccess){
-        int percentage = goalConverter.calculateCompletionPercentage(goal);
-        boolean calculatedIsSuccess = (goal.getSubGoals() == null || goal.getSubGoals().isEmpty()
-            || percentage == 100);
-
-        if (isSuccess == null) {
-            return calculatedIsSuccess;
-        }
-
-        if (!isSuccess.equals(calculatedIsSuccess)) {
-            throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_ISSUCCESS_TYPE_MISMATCH);
-        }
-
-        return isSuccess;
-    }
 }
