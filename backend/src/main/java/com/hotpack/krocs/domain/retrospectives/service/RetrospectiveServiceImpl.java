@@ -7,7 +7,6 @@ import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.retrospectives.converter.RetrospectiveConverter;
 import com.hotpack.krocs.domain.retrospectives.domain.Retrospective;
 import com.hotpack.krocs.domain.retrospectives.dto.request.RetrospectiveCreateRequestDTO;
-import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCheckResponseDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCreateResponseDTO;
 import com.hotpack.krocs.domain.retrospectives.exception.RetrospectiveException;
 import com.hotpack.krocs.domain.retrospectives.exception.RetrospectiveExceptionType;
@@ -32,30 +31,6 @@ public class RetrospectiveServiceImpl implements RetrospectiveService {
     private final UserRepositoryFacade userRepositoryFacade;
 
     @Override
-    @Transactional(readOnly = true)
-    public RetrospectiveCheckResponseDTO checkRetrospective(Long userId, Long goalId) {
-
-        try {
-            User user = userRepositoryFacade.findActiveUserByUserId(userId);
-            if (user == null) {
-                throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_USER_NOT_FOUND);
-            }
-            Goal goal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
-            int percentage = goalConverter.calculateCompletionPercentage(goal);
-
-            boolean isSuccess = (goal.getSubGoals() == null || goal.getSubGoals().isEmpty()
-                || percentage == 100);
-
-            return retrospectiveConverter.toCheckResponseDTO(goal, percentage, isSuccess);
-        } catch (RetrospectiveException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_CHECK_FAILED);
-        }
-    }
-
-
-    @Override
     @Transactional
     public RetrospectiveCreateResponseDTO createRetrospective(Long userId, Long goalId,
         RetrospectiveCreateRequestDTO requestDTO) {
@@ -69,6 +44,7 @@ public class RetrospectiveServiceImpl implements RetrospectiveService {
                 throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_GOAL_NOT_FOUND);
             }
             retrospectiveValidator.validateCreate(goal, requestDTO);
+            validateIsSuccess(goal, requestDTO.isSuccess());
             Retrospective retro = retrospectiveConverter.toEntity(requestDTO, user, goal);
             Retrospective saveRetro = retrospectiveRepositoryFacade.saveRetrospective(retro);
 
@@ -78,5 +54,21 @@ public class RetrospectiveServiceImpl implements RetrospectiveService {
         } catch (Exception e) {
             throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_CREATION_FAILED);
         }
+    }
+
+    private Boolean validateIsSuccess(Goal goal, Boolean isSuccess){
+        int percentage = goalConverter.calculateCompletionPercentage(goal);
+        boolean calculatedIsSuccess = (goal.getSubGoals() == null || goal.getSubGoals().isEmpty()
+            || percentage == 100);
+
+        if (isSuccess == null) {
+            return calculatedIsSuccess;
+        }
+
+        if (!isSuccess.equals(calculatedIsSuccess)) {
+            throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_ISSUCCESS_TYPE_MISMATCH);
+        }
+
+        return isSuccess;
     }
 }

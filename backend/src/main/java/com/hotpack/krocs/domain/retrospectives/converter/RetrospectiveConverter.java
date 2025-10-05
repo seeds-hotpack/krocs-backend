@@ -8,7 +8,6 @@ import com.hotpack.krocs.domain.retrospectives.domain.RetrospectiveOutcome;
 import com.hotpack.krocs.domain.retrospectives.domain.SuccessFactor;
 import com.hotpack.krocs.domain.retrospectives.dto.request.RetrospectiveCreateRequestDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.FactorDTO;
-import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCheckResponseDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCreateResponseDTO;
 import java.util.Arrays;
 import java.util.List;
@@ -34,36 +33,29 @@ public class RetrospectiveConverter {
     }
 
     public RetrospectiveCreateResponseDTO toCreateResponseDTO(Retrospective retrospective) {
+        List<FactorDTO> factorDTOs = getFactorsByType(retrospective.isSuccess());
+
         return RetrospectiveCreateResponseDTO.builder()
             .retrospectiveId(retrospective.getRetrospectiveId())
             .goalId(retrospective.getGoal().getGoalId())
             .outcome(retrospective.getOutcome())
-            .factors(retrospective.getFactors())
+            .isSuccess(retrospective.isSuccess())
+            .factors(factorDTOs)
             .content(retrospective.getContent())
             .createdAt(retrospective.getCreatedAt())
             .updatedAt(retrospective.getUpdatedAt())
             .build();
     }
 
-    public RetrospectiveCheckResponseDTO toCheckResponseDTO(Goal goal, int percentage, boolean isSuccess) {
-
-        String outcomeType = isSuccess ? "SUCCESS" : "FAILURE";
-
-        List<FactorDTO> factorDTOs;
+    private List<FactorDTO> getFactorsByType(boolean isSuccess) {
         if (isSuccess) {
-            factorDTOs = Arrays.stream(SuccessFactor.values())
+            return Arrays.stream(SuccessFactor.values())
                 .map(f -> FactorDTO.builder().key(f.name()).description(f.getDescription()).build())
                 .toList();
         } else {
-            factorDTOs = Arrays.stream(FailureFactor.values())
+            return Arrays.stream(FailureFactor.values())
                 .map(f -> FactorDTO.builder().key(f.name()).description(f.getDescription()).build())
                 .toList();
         }
-
-        return RetrospectiveCheckResponseDTO.builder()
-            .outcomeType(outcomeType)
-            .completionPercentage(percentage)
-            .factors(factorDTOs)
-            .build();
     }
 }

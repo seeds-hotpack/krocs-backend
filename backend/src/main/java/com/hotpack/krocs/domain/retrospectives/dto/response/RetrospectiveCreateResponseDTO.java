@@ -3,6 +3,7 @@ package com.hotpack.krocs.domain.retrospectives.dto.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hotpack.krocs.domain.retrospectives.domain.RetrospectiveOutcome;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
@@ -20,7 +21,10 @@ public class RetrospectiveCreateResponseDTO {
 
     private RetrospectiveOutcome outcome;
 
-    private List<String> factors;
+    @JsonProperty("is_success")
+    private boolean isSuccess;
+
+    private List<FactorDTO> factors;
 
     private String content;
 

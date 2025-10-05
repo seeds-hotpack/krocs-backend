@@ -19,7 +19,7 @@ public class RetrospectiveValidator {
 
         String outcome = requestDTO.getOutcome().toUpperCase();
         if (!"SKIP".equals(outcome)) {
-            validateFactors(requestDTO.getFactors(), requestDTO.getOutcomeType());
+            validateFactors(requestDTO.getFactors(), requestDTO.isSuccess());
         } else{
             throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_INVALID_OUTCOME_KEY);
         }
@@ -32,25 +32,20 @@ public class RetrospectiveValidator {
     }
 
 
-    private void validateFactors(List<String> factorKeys, String outcomeType) {
+    private void validateFactors(List<String> factorKeys, Boolean isSuccess) {
         if (CollectionUtils.isEmpty(factorKeys) || factorKeys.size() > 3) {
             throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_INVALID_FACTORS_SIZE);
         }
 
         boolean allKeysValid;
-        switch (outcomeType.toUpperCase()) {
-            case "SUCCESS":
-                allKeysValid = factorKeys.stream().allMatch(SuccessFactor::isValidKey);
-                break;
-            case "FAILURE":
-                allKeysValid = factorKeys.stream().allMatch(FailureFactor::isValidKey);
-                break;
-            default:
-                throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_INVALID_FACTOR_KEY);
+        if (isSuccess){
+            allKeysValid = factorKeys.stream().allMatch(SuccessFactor::isValidKey);
+        } else {
+            allKeysValid = factorKeys.stream().allMatch(FailureFactor::isValidKey);
         }
 
         if (!allKeysValid) {
-            throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME);
+            throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_INVALID_FACTOR_KEY);
         }
     }
 }

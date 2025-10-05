@@ -3,20 +3,20 @@ package com.hotpack.krocs.domain.retrospectives.dto.request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
+@Builder
 public class RetrospectiveCreateRequestDTO {
     @Schema(description = "사용자의 최종 행동 (COMPLETE, RETRY)", example = "COMPLETE")
     @NotBlank(message = "{retro.outcome.notBlank}")
     private String outcome;
 
-    @Schema(description = "회고의 맥락 (SUCCESS, FAILURE)", example = "SUCCESS")
-    @JsonProperty("outcome_type")
-    @NotBlank(message = "{retro.outcomeType.notBlank}")
-    private String outcomeType;
+    @Schema(description = "회고의 성공 여부 (true: 성공, false: 실패)", example = "true")
+    @JsonProperty("is_success")
+    private boolean isSuccess;
 
     @Schema(description = "회고 요인(Key) 목록", example = "[\"CLEAR_PLAN\", \"STEADY_EXECUTION\", \"ETC\"]")
     private List<String> factors;

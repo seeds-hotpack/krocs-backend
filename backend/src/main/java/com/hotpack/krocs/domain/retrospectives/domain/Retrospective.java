@@ -1,5 +1,6 @@
 package com.hotpack.krocs.domain.retrospectives.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.global.common.entity.BaseTimeEntity;
