@@ -5,6 +5,7 @@ import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCreateR
 
 public interface RetrospectiveService {
 
-    // 회고 생성 API
+    void deleteRetrospective(Long userId, Long goalId, Long retroId);
+
     RetrospectiveCreateResponseDTO createRetrospective(Long userId, Long goalId, RetrospectiveCreateRequestDTO requestDTO);
 }

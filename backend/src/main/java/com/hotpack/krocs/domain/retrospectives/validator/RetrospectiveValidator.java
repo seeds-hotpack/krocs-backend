@@ -1,5 +1,6 @@
 package com.hotpack.krocs.domain.retrospectives.validator;
 
+import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.retrospectives.domain.FailureFactor;
 import com.hotpack.krocs.domain.retrospectives.domain.RetrospectiveOutcome;
 import com.hotpack.krocs.domain.retrospectives.domain.SuccessFactor;
@@ -52,6 +53,14 @@ public class RetrospectiveValidator {
 
         if (!allKeysValid) {
             throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME);
+        }
+    }
+
+    public void validateDelete(Goal goal, Long requestUserId, Long retroId) {
+        if (!goal.getUser().getUserId().equals(requestUserId)) {
+            throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_NOT_FOUND);
+        } else if (!goal.getUser().getUserId().equals(retroId)){
+            throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_NOT_FOUND);
         }
     }
 }

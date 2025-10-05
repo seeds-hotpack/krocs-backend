@@ -56,4 +56,30 @@ public class RetrospectiveServiceImpl implements RetrospectiveService {
         }
     }
 
+    @Override
+    @Transactional
+    public void deleteRetrospective(Long userId, Long goalId, Long retroId) {
+        try {
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if(user == null){
+                throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_USER_NOT_FOUND);
+            }
+            Goal goal = goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId);
+            if (goal == null) {
+                throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_GOAL_NOT_FOUND);
+            }
+
+            retrospectiveValidator.validateDelete(goal, userId, retroId);
+
+            Retrospective retrospective = retrospectiveRepositoryFacade.findActiveRetrospectiveByUserAndRetrospectiveId(
+                user, retroId);
+            retrospectiveRepositoryFacade.delete(retrospective);
+
+        } catch (RetrospectiveException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_DELETE_FAILED);
+        }
+    }
+
 }

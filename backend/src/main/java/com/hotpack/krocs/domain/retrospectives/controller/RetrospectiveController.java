@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,6 +47,25 @@ public class RetrospectiveController {
             throw e;
         } catch (Exception e) {
             throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_CREATION_FAILED);
+        }
+    }
+
+    @Operation(summary = "대목표 회고 삭제", description = "특정 대목표에 작성된 회고를 삭제합니다.")
+    @DeleteMapping("/goals/{goalId}/{retroId}")
+    public ApiResponse<Void> deleteRetrospective(
+        @Parameter(hidden = true) @Login Long userId,
+        @Parameter(description = "회고를 삭제할 목표 ID", example = "1")
+        @PathVariable @Positive Long goalId,
+        @Parameter(description = "삭제할 회고 ID", example = "1")
+        @PathVariable @Positive Long retroId
+    ) {
+        try {
+            retrospectiveService.deleteRetrospective(userId, goalId, retroId);
+            return ApiResponse.success(null);
+        } catch (RetrospectiveException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_DELETE_FAILED);
         }
     }
 }

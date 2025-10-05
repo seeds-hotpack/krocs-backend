@@ -51,4 +51,10 @@ public class Retrospective extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status = Status.ACTIVE;
+
+    public void delete() {
+        if (this.status == Status.ACTIVE) {
+            this.status = Status.INACTIVE;
+        }
+    }
 }
