@@ -3,10 +3,8 @@ package com.hotpack.krocs.domain.retrospectives.service;
 
 import com.hotpack.krocs.domain.goals.converter.GoalConverter;
 import com.hotpack.krocs.domain.goals.domain.Goal;
-import com.hotpack.krocs.domain.goals.exception.GoalException;
-import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
-import com.hotpack.krocs.domain.retrospectives.converter.RetrospectiveConvertor;
+import com.hotpack.krocs.domain.retrospectives.converter.RetrospectiveConverter;
 import com.hotpack.krocs.domain.retrospectives.domain.Retrospective;
 import com.hotpack.krocs.domain.retrospectives.dto.request.RetrospectiveCreateRequestDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCheckResponseDTO;
@@ -30,7 +28,7 @@ public class RetrospectiveServiceImpl implements RetrospectiveService {
 
     private final RetrospectiveRepositoryFacade retrospectiveRepositoryFacade;
     private final RetrospectiveValidator retrospectiveValidator;
-    private final RetrospectiveConvertor retrospectiveConverter;
+    private final RetrospectiveConverter retrospectiveConverter;
     private final UserRepositoryFacade userRepositoryFacade;
 
     @Override

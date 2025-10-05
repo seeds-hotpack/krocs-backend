@@ -15,7 +15,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RetrospectiveConvertor {
+public class RetrospectiveConverter {
 
     public Retrospective toEntity(RetrospectiveCreateRequestDTO requestDTO, User user, Goal goal) {
         RetrospectiveOutcome outcome = RetrospectiveOutcome.valueOf(requestDTO.getOutcome().toUpperCase());
