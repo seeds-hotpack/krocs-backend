@@ -69,7 +69,7 @@ public class RetrospectiveServiceImpl implements RetrospectiveService {
                 throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_GOAL_NOT_FOUND);
             }
 
-            retrospectiveValidator.validateDelete(goal, userId, retroId);
+            retrospectiveValidator.validateDelete(goal, userId);
 
             Retrospective retrospective = retrospectiveRepositoryFacade.findActiveRetrospectiveByUserAndRetrospectiveId(
                 user, retroId);

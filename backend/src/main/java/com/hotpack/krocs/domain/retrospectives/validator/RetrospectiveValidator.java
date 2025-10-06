@@ -56,10 +56,8 @@ public class RetrospectiveValidator {
         }
     }
 
-    public void validateDelete(Goal goal, Long requestUserId, Long retroId) {
+    public void validateDelete(Goal goal, Long requestUserId) {
         if (!goal.getUser().getUserId().equals(requestUserId)) {
-            throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_NOT_FOUND);
-        } else if (!goal.getUser().getUserId().equals(retroId)){
             throw new RetrospectiveException(RetrospectiveExceptionType.RETRO_NOT_FOUND);
         }
     }
