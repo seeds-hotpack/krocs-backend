@@ -1,6 +1,7 @@
 package com.hotpack.krocs.domain.retrospectives.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -28,7 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RetrospectiveServiceImpl 단위 테스트")
-class RetrospectiveServiceImplTest {
+class RetrospectiveServiceTest {
 
     @InjectMocks
     private RetrospectiveServiceImpl retrospectiveService;
@@ -49,16 +50,23 @@ class RetrospectiveServiceImplTest {
     private Goal validGoal;
     private Long userId = 1L;
     private Long goalId = 10L;
+    private Long retroId = 100L;
 
     @BeforeEach
     void setUp() {
         validUser = User.builder().userId(userId).build();
         validGoal = Goal.builder().goalId(goalId).user(validUser).build();
+        Retrospective validRetro = Retrospective.builder()
+            .retrospectiveId(retroId)
+            .user(validUser)
+            .goal(validGoal)
+            .build();
     }
 
     @Nested
     @DisplayName("createRetrospective 성공 케이스")
     class SuccessCases {
+
         @Test
         @DisplayName("정상 흐름: 검증 통과 후 회고 저장 및 응답 반환")
         void createRetrospective_Success() {
@@ -69,16 +77,21 @@ class RetrospectiveServiceImplTest {
                 .build();
 
             Retrospective mockRetro = Retrospective.builder().build();
-            RetrospectiveCreateResponseDTO expectedResponse = RetrospectiveCreateResponseDTO.builder().retrospectiveId(123L).build();
+            RetrospectiveCreateResponseDTO expectedResponse = RetrospectiveCreateResponseDTO.builder()
+                .retrospectiveId(123L).build();
 
             when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
-            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(validGoal);
-            when(retrospectiveConverter.toEntity(request, validUser, validGoal)).thenReturn(mockRetro);
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(
+                validGoal);
+            when(retrospectiveConverter.toEntity(request, validUser, validGoal)).thenReturn(
+                mockRetro);
             when(retrospectiveRepositoryFacade.saveRetrospective(mockRetro)).thenReturn(mockRetro);
-            when(retrospectiveConverter.toCreateResponseDTO(mockRetro)).thenReturn(expectedResponse);
+            when(retrospectiveConverter.toCreateResponseDTO(mockRetro)).thenReturn(
+                expectedResponse);
 
             // when
-            RetrospectiveCreateResponseDTO result = retrospectiveService.createRetrospective(userId, goalId, request);
+            RetrospectiveCreateResponseDTO result = retrospectiveService.createRetrospective(userId,
+                goalId, request);
 
             // then
             assertThat(result).isNotNull();
@@ -97,13 +110,17 @@ class RetrospectiveServiceImplTest {
                 .build();
 
             Retrospective mockRetro = Retrospective.builder().build();
-            RetrospectiveCreateResponseDTO expectedResponse = RetrospectiveCreateResponseDTO.builder().build();
+            RetrospectiveCreateResponseDTO expectedResponse = RetrospectiveCreateResponseDTO.builder()
+                .build();
 
             when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
-            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(validGoal);
-            when(retrospectiveConverter.toEntity(request, validUser, validGoal)).thenReturn(mockRetro);
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(
+                validGoal);
+            when(retrospectiveConverter.toEntity(request, validUser, validGoal)).thenReturn(
+                mockRetro);
             when(retrospectiveRepositoryFacade.saveRetrospective(mockRetro)).thenReturn(mockRetro);
-            when(retrospectiveConverter.toCreateResponseDTO(mockRetro)).thenReturn(expectedResponse);
+            when(retrospectiveConverter.toCreateResponseDTO(mockRetro)).thenReturn(
+                expectedResponse);
 
             // when
             retrospectiveService.createRetrospective(userId, goalId, request);
@@ -112,6 +129,7 @@ class RetrospectiveServiceImplTest {
             verify(retrospectiveValidator).validateCreate(request);
             verify(retrospectiveRepositoryFacade).saveRetrospective(mockRetro);
         }
+
         @Test
         @DisplayName("RETRY_FAILURE: 회고 생성 후 재도전")
         void createRetrospective_Success_RetryFailure() {
@@ -122,13 +140,17 @@ class RetrospectiveServiceImplTest {
                 .build();
 
             Retrospective mockRetro = Retrospective.builder().build();
-            RetrospectiveCreateResponseDTO expectedResponse = RetrospectiveCreateResponseDTO.builder().build();
+            RetrospectiveCreateResponseDTO expectedResponse = RetrospectiveCreateResponseDTO.builder()
+                .build();
 
             when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
-            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(validGoal);
-            when(retrospectiveConverter.toEntity(request, validUser, validGoal)).thenReturn(mockRetro);
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(
+                validGoal);
+            when(retrospectiveConverter.toEntity(request, validUser, validGoal)).thenReturn(
+                mockRetro);
             when(retrospectiveRepositoryFacade.saveRetrospective(mockRetro)).thenReturn(mockRetro);
-            when(retrospectiveConverter.toCreateResponseDTO(mockRetro)).thenReturn(expectedResponse);
+            when(retrospectiveConverter.toCreateResponseDTO(mockRetro)).thenReturn(
+                expectedResponse);
 
             // when
             retrospectiveService.createRetrospective(userId, goalId, request);
@@ -142,6 +164,7 @@ class RetrospectiveServiceImplTest {
     @Nested
     @DisplayName("createRetrospective 실패 케이스")
     class FailureCases {
+
         @Test
         @DisplayName("사용자 없음: RETRO_USER_NOT_FOUND 예외 발생")
         void createRetrospective_Fail_UserNotFound() {
@@ -153,7 +176,8 @@ class RetrospectiveServiceImplTest {
             RetrospectiveException ex = assertThrows(RetrospectiveException.class,
                 () -> retrospectiveService.createRetrospective(userId, goalId, request));
 
-            assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_USER_NOT_FOUND);
+            assertThat(ex.getErrorCode()).isEqualTo(
+                RetrospectiveExceptionType.RETRO_USER_NOT_FOUND);
         }
 
         @Test
@@ -169,7 +193,8 @@ class RetrospectiveServiceImplTest {
             RetrospectiveException ex = assertThrows(RetrospectiveException.class,
                 () -> retrospectiveService.createRetrospective(userId, goalId, request));
 
-            assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_GOAL_NOT_FOUND);
+            assertThat(ex.getErrorCode()).isEqualTo(
+                RetrospectiveExceptionType.RETRO_GOAL_NOT_FOUND);
         }
 
         @Test
@@ -182,15 +207,18 @@ class RetrospectiveServiceImplTest {
                 .build();
 
             when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
-            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(validGoal);
-            doThrow(new RetrospectiveException(RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME))
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(
+                validGoal);
+            doThrow(new RetrospectiveException(
+                RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME))
                 .when(retrospectiveValidator).validateCreate(request);
 
             // when & then
             RetrospectiveException ex = assertThrows(RetrospectiveException.class,
                 () -> retrospectiveService.createRetrospective(userId, goalId, request));
 
-            assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME);
+            assertThat(ex.getErrorCode()).isEqualTo(
+                RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME);
         }
 
         @Test
@@ -205,8 +233,10 @@ class RetrospectiveServiceImplTest {
             Retrospective mockRetro = Retrospective.builder().build();
 
             when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
-            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(validGoal);
-            when(retrospectiveConverter.toEntity(request, validUser, validGoal)).thenReturn(mockRetro);
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(
+                validGoal);
+            when(retrospectiveConverter.toEntity(request, validUser, validGoal)).thenReturn(
+                mockRetro);
             when(retrospectiveRepositoryFacade.saveRetrospective(mockRetro))
                 .thenThrow(new RuntimeException("DB Connection Error"));
 
@@ -214,7 +244,8 @@ class RetrospectiveServiceImplTest {
             RetrospectiveException ex = assertThrows(RetrospectiveException.class,
                 () -> retrospectiveService.createRetrospective(userId, goalId, request));
 
-            assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_CREATION_FAILED);
+            assertThat(ex.getErrorCode()).isEqualTo(
+                RetrospectiveExceptionType.RETRO_CREATION_FAILED);
         }
 
         @Test
@@ -223,20 +254,23 @@ class RetrospectiveServiceImplTest {
             // given
             RetrospectiveCreateRequestDTO request = RetrospectiveCreateRequestDTO.builder()
                 .outcome("COMPLETE_SUCCESS")
-                .factors(List.of()) // 비어있는 리스트
+                .factors(List.of())
                 .build();
 
             when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
-            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(validGoal);
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(
+                validGoal);
 
-            doThrow(new RetrospectiveException(RetrospectiveExceptionType.RETRO_INVALID_FACTORS_SIZE))
+            doThrow(
+                new RetrospectiveException(RetrospectiveExceptionType.RETRO_INVALID_FACTORS_SIZE))
                 .when(retrospectiveValidator).validateCreate(request);
 
             // when & then
             RetrospectiveException ex = assertThrows(RetrospectiveException.class,
                 () -> retrospectiveService.createRetrospective(userId, goalId, request));
 
-            assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_INVALID_FACTORS_SIZE);
+            assertThat(ex.getErrorCode()).isEqualTo(
+                RetrospectiveExceptionType.RETRO_INVALID_FACTORS_SIZE);
         }
 
         @Test
@@ -249,16 +283,122 @@ class RetrospectiveServiceImplTest {
                 .build();
 
             when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
-            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(validGoal);
-            
-            doThrow(new RetrospectiveException(RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME))
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(
+                validGoal);
+
+            doThrow(new RetrospectiveException(
+                RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME))
                 .when(retrospectiveValidator).validateCreate(request);
 
             // when & then
             RetrospectiveException ex = assertThrows(RetrospectiveException.class,
                 () -> retrospectiveService.createRetrospective(userId, goalId, request));
 
-            assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME);
+            assertThat(ex.getErrorCode()).isEqualTo(
+                RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME);
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteRetrospective 테스트")
+    class DeleteCases {
+
+        @Test
+        @DisplayName("성공: 회고를 정상적으로 삭제한다")
+        void deleteRetrospective_Success() {
+            // given
+            Retrospective mockRetro = Retrospective.builder().build();
+
+            when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(
+                validGoal);
+            when(retrospectiveRepositoryFacade.findActiveRetrospectiveByUserAndRetrospectiveId(
+                validUser, mockRetro.getRetrospectiveId()))
+                .thenReturn(mockRetro);
+
+            // when
+            assertThatCode(() -> retrospectiveService.deleteRetrospective(userId, goalId,
+                mockRetro.getRetrospectiveId()))
+                .doesNotThrowAnyException();
+
+            // then
+            verify(retrospectiveValidator).validateDelete(validGoal, userId);
+            verify(retrospectiveRepositoryFacade).delete(mockRetro);
+        }
+
+        @Test
+        @DisplayName("실패: Goal을 찾을 수 없는 경우 RETRO_GOAL_NOT_FOUND 예외 발생")
+        void deleteRetrospective_Fail_GoalNotFound() {
+            // given
+            when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(null);
+
+            // when & then
+            RetrospectiveException ex = assertThrows(RetrospectiveException.class,
+                () -> retrospectiveService.deleteRetrospective(userId, goalId, retroId));
+
+            assertThat(ex.getErrorCode()).isEqualTo(
+                RetrospectiveExceptionType.RETRO_GOAL_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("실패: 다른 사용자의 회고 삭제 시도 시 RETRO_NOT_FOUND 예외 발생")
+        void deleteRetrospective_Fail_WhenUserIsNotOwner() {
+            // given
+            Long otherUserId = 999L;
+            User otherUser = User.builder().userId(otherUserId).build();
+
+            when(userRepository.findActiveUserByUserId(otherUserId)).thenReturn(otherUser);
+            when(goalRepository.findActiveGoalByUserAndGoalId(otherUser, goalId)).thenReturn(
+                validGoal);
+
+            doThrow(new RetrospectiveException(RetrospectiveExceptionType.RETRO_NOT_FOUND))
+                .when(retrospectiveValidator).validateDelete(validGoal, otherUserId);
+
+            // when & then
+            RetrospectiveException ex = assertThrows(RetrospectiveException.class,
+                () -> retrospectiveService.deleteRetrospective(otherUserId, goalId, retroId));
+
+            assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_NOT_FOUND);
+        }
+        
+
+        @Test
+        @DisplayName("실패: 삭제할 회고(Retrospective)를 찾을 수 없는 경우")
+        void deleteRetrospective_Fail_RetrospectiveNotFound() {
+            // given
+            when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(validGoal);
+
+            when(retrospectiveRepositoryFacade.findActiveRetrospectiveByUserAndRetrospectiveId(validUser, 99L))
+                .thenThrow(new RetrospectiveException(RetrospectiveExceptionType.RETRO_NOT_FOUND));
+
+            // when & then
+            RetrospectiveException ex = assertThrows(RetrospectiveException.class,
+                () -> retrospectiveService.deleteRetrospective(userId, goalId, 99L));
+
+            assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_NOT_FOUND);
+        }
+
+        @Test
+        @DisplayName("실패: 삭제 과정에서 DB 오류 발생 시 RETRO_DELETE_FAILED 반환")
+        void deleteRetrospective_Fail_WhenDatabaseErrorOnDelete() {
+            // given
+            Retrospective mockRetro = Retrospective.builder().goal(validGoal).build();
+
+            when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
+            when(goalRepository.findActiveGoalByUserAndGoalId(validUser, goalId)).thenReturn(validGoal);
+            when(retrospectiveRepositoryFacade.findActiveRetrospectiveByUserAndRetrospectiveId(validUser, retroId))
+                .thenReturn(mockRetro);
+
+            doThrow(new RuntimeException("DB 오류"))
+                .when(retrospectiveRepositoryFacade).delete(mockRetro);
+
+            // when & then
+            RetrospectiveException ex = assertThrows(RetrospectiveException.class,
+                () -> retrospectiveService.deleteRetrospective(userId, goalId, retroId));
+
+            assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_DELETE_FAILED);
         }
     }
 }
