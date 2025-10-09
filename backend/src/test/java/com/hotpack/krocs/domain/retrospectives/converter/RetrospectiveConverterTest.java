@@ -4,9 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
+import com.hotpack.krocs.domain.retrospectives.domain.FailureFactor;
 import com.hotpack.krocs.domain.retrospectives.domain.Retrospective;
 import com.hotpack.krocs.domain.retrospectives.domain.RetrospectiveOutcome;
+import com.hotpack.krocs.domain.retrospectives.domain.SuccessFactor;
 import com.hotpack.krocs.domain.retrospectives.dto.request.RetrospectiveCreateRequestDTO;
+import com.hotpack.krocs.domain.retrospectives.dto.response.AllFactorsResponseDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.FactorDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCreateResponseDTO;
 import com.hotpack.krocs.domain.retrospectives.exception.RetrospectiveException;
@@ -167,5 +170,29 @@ class RetrospectiveConverterTest {
             assertThat(exception.getErrorCode())
                 .isEqualTo(RetrospectiveExceptionType.RETRO_FACTORS_MISMATCH_OUTCOME);
         }
+    }
+
+    @Test
+    @DisplayName("toAllFactorsResponseDTO: 모든 성공/실패 요인 목록을 DTO로 변환")
+    void toAllFactorsResponseDTO_Success() {
+        // when
+        AllFactorsResponseDTO result = retrospectiveConverter.toAllFactorsResponseDTO();
+
+        // then
+        assertThat(result).isNotNull();
+
+        List<FactorDTO> successFactors = result.getSuccessFactors();
+        assertThat(successFactors).isNotNull();
+        assertThat(successFactors).hasSize(SuccessFactor.values().length);
+
+        assertThat(successFactors.get(0).getKey()).isEqualTo(SuccessFactor.CLEAR_PLAN.name());
+        assertThat(successFactors.get(0).getDescription()).isEqualTo(SuccessFactor.CLEAR_PLAN.getDescription());
+
+        List<FactorDTO> failureFactors = result.getFailureFactors();
+        assertThat(failureFactors).isNotNull();
+        assertThat(failureFactors).hasSize(FailureFactor.values().length);
+
+        assertThat(failureFactors.get(0).getKey()).isEqualTo(FailureFactor.NO_PLAN.name());
+        assertThat(failureFactors.get(0).getDescription()).isEqualTo(FailureFactor.NO_PLAN.getDescription());
     }
 }

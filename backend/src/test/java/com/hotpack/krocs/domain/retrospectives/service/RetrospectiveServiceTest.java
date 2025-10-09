@@ -361,7 +361,7 @@ class RetrospectiveServiceTest {
 
             assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_NOT_FOUND);
         }
-        
+
 
         @Test
         @DisplayName("실패: 삭제할 회고(Retrospective)를 찾을 수 없는 경우")

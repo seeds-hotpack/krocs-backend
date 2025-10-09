@@ -79,7 +79,6 @@ public class RetrospectiveConverter {
             .map(this::toFactorDTO)
             .toList();
 
-        // 최종 응답 DTO를 빌드하여 반환
         return AllFactorsResponseDTO.builder()
             .successFactors(successFactorDTOs)
             .failureFactors(failureFactorDTOs)
@@ -111,4 +110,5 @@ public class RetrospectiveConverter {
             })
             .toList();
     }
+
 }
