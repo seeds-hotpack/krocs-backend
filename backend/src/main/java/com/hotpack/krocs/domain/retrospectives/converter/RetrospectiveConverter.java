@@ -3,6 +3,7 @@ package com.hotpack.krocs.domain.retrospectives.converter;
 import static java.util.stream.Collectors.toList;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
+import com.hotpack.krocs.domain.retrospectives.dto.response.AllFactorsResponseDTO;
 import com.hotpack.krocs.domain.retrospectives.exception.RetrospectiveException;
 import com.hotpack.krocs.domain.retrospectives.exception.RetrospectiveExceptionType;
 import com.hotpack.krocs.domain.user.domain.User;
@@ -65,6 +66,23 @@ public class RetrospectiveConverter {
         return FactorDTO.builder()
             .key(factor.name())
             .description(factor.getDescription())
+            .build();
+    }
+
+
+    public AllFactorsResponseDTO toAllFactorsResponseDTO() {
+        List<FactorDTO> successFactorDTOs = Arrays.stream(SuccessFactor.values())
+            .map(this::toFactorDTO)
+            .toList();
+
+        List<FactorDTO> failureFactorDTOs = Arrays.stream(FailureFactor.values())
+            .map(this::toFactorDTO)
+            .toList();
+
+        // 최종 응답 DTO를 빌드하여 반환
+        return AllFactorsResponseDTO.builder()
+            .successFactors(successFactorDTOs)
+            .failureFactors(failureFactorDTOs)
             .build();
     }
 

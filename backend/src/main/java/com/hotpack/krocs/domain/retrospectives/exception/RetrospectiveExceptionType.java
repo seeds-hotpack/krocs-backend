@@ -18,7 +18,8 @@ public enum RetrospectiveExceptionType implements BaseCode {
     RETRO_CREATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "RETRO500", "회고 생성에 실패했습니다."),
 
     RETRO_NOT_FOUND(HttpStatus.NOT_FOUND, "RETRO404", "삭제할 회고를 찾을 수 없습니다."),
-    RETRO_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "RETRO500", "회고 삭제에 실패했습니다.");
+    RETRO_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "RETRO500", "회고 삭제에 실패했습니다."),
+    RETRO_GETFACTORS_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "RETRO500", "요소 리스트 조회에 실패했습니다.");
 
     private final HttpStatus httpStatus;
     private final String code;
