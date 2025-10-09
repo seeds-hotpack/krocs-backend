@@ -1,8 +1,5 @@
 package com.hotpack.krocs.domain.stopwatch.controller;
 
-import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
-import com.hotpack.krocs.domain.goals.exception.GoalException;
-import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
 import com.hotpack.krocs.domain.stopwatch.dto.request.StopwatchActionRequestDTO;
 import com.hotpack.krocs.domain.stopwatch.dto.response.StopwatchTimeResponseDTO;
 import com.hotpack.krocs.domain.stopwatch.exception.StopwatchException;
@@ -16,7 +13,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
