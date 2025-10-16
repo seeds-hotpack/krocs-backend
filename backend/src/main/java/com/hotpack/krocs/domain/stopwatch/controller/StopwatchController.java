@@ -1,6 +1,5 @@
 package com.hotpack.krocs.domain.stopwatch.controller;
 
-import com.hotpack.krocs.domain.stopwatch.dto.request.StopwatchActionRequestDTO;
 import com.hotpack.krocs.domain.stopwatch.dto.request.StopwatchCreateRequestDTO;
 import com.hotpack.krocs.domain.stopwatch.dto.response.StopwatchTimeResponseDTO;
 import com.hotpack.krocs.domain.stopwatch.exception.StopwatchException;
@@ -42,25 +41,6 @@ public class StopwatchController {
             throw e;
         } catch (Exception e) {
             throw new StopwatchException(StopwatchExceptionType.STOPWATCH_CREATE_FAILED);
-        }
-    }
-
-    @Operation(summary = "스톱워치 수정", description = "기존 스톱워치의 정보를 수정합니다.")
-    @PatchMapping
-    public ApiResponse<StopwatchTimeResponseDTO> updateStopwatch(
-            @PathVariable @Positive(message = "{common.id.positive}") Long goalId,
-            @PathVariable @Positive(message = "{common.id.positive}") Long subgoalId,
-            @PathVariable @Positive(message = "{common.id.positive}") Long stopwatchId,
-            @Valid @RequestBody StopwatchActionRequestDTO request,
-            @Login Long userId
-    ) {
-        try {
-            StopwatchTimeResponseDTO responseDTO = stopwatchService.updateStopwatch(goalId, subgoalId, stopwatchId, request, userId);
-            return ApiResponse.success(responseDTO);
-        } catch (StopwatchException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new StopwatchException(StopwatchExceptionType.STOPWATCH_UPDATE_FAILED);
         }
     }
 
