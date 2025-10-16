@@ -29,6 +29,7 @@ public class StopwatchServiceImpl implements StopwatchService {
     private final StopwatchConverter stopwatchConverter;
 
     @Override
+    @Transactional
     public StopwatchTimeResponseDTO createStopwatch(Long goalId, Long subgoalId, StopwatchCreateRequestDTO request, Long userId) {
         try {
             validateUserAccess(userId, goalId, subgoalId);
