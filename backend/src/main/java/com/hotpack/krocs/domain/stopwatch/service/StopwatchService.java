@@ -1,10 +1,12 @@
 package com.hotpack.krocs.domain.stopwatch.service;
 
-import com.hotpack.krocs.domain.stopwatch.dto.request.StopwatchActionRequestDTO;
+import com.hotpack.krocs.domain.stopwatch.dto.request.StopwatchCreateRequestDTO;
 import com.hotpack.krocs.domain.stopwatch.dto.response.StopwatchTimeResponseDTO;
 
-public interface StopwatchService {
-    StopwatchTimeResponseDTO updateStopwatch(Long goalId, Long subgoalId, StopwatchActionRequestDTO request, Long userId);
+import java.util.List;
 
-    StopwatchTimeResponseDTO getStopwatch(Long goalId, Long subgoalId, Long userId);
+public interface StopwatchService {
+    StopwatchTimeResponseDTO createStopwatch(Long goalId, Long subgoalId, StopwatchCreateRequestDTO request, Long userId);
+
+    List<StopwatchTimeResponseDTO> getStopwatch(Long goalId, Long subgoalId, Long userId);
 }

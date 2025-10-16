@@ -50,7 +50,6 @@ public class StopwatchValidator {
             int minutes = Integer.parseInt(timeParts[1]);
             int seconds = Integer.parseInt(timeParts[2]);
 
-            // 시간 범위 검증
             if (hours < 0 || minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60) {
                 throw new StopwatchException(StopwatchExceptionType.INVALID_STOPWATCH_ACTION);
             }
