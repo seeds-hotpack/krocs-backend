@@ -1,6 +1,7 @@
 package com.hotpack.krocs.domain.stopwatch.controller;
 
 import com.hotpack.krocs.domain.stopwatch.dto.request.StopwatchActionRequestDTO;
+import com.hotpack.krocs.domain.stopwatch.dto.request.StopwatchCreateRequestDTO;
 import com.hotpack.krocs.domain.stopwatch.dto.response.StopwatchTimeResponseDTO;
 import com.hotpack.krocs.domain.stopwatch.exception.StopwatchException;
 import com.hotpack.krocs.domain.stopwatch.exception.StopwatchExceptionType;
@@ -26,21 +27,40 @@ public class StopwatchController {
 
     private final StopwatchService stopwatchService;
 
-    @Operation(summary = "스톱워치 수정", description = "기존 스톱워치의 정보를 수정합니다.")
-    @PatchMapping
-    public ApiResponse<StopwatchTimeResponseDTO> controlStopwatch(
+    @Operation(summary = "스톱워치 생성", description = "스톱워치를 생성합니다.")
+    @PostMapping
+    public ApiResponse<StopwatchTimeResponseDTO> createStopwatch(
             @PathVariable @Positive(message = "{common.id.positive}") Long goalId,
             @PathVariable @Positive(message = "{common.id.positive}") Long subgoalId,
-            @Valid @RequestBody StopwatchActionRequestDTO request,
+            @Valid @RequestBody StopwatchCreateRequestDTO request,
             @Login Long userId
     ) {
         try {
-            StopwatchTimeResponseDTO responseDTO = stopwatchService.updateStopwatch(goalId, subgoalId, request, userId);
+            StopwatchTimeResponseDTO responseDTO = stopwatchService.createStopwatch(goalId, subgoalId, request, userId);
             return ApiResponse.success(responseDTO);
         } catch (StopwatchException e) {
             throw e;
         } catch (Exception e) {
-            throw new StopwatchException(StopwatchExceptionType.STOPWATCH_NOT_FOUND);
+            throw new StopwatchException(StopwatchExceptionType.STOPWATCH_CREATE_FAILED);
+        }
+    }
+
+    @Operation(summary = "스톱워치 수정", description = "기존 스톱워치의 정보를 수정합니다.")
+    @PatchMapping
+    public ApiResponse<StopwatchTimeResponseDTO> updateStopwatch(
+            @PathVariable @Positive(message = "{common.id.positive}") Long goalId,
+            @PathVariable @Positive(message = "{common.id.positive}") Long subgoalId,
+            @PathVariable @Positive(message = "{common.id.positive}") Long stopwatchId,
+            @Valid @RequestBody StopwatchActionRequestDTO request,
+            @Login Long userId
+    ) {
+        try {
+            StopwatchTimeResponseDTO responseDTO = stopwatchService.updateStopwatch(goalId, subgoalId, stopwatchId, request, userId);
+            return ApiResponse.success(responseDTO);
+        } catch (StopwatchException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new StopwatchException(StopwatchExceptionType.STOPWATCH_UPDATE_FAILED);
         }
     }
 
@@ -57,7 +77,7 @@ public class StopwatchController {
         } catch (StopwatchException e) {
             throw e;
         } catch (Exception e) {
-            throw new StopwatchException(StopwatchExceptionType.STOPWATCH_NOT_FOUND);
+            throw new StopwatchException(StopwatchExceptionType.STOPWATCH_FOUND_FAILED);
         }
     }
 }
