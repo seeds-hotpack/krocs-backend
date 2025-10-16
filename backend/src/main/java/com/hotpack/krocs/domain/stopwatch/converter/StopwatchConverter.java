@@ -6,6 +6,9 @@ import com.hotpack.krocs.domain.stopwatch.dto.request.StopwatchCreateRequestDTO;
 import com.hotpack.krocs.domain.stopwatch.dto.response.StopwatchTimeResponseDTO;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class StopwatchConverter {
 
@@ -24,5 +27,11 @@ public class StopwatchConverter {
                 .elapsedTime(stopwatchLog.getElapsedTime())
                 .completedDateTime(stopwatchLog.getEndDateTime())
                 .build();
+    }
+
+    public List<StopwatchTimeResponseDTO> toStopwatchTimeResponseDTOList(List<StopwatchLog> stopwatchLogs) {
+        return stopwatchLogs.stream()
+                .map(this::toStopwatchTimeResponseDTO)
+                .collect(Collectors.toList());
     }
 }

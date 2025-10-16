@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -44,15 +46,15 @@ public class StopwatchController {
         }
     }
 
-    @Operation(summary = "특정 스톱워치 상세 조회", description = "특정 스톱워치의 상세 정보를 조회합니다.")
+    @Operation(summary = "특정 Subgoal의 모든 스톱워치 조회", description = "특정 Subgoal에 속한 모든 스톱워치 기록을 조회합니다.")
     @GetMapping
-    public ApiResponse<StopwatchTimeResponseDTO> getStopwatchTime(
+    public ApiResponse<List<StopwatchTimeResponseDTO>> getStopwatchTime(
             @PathVariable @Positive(message = "{common.id.positive}") Long goalId,
             @PathVariable @Positive(message = "{common.id.positive}") Long subgoalId,
             @Login Long userId
     ) {
         try {
-            StopwatchTimeResponseDTO responseDTO = stopwatchService.getStopwatch(goalId, subgoalId, userId);
+            List<StopwatchTimeResponseDTO> responseDTO = stopwatchService.getStopwatch(goalId, subgoalId, userId);
             return ApiResponse.success(responseDTO);
         } catch (StopwatchException e) {
             throw e;
