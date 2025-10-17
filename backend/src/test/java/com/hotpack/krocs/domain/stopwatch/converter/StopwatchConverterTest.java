@@ -5,6 +5,8 @@ import com.hotpack.krocs.domain.goals.domain.SubGoal;
 import com.hotpack.krocs.domain.stopwatch.domain.StopwatchLog;
 import com.hotpack.krocs.domain.stopwatch.dto.request.StopwatchCreateRequestDTO;
 import com.hotpack.krocs.domain.stopwatch.dto.response.StopwatchTimeResponseDTO;
+import com.hotpack.krocs.domain.stopwatch.exception.StopwatchException;
+import com.hotpack.krocs.domain.stopwatch.exception.StopwatchExceptionType;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
 import com.hotpack.krocs.global.common.entity.Priority;
@@ -19,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class StopwatchConverterTest {
 
@@ -217,8 +220,8 @@ class StopwatchConverterTest {
     }
 
     @Test
-    @DisplayName("StopwatchLog를 StopwatchTimeResponseDTO로 변환 - null endDateTime")
-    void toStopwatchTimeResponseDTO_NullEndDateTime() {
+    @DisplayName("StopwatchLog를 StopwatchTimeResponseDTO로 변환 실패 - null endDateTime")
+    void toStopwatchTimeResponseDTO_Fail_NullEndDateTime() {
         // given
         StopwatchLog logWithNullEnd = StopwatchLog.builder()
                 .stopwatchLogId(1L)
@@ -228,14 +231,11 @@ class StopwatchConverterTest {
                 .endDateTime(null)
                 .build();
 
-        // when
-        StopwatchTimeResponseDTO result = stopwatchConverter.toStopwatchTimeResponseDTO(logWithNullEnd);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result.getStartDateTime()).isEqualTo(LocalDateTime.of(2025, 10, 3, 10, 0, 0));
-        assertThat(result.getElapsedTime()).isEqualTo("01:30:00");
-        assertThat(result.getCompletedDateTime()).isNull();
+        // when & then
+        assertThatThrownBy(() -> stopwatchConverter.toStopwatchTimeResponseDTO(logWithNullEnd))
+                .isInstanceOf(StopwatchException.class)
+                .hasFieldOrPropertyWithValue("stopwatchExceptionType",
+                        StopwatchExceptionType.INVALID_STOPWATCH_ACTION);
     }
 
     @Test
@@ -386,37 +386,6 @@ class StopwatchConverterTest {
         assertThat(result.get(0).getElapsedTime()).isEqualTo("00:15:30");
         assertThat(result.get(1).getElapsedTime()).isEqualTo("05:45:20");
         assertThat(result.get(2).getElapsedTime()).isEqualTo("23:59:59");
-    }
-
-    @Test
-    @DisplayName("null endDateTime을 포함한 StopwatchLog 리스트 변환")
-    void toStopwatchTimeResponseDTOList_WithNullEndDateTime() {
-        // given
-        List<StopwatchLog> logs = Arrays.asList(
-                StopwatchLog.builder()
-                        .stopwatchLogId(1L)
-                        .subGoal(subGoal)
-                        .startDateTime(LocalDateTime.of(2025, 10, 3, 9, 0))
-                        .elapsedTime("01:00:00")
-                        .endDateTime(LocalDateTime.of(2025, 10, 3, 10, 0))
-                        .build(),
-                StopwatchLog.builder()
-                        .stopwatchLogId(2L)
-                        .subGoal(subGoal)
-                        .startDateTime(LocalDateTime.of(2025, 10, 3, 11, 0))
-                        .elapsedTime("02:00:00")
-                        .endDateTime(null) // null endDateTime
-                        .build()
-        );
-
-        // when
-        List<StopwatchTimeResponseDTO> result = stopwatchConverter.toStopwatchTimeResponseDTOList(logs);
-
-        // then
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getCompletedDateTime()).isNotNull();
-        assertThat(result.get(1).getCompletedDateTime()).isNull();
     }
 
     @Test

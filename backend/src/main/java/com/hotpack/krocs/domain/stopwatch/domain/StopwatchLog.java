@@ -30,7 +30,7 @@ public class StopwatchLog extends BaseTimeEntity {
     @Column(name = "start_datetime", nullable = false)
     private LocalDateTime startDateTime;
 
-    @Column(name = "end_datetime")
+    @Column(name = "end_datetime", nullable = false)
     private LocalDateTime endDateTime;
 
     @Column(name = "elapsed_time", nullable = false, length = 10)
