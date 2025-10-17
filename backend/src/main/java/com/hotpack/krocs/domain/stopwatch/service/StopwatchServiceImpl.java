@@ -1,6 +1,7 @@
 package com.hotpack.krocs.domain.stopwatch.service;
 
 import com.hotpack.krocs.domain.goals.domain.SubGoal;
+import com.hotpack.krocs.domain.goals.exception.SubGoalException;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.stopwatch.converter.StopwatchConverter;
 import com.hotpack.krocs.domain.stopwatch.domain.StopwatchLog;
@@ -32,16 +33,17 @@ public class StopwatchServiceImpl implements StopwatchService {
     @Transactional
     public StopwatchTimeResponseDTO createStopwatch(Long goalId, Long subgoalId, StopwatchCreateRequestDTO request, Long userId) {
         try {
+            SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subgoalId);
+
             validateUserAccess(userId, goalId, subgoalId);
 
-            SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subgoalId);
             stopwatchValidator.validateCreateRequest(request);
 
             StopwatchLog stopwatchLog = stopwatchConverter.toStopwatchLog(subGoal, request);
             StopwatchLog savedLog = stopwatchRepositoryFacade.saveStopwatchLog(stopwatchLog);
 
             return stopwatchConverter.toStopwatchTimeResponseDTO(savedLog);
-        } catch (StopwatchException e) {
+        } catch (SubGoalException | StopwatchException e) {
             throw e;
         } catch (Exception e) {
             log.error("스톱워치 생성 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
@@ -52,13 +54,13 @@ public class StopwatchServiceImpl implements StopwatchService {
     @Override
     public List<StopwatchTimeResponseDTO> getStopwatch(Long goalId, Long subgoalId, Long userId) {
         try {
-            validateUserAccess(userId, goalId, subgoalId);
             SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subgoalId);
+            validateUserAccess(userId, goalId, subgoalId);
 
             List<StopwatchLog> logs = stopwatchRepositoryFacade.findAllStopwatchLogs(subGoal);
 
             return stopwatchConverter.toStopwatchTimeResponseDTOList(logs);
-        } catch (StopwatchException e) {
+        } catch (SubGoalException | StopwatchException e) {
             throw e;
         } catch (Exception e) {
             log.error("스톱워치 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);

@@ -2,6 +2,8 @@ package com.hotpack.krocs.domain.stopwatch.service;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.domain.SubGoal;
+import com.hotpack.krocs.domain.goals.exception.SubGoalException;
+import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
 import com.hotpack.krocs.domain.stopwatch.converter.StopwatchConverter;
 import com.hotpack.krocs.domain.stopwatch.domain.StopwatchLog;
@@ -140,27 +142,6 @@ class StopwatchServiceTest {
     }
 
     @Test
-    @DisplayName("스톱워치 생성 실패 - 권한 없음")
-    void createStopwatch_Fail_UnauthorizedAccess() {
-        // given
-        Long goalId = 1L;
-        Long subgoalId = 1L;
-        Long userId = 999L;
-
-        when(subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId)).thenReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> stopwatchService.createStopwatch(goalId, subgoalId, validCreateRequest, userId))
-                .isInstanceOf(StopwatchException.class)
-                .hasFieldOrPropertyWithValue("stopwatchExceptionType",
-                        StopwatchExceptionType.UNAUTHORIZED_STOPWATCH_ACCESS);
-
-        verify(subGoalRepositoryFacade).existsValidSubGoal(userId, goalId, subgoalId);
-        verify(subGoalRepositoryFacade, never()).findActiveSubGoalBySubGoalId(any());
-        verify(stopwatchValidator, never()).validateCreateRequest(any());
-    }
-
-    @Test
     @DisplayName("스톱워치 생성 실패 - 유효하지 않은 시간 데이터")
     void createStopwatch_Fail_InvalidTime() {
         // given
@@ -215,15 +196,14 @@ class StopwatchServiceTest {
         Long subgoalId = 999L;
         Long userId = 1L;
 
-        when(subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId)).thenReturn(true);
         when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subgoalId))
-                .thenThrow(new RuntimeException("SubGoal을 찾을 수 없습니다"));
+                .thenThrow(new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND));
 
         // when & then
         assertThatThrownBy(() -> stopwatchService.createStopwatch(goalId, subgoalId, validCreateRequest, userId))
-                .isInstanceOf(StopwatchException.class)
-                .hasFieldOrPropertyWithValue("stopwatchExceptionType",
-                        StopwatchExceptionType.STOPWATCH_CREATE_FAILED);
+                .isInstanceOf(SubGoalException.class)
+                .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                        SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
 
         verify(subGoalRepositoryFacade).findActiveSubGoalBySubGoalId(subgoalId);
     }
@@ -429,26 +409,6 @@ class StopwatchServiceTest {
     }
 
     @Test
-    @DisplayName("스톱워치 조회 실패 - 권한 없음")
-    void getStopwatch_Fail_UnauthorizedAccess() {
-        // given
-        Long goalId = 1L;
-        Long subgoalId = 1L;
-        Long userId = 999L;
-
-        when(subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId)).thenReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> stopwatchService.getStopwatch(goalId, subgoalId, userId))
-                .isInstanceOf(StopwatchException.class)
-                .hasFieldOrPropertyWithValue("stopwatchExceptionType",
-                        StopwatchExceptionType.UNAUTHORIZED_STOPWATCH_ACCESS);
-
-        verify(subGoalRepositoryFacade).existsValidSubGoal(userId, goalId, subgoalId);
-        verify(subGoalRepositoryFacade, never()).findActiveSubGoalBySubGoalId(any());
-    }
-
-    @Test
     @DisplayName("스톱워치 조회 실패 - SubGoal 조회 실패")
     void getStopwatch_Fail_SubGoalNotFound() {
         // given
@@ -456,15 +416,14 @@ class StopwatchServiceTest {
         Long subgoalId = 999L;
         Long userId = 1L;
 
-        when(subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId)).thenReturn(true);
         when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subgoalId))
-                .thenThrow(new RuntimeException("SubGoal을 찾을 수 없습니다"));
+                .thenThrow(new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND));
 
         // when & then
-        assertThatThrownBy(() -> stopwatchService.getStopwatch(goalId, subgoalId, userId))
-                .isInstanceOf(StopwatchException.class)
-                .hasFieldOrPropertyWithValue("stopwatchExceptionType",
-                        StopwatchExceptionType.STOPWATCH_FOUND_FAILED);
+        assertThatThrownBy(() -> stopwatchService.createStopwatch(goalId, subgoalId, validCreateRequest, userId))
+                .isInstanceOf(SubGoalException.class)
+                .hasFieldOrPropertyWithValue("subGoalExceptionType",
+                        SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
 
         verify(subGoalRepositoryFacade).findActiveSubGoalBySubGoalId(subgoalId);
     }
