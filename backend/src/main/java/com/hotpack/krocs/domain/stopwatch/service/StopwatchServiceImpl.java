@@ -33,9 +33,12 @@ public class StopwatchServiceImpl implements StopwatchService {
     @Transactional
     public StopwatchTimeResponseDTO createStopwatch(Long goalId, Long subgoalId, StopwatchCreateRequestDTO request, Long userId) {
         try {
-            SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subgoalId);
+            boolean isValid = subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId);
+            if (!isValid) {
+                throw new StopwatchException(StopwatchExceptionType.STOPWATCH_CREATE_FAILED);
+            }
 
-            validateUserAccess(userId, goalId, subgoalId);
+            SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subgoalId);
 
             stopwatchValidator.validateCreateRequest(request);
 
@@ -54,8 +57,12 @@ public class StopwatchServiceImpl implements StopwatchService {
     @Override
     public List<StopwatchTimeResponseDTO> getStopwatch(Long goalId, Long subgoalId, Long userId) {
         try {
+
+            boolean isValid = subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId);
+            if (!isValid) {
+                throw new StopwatchException(StopwatchExceptionType.STOPWATCH_FOUND_FAILED);
+            }
             SubGoal subGoal = subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subgoalId);
-            validateUserAccess(userId, goalId, subgoalId);
 
             List<StopwatchLog> logs = stopwatchRepositoryFacade.findAllStopwatchLogs(subGoal);
 
