@@ -196,6 +196,9 @@ class StopwatchServiceTest {
         Long subgoalId = 999L;
         Long userId = 1L;
 
+        when(subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId))
+                .thenReturn(true);
+
         when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subgoalId))
                 .thenThrow(new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND));
 
@@ -205,6 +208,7 @@ class StopwatchServiceTest {
                 .hasFieldOrPropertyWithValue("subGoalExceptionType",
                         SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
 
+        verify(subGoalRepositoryFacade).existsValidSubGoal(userId, goalId, subgoalId);
         verify(subGoalRepositoryFacade).findActiveSubGoalBySubGoalId(subgoalId);
     }
 
@@ -416,15 +420,19 @@ class StopwatchServiceTest {
         Long subgoalId = 999L;
         Long userId = 1L;
 
+        when(subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId))
+                .thenReturn(true);
+
         when(subGoalRepositoryFacade.findActiveSubGoalBySubGoalId(subgoalId))
                 .thenThrow(new SubGoalException(SubGoalExceptionType.SUB_GOAL_NOT_FOUND));
 
         // when & then
-        assertThatThrownBy(() -> stopwatchService.createStopwatch(goalId, subgoalId, validCreateRequest, userId))
+        assertThatThrownBy(() -> stopwatchService.getStopwatch(goalId, subgoalId, userId))
                 .isInstanceOf(SubGoalException.class)
                 .hasFieldOrPropertyWithValue("subGoalExceptionType",
                         SubGoalExceptionType.SUB_GOAL_NOT_FOUND);
 
+        verify(subGoalRepositoryFacade).existsValidSubGoal(userId, goalId, subgoalId);
         verify(subGoalRepositoryFacade).findActiveSubGoalBySubGoalId(subgoalId);
     }
 
@@ -448,43 +456,6 @@ class StopwatchServiceTest {
                         StopwatchExceptionType.STOPWATCH_FOUND_FAILED);
 
         verify(stopwatchRepositoryFacade).findAllStopwatchLogs(subGoal);
-    }
-
-    // ========== VALIDATION 테스트 ==========
-
-    @Test
-    @DisplayName("사용자 접근 권한 검증 성공")
-    void validateUserAccess_Success() {
-        // given
-        Long userId = 1L;
-        Long goalId = 1L;
-        Long subgoalId = 1L;
-
-        when(subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId)).thenReturn(true);
-
-        // when & then
-        stopwatchService.validateUserAccess(userId, goalId, subgoalId);
-
-        verify(subGoalRepositoryFacade).existsValidSubGoal(userId, goalId, subgoalId);
-    }
-
-    @Test
-    @DisplayName("사용자 접근 권한 검증 실패 - 권한 없음")
-    void validateUserAccess_Fail_Unauthorized() {
-        // given
-        Long userId = 999L;
-        Long goalId = 1L;
-        Long subgoalId = 1L;
-
-        when(subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId)).thenReturn(false);
-
-        // when & then
-        assertThatThrownBy(() -> stopwatchService.validateUserAccess(userId, goalId, subgoalId))
-                .isInstanceOf(StopwatchException.class)
-                .hasFieldOrPropertyWithValue("stopwatchExceptionType",
-                        StopwatchExceptionType.UNAUTHORIZED_STOPWATCH_ACCESS);
-
-        verify(subGoalRepositoryFacade).existsValidSubGoal(userId, goalId, subgoalId);
     }
 
     // ========== EDGE CASE 테스트 ==========

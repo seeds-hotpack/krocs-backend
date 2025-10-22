@@ -74,12 +74,4 @@ public class StopwatchServiceImpl implements StopwatchService {
             throw new StopwatchException(StopwatchExceptionType.STOPWATCH_FOUND_FAILED);
         }
     }
-
-    public void validateUserAccess(Long userId, Long goalId, Long subgoalId) {
-        boolean hasAccess = subGoalRepositoryFacade.existsValidSubGoal(userId, goalId, subgoalId);
-
-        if (!hasAccess) {
-            throw new StopwatchException(StopwatchExceptionType.UNAUTHORIZED_STOPWATCH_ACCESS);
-        }
-    }
 }
