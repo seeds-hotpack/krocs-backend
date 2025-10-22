@@ -19,11 +19,13 @@ public interface SubGoalRepository extends JpaRepository<SubGoal, Long> {
     @Query("""
         SELECT CASE WHEN COUNT(s) > 0 THEN TRUE ELSE FALSE END
         FROM SubGoal s
+        LEFT JOIN s.goal g
+        LEFT JOIN g.user u
         WHERE s.subGoalId = :subGoalId
-          AND s.goal.goalId = :goalId
-          AND s.goal.user.userId = :userId
+          AND g.goalId = :goalId
+          AND u.userId = :userId
           AND s.status = :status
-        """)
+    """)
     boolean existsValidSubGoal(
         @Param("userId") Long userId,
         @Param("goalId") Long goalId,
