@@ -39,6 +39,8 @@ public class SecurityConfig {
 
     @Value("${frontOrigin}")
     private String frontOrigin;
+    @Value("${baseUrl}")
+    private String baseUrl;
 
     @Bean
     public AuthenticationManager authenticationManager() {
@@ -87,7 +89,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(frontOrigin));
+        config.setAllowedOrigins(List.of(frontOrigin, baseUrl));
         config.setAllowCredentials(true);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
