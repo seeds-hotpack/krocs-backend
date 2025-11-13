@@ -1,5 +1,4 @@
-# Multi-stage build를 사용하여 최적화된 이미지 생성
-FROM openjdk:21-jdk-slim AS builder
+FROM eclipse-temurin:21-jdk-jammy AS builder
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -23,7 +22,7 @@ COPY src src
 RUN ./gradlew build -x test --no-daemon --parallel
 
 # 실행 단계
-FROM openjdk:21-jdk-slim
+FROM eclipse-temurin:21-jre-jammy
 
 # 메타데이터 설정
 LABEL maintainer="krocs-team"
