@@ -19,10 +19,11 @@ services:
     networks:
       - krocs-network
     healthcheck:
-      test: ["CMD", "nginx", "-t"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/swagger-ui/index.html" ]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 60s
 
   # Spring Boot Application (from Docker Hub)
   krocs-backend:
@@ -32,7 +33,7 @@ services:
       - "8080:8080"  # 내부 통신용
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=create
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - SPRING_DATASOURCE_URL=${DB_URL}
