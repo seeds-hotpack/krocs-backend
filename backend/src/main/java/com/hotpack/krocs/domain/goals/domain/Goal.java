@@ -31,10 +31,10 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "goals",
-    indexes = {
-        @Index(name = "idx_goals_date_range", columnList = "start_date, end_date"),
-        @Index(name = "idx_goals_user_id", columnList = "user_id")
-    })
+        indexes = {
+                @Index(name = "idx_goals_date_range", columnList = "start_date, end_date"),
+                @Index(name = "idx_goals_user_id", columnList = "user_id")
+        })
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -100,19 +100,23 @@ public class Goal extends BaseTimeEntity {
             this.startDate = requestDTO.getStartDate();
         }
 
-    if (requestDTO.getEndDate() != null) {
-      this.endDate = requestDTO.getEndDate();
-    }
+        if (requestDTO.getColor() != null) {
+            this.color = requestDTO.getColor();
+        }
 
-    if (requestDTO.getIsCompleted() != null) {
-      this.isCompleted = requestDTO.getIsCompleted();
-      if (requestDTO.getIsCompleted()) {
-        this.completedAt = LocalDateTime.now();
-      } else {
-        this.completedAt = null;
-      }
+        if (requestDTO.getEndDate() != null) {
+            this.endDate = requestDTO.getEndDate();
+        }
+
+        if (requestDTO.getIsCompleted() != null) {
+            this.isCompleted = requestDTO.getIsCompleted();
+            if (requestDTO.getIsCompleted()) {
+                this.completedAt = LocalDateTime.now();
+            } else {
+                this.completedAt = null;
+            }
+        }
     }
-  }
 
     public void delete() {
         if (this.status == Status.ACTIVE && this.subGoals != null) {
