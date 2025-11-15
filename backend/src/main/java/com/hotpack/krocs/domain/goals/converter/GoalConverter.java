@@ -16,6 +16,8 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import static com.hotpack.krocs.global.common.entity.Status.ACTIVE;
+
 @Component
 @RequiredArgsConstructor
 public class GoalConverter {
@@ -83,6 +85,7 @@ public class GoalConverter {
   public GoalResponseDTO toGoalResponseDTO(Goal goal) {
     List<SubGoalResponseDTO> subGoalResponseDTOs = goal.getSubGoals() != null ?
         goal.getSubGoals().stream()
+            .filter(subGoal -> subGoal.getStatus() == ACTIVE)
             .map(this::toSubGoalResponseDTO)
             .collect(Collectors.toList()) :
         List.of();
