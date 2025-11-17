@@ -1,7 +1,5 @@
 package com.hotpack.krocs.domain.retrospectives.converter;
 
-import static java.util.stream.Collectors.toList;
-
 import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.retrospectives.dto.response.AllFactorsResponseDTO;
 import com.hotpack.krocs.domain.retrospectives.exception.RetrospectiveException;
@@ -14,8 +12,13 @@ import com.hotpack.krocs.domain.retrospectives.domain.SuccessFactor;
 import com.hotpack.krocs.domain.retrospectives.dto.request.RetrospectiveCreateRequestDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.FactorDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCreateResponseDTO;
+import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveFactorStatisticsDTO;
+import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveStatisticsDTO;
+import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveSummaryDTO;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -109,6 +112,76 @@ public class RetrospectiveConverter {
                 }
             })
             .toList();
+    }
+
+    public RetrospectiveSummaryDTO toRetrospectiveSummaryDTO(Retrospective retrospective) {
+        List<String> factors = retrospective.getFactors() == null
+            ? List.of()
+            : List.copyOf(retrospective.getFactors());
+
+        return RetrospectiveSummaryDTO.builder()
+            .retrospectiveId(retrospective.getRetrospectiveId())
+            .goalId(retrospective.getGoal().getGoalId())
+            .goalName(retrospective.getGoal().getTitle())
+            .outcome(retrospective.getOutcome())
+            .content(retrospective.getContent())
+            .factors(factors)
+            .createdAt(retrospective.getCreatedAt())
+            .build();
+    }
+
+    public RetrospectiveStatisticsDTO toStatisticsDTO(List<Retrospective> retrospectives) {
+        Map<String, Long> successFactorCounts = new HashMap<>();
+        Map<String, Long> failureFactorCounts = new HashMap<>();
+
+        retrospectives.forEach(retrospective -> {
+            List<String> factors = retrospective.getFactors();
+            if (factors == null || factors.isEmpty()) {
+                return;
+            }
+
+            Map<String, Long> targetMap = isSuccessOutcome(retrospective.getOutcome())
+                ? successFactorCounts
+                : failureFactorCounts;
+            factors.forEach(factor -> targetMap.merge(factor, 1L, Long::sum));
+        });
+
+        return RetrospectiveStatisticsDTO.builder()
+            .topSuccessFactors(buildTopFactors(successFactorCounts, true))
+            .topFailureFactors(buildTopFactors(failureFactorCounts, false))
+            .build();
+    }
+
+    private boolean isSuccessOutcome(RetrospectiveOutcome outcome) {
+        return outcome == RetrospectiveOutcome.COMPLETE_SUCCESS;
+    }
+
+    private List<RetrospectiveFactorStatisticsDTO> buildTopFactors(Map<String, Long> factorCounts,
+        boolean isSuccessType) {
+        return factorCounts.entrySet().stream()
+            .sorted((entry1, entry2) -> {
+                int compare = Long.compare(entry2.getValue(), entry1.getValue());
+                if (compare == 0) {
+                    return entry1.getKey().compareTo(entry2.getKey());
+                }
+                return compare;
+            })
+            .limit(3)
+            .map(entry -> toFactorStatisticsDTO(entry.getKey(), entry.getValue(), isSuccessType))
+            .toList();
+    }
+
+    private RetrospectiveFactorStatisticsDTO toFactorStatisticsDTO(String factorKey, long count,
+        boolean isSuccessType) {
+        String description = isSuccessType
+            ? SuccessFactor.valueOf(factorKey).getDescription()
+            : FailureFactor.valueOf(factorKey).getDescription();
+
+        return RetrospectiveFactorStatisticsDTO.builder()
+            .factor(factorKey)
+            .description(description)
+            .count(count)
+            .build();
     }
 
 }

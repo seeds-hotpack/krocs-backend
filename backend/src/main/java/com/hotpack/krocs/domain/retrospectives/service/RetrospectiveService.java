@@ -2,9 +2,9 @@ package com.hotpack.krocs.domain.retrospectives.service;
 
 import com.hotpack.krocs.domain.retrospectives.dto.request.RetrospectiveCreateRequestDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.AllFactorsResponseDTO;
-import com.hotpack.krocs.domain.retrospectives.dto.response.FactorDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCreateResponseDTO;
-import java.util.List;
+import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveMyPageResponseDTO;
+import org.springframework.data.domain.Pageable;
 
 public interface RetrospectiveService {
 
@@ -13,4 +13,6 @@ public interface RetrospectiveService {
     RetrospectiveCreateResponseDTO createRetrospective(Long userId, Long goalId, RetrospectiveCreateRequestDTO requestDTO);
 
     AllFactorsResponseDTO getFactors ();
+
+    RetrospectiveMyPageResponseDTO getMyPageRetrospectives(Long userId, String outcome, Pageable pageable);
 }
