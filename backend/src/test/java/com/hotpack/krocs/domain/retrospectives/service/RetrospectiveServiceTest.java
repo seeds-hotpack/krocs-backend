@@ -9,14 +9,19 @@ import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.retrospectives.converter.RetrospectiveConverter;
 import com.hotpack.krocs.domain.retrospectives.domain.Retrospective;
+import com.hotpack.krocs.domain.retrospectives.domain.RetrospectiveOutcome;
 import com.hotpack.krocs.domain.retrospectives.dto.request.RetrospectiveCreateRequestDTO;
 import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveCreateResponseDTO;
+import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveMyPageResponseDTO;
+import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveStatisticsDTO;
+import com.hotpack.krocs.domain.retrospectives.dto.response.RetrospectiveSummaryDTO;
 import com.hotpack.krocs.domain.retrospectives.exception.RetrospectiveException;
 import com.hotpack.krocs.domain.retrospectives.exception.RetrospectiveExceptionType;
 import com.hotpack.krocs.domain.retrospectives.facade.RetrospectiveRepositoryFacade;
 import com.hotpack.krocs.domain.retrospectives.validator.RetrospectiveValidator;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
+import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +31,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RetrospectiveServiceImpl 단위 테스트")
@@ -399,6 +408,128 @@ class RetrospectiveServiceTest {
                 () -> retrospectiveService.deleteRetrospective(userId, goalId, retroId));
 
             assertThat(ex.getErrorCode()).isEqualTo(RetrospectiveExceptionType.RETRO_DELETE_FAILED);
+        }
+    }
+
+    @Nested
+    @DisplayName("getMyPageRetrospectives 테스트")
+    class GetMyPageRetrospectives {
+
+        private final Pageable pageable = PageRequest.of(0, 20);
+
+        @Test
+        @DisplayName("성공: outcome 미지정 시 전체 회고 목록과 통계 반환")
+        void getMyPage_withoutOutcome_returnsAllRetros() {
+            // given
+            Retrospective retrospective = Retrospective.builder().retrospectiveId(1L).build();
+            Page<Retrospective> retroPage = new PageImpl<>(List.of(retrospective), pageable, 1);
+
+            RetrospectiveSummaryDTO summaryDTO = RetrospectiveSummaryDTO.builder()
+                .retrospectiveId(1L)
+                .goalId(goalId)
+                .goalName("My Goal")
+                .outcome(RetrospectiveOutcome.COMPLETE_SUCCESS)
+                .content("content")
+                .factors(List.of("CLEAR_PLAN"))
+                .createdAt(null)
+                .build();
+
+            RetrospectiveStatisticsDTO statisticsDTO = RetrospectiveStatisticsDTO.builder()
+                .topSuccessFactors(Collections.emptyList())
+                .topFailureFactors(Collections.emptyList())
+                .build();
+
+            when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
+            when(retrospectiveRepositoryFacade.findRetrospectivesByUser(validUser, pageable)).thenReturn(
+                retroPage);
+            when(retrospectiveConverter.toRetrospectiveSummaryDTO(any(Retrospective.class))).thenReturn(
+                summaryDTO);
+            when(retrospectiveRepositoryFacade.findAllActiveRetrospectivesByUser(validUser)).thenReturn(
+                List.of(retrospective));
+            when(retrospectiveConverter.toStatisticsDTO(anyList())).thenReturn(statisticsDTO);
+
+            // when
+            RetrospectiveMyPageResponseDTO response = retrospectiveService.getMyPageRetrospectives(
+                userId, null, pageable);
+
+            // then
+            assertThat(response.getRetrospectives().getContent()).containsExactly(summaryDTO);
+            assertThat(response.getStatistics()).isEqualTo(statisticsDTO);
+            verify(retrospectiveRepositoryFacade).findRetrospectivesByUser(validUser, pageable);
+            verify(retrospectiveRepositoryFacade, never()).findRetrospectivesByUserAndOutcome(any(),
+                any(), any());
+        }
+
+        @Test
+        @DisplayName("성공: outcome 파라미터 지정 시 해당 결과만 조회")
+        void getMyPage_withOutcome_filtersByOutcome() {
+            // given
+            Pageable pageable = PageRequest.of(0, 5);
+            Retrospective retrospective = Retrospective.builder().retrospectiveId(2L).build();
+            Page<Retrospective> retroPage = new PageImpl<>(List.of(retrospective), pageable, 1);
+
+            RetrospectiveSummaryDTO summaryDTO = RetrospectiveSummaryDTO.builder()
+                .retrospectiveId(2L)
+                .goalId(goalId)
+                .goalName("Filtered Goal")
+                .outcome(RetrospectiveOutcome.COMPLETE_SUCCESS)
+                .content(null)
+                .factors(List.of("CLEAR_PLAN"))
+                .createdAt(null)
+                .build();
+
+            RetrospectiveStatisticsDTO statisticsDTO = RetrospectiveStatisticsDTO.builder()
+                .topSuccessFactors(Collections.emptyList())
+                .topFailureFactors(Collections.emptyList())
+                .build();
+
+            when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
+            when(retrospectiveRepositoryFacade.findRetrospectivesByUserAndOutcome(validUser,
+                RetrospectiveOutcome.COMPLETE_SUCCESS, pageable)).thenReturn(retroPage);
+            when(retrospectiveConverter.toRetrospectiveSummaryDTO(any(Retrospective.class))).thenReturn(
+                summaryDTO);
+            when(retrospectiveRepositoryFacade.findAllActiveRetrospectivesByUser(validUser)).thenReturn(
+                List.of(retrospective));
+            when(retrospectiveConverter.toStatisticsDTO(anyList())).thenReturn(statisticsDTO);
+
+            // when
+            RetrospectiveMyPageResponseDTO response = retrospectiveService.getMyPageRetrospectives(
+                userId, "COMPLETE_SUCCESS", pageable);
+
+            // then
+            assertThat(response.getRetrospectives().getContent()).containsExactly(summaryDTO);
+            verify(retrospectiveRepositoryFacade).findRetrospectivesByUserAndOutcome(validUser,
+                RetrospectiveOutcome.COMPLETE_SUCCESS, pageable);
+            verify(retrospectiveRepositoryFacade, never()).findRetrospectivesByUser(validUser,
+                pageable);
+        }
+
+        @Test
+        @DisplayName("실패: outcome 값이 잘못되면 RETRO_INVALID_OUTCOME_KEY 발생")
+        void getMyPage_invalidOutcome_throwsException() {
+            // given
+            when(userRepository.findActiveUserByUserId(userId)).thenReturn(validUser);
+
+            // when & then
+            RetrospectiveException ex = assertThrows(RetrospectiveException.class,
+                () -> retrospectiveService.getMyPageRetrospectives(userId, "INVALID", pageable));
+
+            assertThat(ex.getErrorCode()).isEqualTo(
+                RetrospectiveExceptionType.RETRO_INVALID_OUTCOME_KEY);
+        }
+
+        @Test
+        @DisplayName("실패: 사용자 정보를 찾지 못하면 RETRO_USER_NOT_FOUND 발생")
+        void getMyPage_userNotFound() {
+            // given
+            when(userRepository.findActiveUserByUserId(userId)).thenReturn(null);
+
+            // when & then
+            RetrospectiveException ex = assertThrows(RetrospectiveException.class,
+                () -> retrospectiveService.getMyPageRetrospectives(userId, null, pageable));
+
+            assertThat(ex.getErrorCode()).isEqualTo(
+                RetrospectiveExceptionType.RETRO_USER_NOT_FOUND);
         }
     }
 }
