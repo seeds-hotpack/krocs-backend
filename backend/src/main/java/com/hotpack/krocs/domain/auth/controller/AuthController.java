@@ -28,8 +28,8 @@ public class AuthController {
             return ApiResponse.onFailure("GLOBAL401", "인증 실패");
         }
 
-        UserResponseDTO responseDto = authService.getUser(userId);
-        return ApiResponse.success(responseDto);
+        // UserResponseDTO responseDto = authService.getUser(userId);
+        return ApiResponse.success();
     }
 
     @PostMapping("/logout")
