@@ -24,6 +24,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "templates", indexes = {
@@ -56,6 +57,7 @@ public class Template extends BaseTimeEntity {
     private Integer duration;
 
     @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Where(clause = "status = 'ACTIVE'")
     private List<SubTemplate> subTemplates;
 
     @Builder.Default
