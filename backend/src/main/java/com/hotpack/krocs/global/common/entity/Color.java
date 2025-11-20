@@ -1,6 +1,5 @@
 package com.hotpack.krocs.global.common.entity;
 
-
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 
@@ -11,7 +10,6 @@ public enum Color {
     PLAN_GREEN("#4caf50"),     // 초록
     PLAN_PURPLE("#9c27b0"),    // 보라
     PLAN_ORANGE("#ff9800"),    // 주황
-    PLAN_PINK("#e91e63"),      // 분홍
     PLAN_YELLOW("#ffeb3b"),    // 노랑
     PLAN_NAVY("#607d8b"),
 
@@ -20,7 +18,6 @@ public enum Color {
     GOAL_GREEN("#c8e6c9"),     // 초록
     GOAL_PURPLE("#e1bee7"),    // 보라
     GOAL_ORANGE("#ffe0b2"),    // 주황
-    GOAL_PINK("#f8bbd0"),      // 분홍
     GOAL_YELLOW("#fff9c4"),    // 노랑
     GOAL_NAVY("#BDBDBD");      // 남색
 
