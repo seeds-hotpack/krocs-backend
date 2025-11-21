@@ -5,6 +5,7 @@ import com.hotpack.krocs.domain.auth.service.AuthService;
 import com.hotpack.krocs.domain.auth.service.RedisTokenService;
 import com.hotpack.krocs.global.common.response.ApiResponse;
 import com.hotpack.krocs.global.security.annotation.Login;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "auth", description = "auth 관련 API")
 @RestController
 @RequestMapping("api/v1/auth")
 @RequiredArgsConstructor

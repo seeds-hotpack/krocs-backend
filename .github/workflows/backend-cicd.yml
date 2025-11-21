@@ -1,4 +1,4 @@
-name: 🚀 Backend CI/CD with Docker Compose + Docker Hub + RDS + Submodules
+name: 🚀 Backend CI/CD with Docker Compose + Docker Hub + GCP + Submodules
 
 on:
   push:
@@ -101,54 +101,64 @@ jobs:
           echo "✅ Image pushed to Docker Hub successfully!"
           echo "📍 Image URI: $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPOSITORY:latest"
 
-      # 8-1. 배포 파일들을 EC2로 복사
-      - name: 📁 Copy deployment files to EC2
+      # 8-1. 배포 파일들을 GCP VM으로 복사
+      - name: 📁 Copy deployment files to GCP VM
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          host: ${{ secrets.GCP_VM_HOST }}
+          username: ${{ secrets.GCP_VM_USERNAME }}
+          key: ${{ secrets.GCP_VM_PRIVATE_KEY }}
           source: "deploy/*"
-          target: "/home/ubuntu/krocs-deploy/"
+          target: "/home/${{ secrets.GCP_VM_USERNAME }}/krocs-backend/"
           strip_components: 1
 
-      # 8. EC2 배포 (Docker Compose + Docker Hub + Nginx + HTTPS)
-      - name: 🚀 Deploy to EC2 with Docker Compose and HTTPS
+      # 8. GCP VM 배포 (Docker Compose + Docker Hub + Nginx + HTTPS)
+      - name: 🚀 Deploy to GCP VM with Docker Compose and HTTPS
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          host: ${{ secrets.GCP_VM_HOST }}
+          username: ${{ secrets.GCP_VM_USERNAME }}
+          key: ${{ secrets.GCP_VM_PRIVATE_KEY }}
           script: |
-            echo "🚀 Starting deployment to EC2 with HTTPS..."
+            echo "🚀 Starting deployment to GCP VM with HTTPS..."
             
-            # 환경변수 설정
-            export DOCKER_HUB_USERNAME="${{ secrets.DOCKER_HUB_USERNAME }}"
-            export DOCKER_HUB_REPOSITORY="${{ secrets.DOCKER_HUB_REPOSITORY }}"
-            export DB_URL="${{ secrets.DB_URL }}"
-            export DB_USER="${{ secrets.DB_USER }}"
-            export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
-            export SWAGGER_SERVER_URL="${{ secrets.SWAGGER_SERVER_URL }}"
+            # 환경변수 파일 생성 (.env)
+            cd /home/${{ secrets.GCP_VM_USERNAME }}/krocs-backend/deploy
             
-            # 배포 디렉토리로 이동
-            mkdir -p /home/ubuntu/krocs-deploy/nginx/conf.d
-            mkdir -p /home/ubuntu/krocs-deploy/certbot/www
-            mkdir -p /home/ubuntu/krocs-deploy/certbot/conf
-            cd /home/ubuntu/krocs-deploy
+            cat > .env << EOF
+            DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
+            DOCKER_HUB_REPOSITORY=${{ secrets.DOCKER_HUB_REPOSITORY }}
+            DB_URL=${{ secrets.DB_URL }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            SWAGGER_SERVER_URL=${{ secrets.SWAGGER_SERVER_URL }}
+            frontOrigin=${{ secrets.FRONT_ORIGIN }}
+            baseUrl=${{ secrets.BASE_URL }}
+            EOF
+            
+            echo "✅ .env file created"
             
             echo "🔴 Stopping existing services..."
+            # 기존 서비스 중지
+            docker compose -f docker-compose.prod.yml down || true
+            
             # 오래된 이미지 정리
             docker image prune -f || true
-            # 기존 서비스 중지
-            docker compose down || true
             
             # 최신 이미지 풀
             echo "📥 Pulling latest image from Docker Hub..."
-            docker pull $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPOSITORY:latest
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/${{ secrets.DOCKER_HUB_REPOSITORY }}:latest
             
             # 서비스 시작
             echo "🚀 Starting services with HTTPS..."
             docker compose -f docker-compose.prod.yml up -d
             
-            echo "🎉 HTTPS 배포가 완료되었습니다!"
+            # 서비스 상태 확인
+            echo "📊 Checking service status..."
+            sleep 10
+            docker ps
+            
+            echo ""
+            echo "🎉 GCP VM HTTPS 배포가 완료되었습니다!"
             echo "🔒 HTTPS URL: https://${{ secrets.DOMAIN_NAME }}"
+            echo "📊 Swagger UI: https://${{ secrets.DOMAIN_NAME }}/swagger-ui/index.html"

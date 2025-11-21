@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
-@Tag(name = "회고", description = "회고 관련 API")
+@Tag(name = "retrospectives", description = "회고 관련 API")
 @RestController
 @RequestMapping("/api/v1/retrospectives")
 @RequiredArgsConstructor
