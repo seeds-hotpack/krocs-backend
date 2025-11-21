@@ -41,6 +41,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRINGDOC_SWAGGER_UI_SERVERS_0_URL=${SWAGGER_SERVER_URL}
       - SPRINGDOC_SWAGGER_UI_SERVERS_0_DESCRIPTION=Production Server
+      - frontOrigin=${frontOrigin}
+      - baseUrl=${baseUrl}
     depends_on:
       redis:
         condition: service_healthy
