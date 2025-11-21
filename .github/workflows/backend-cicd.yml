@@ -125,17 +125,12 @@ jobs:
             # 환경변수 파일 생성 (.env)
             cd /home/${{ secrets.GCP_VM_USERNAME }}/krocs-backend/deploy
             
-            cat > .env << 'EOF'
+            cat > .env << EOF
             DOCKER_HUB_USERNAME=${{ secrets.DOCKER_HUB_USERNAME }}
             DOCKER_HUB_REPOSITORY=${{ secrets.DOCKER_HUB_REPOSITORY }}
             DB_URL=${{ secrets.DB_URL }}
             DB_USER=${{ secrets.DB_USER }}
-            EOF
-            
-            # DB 비밀번호는 base64 디코딩
-            echo "DB_PASSWORD=$(echo '${{ secrets.DB_PASSWORD }}' | base64 -d)" >> .env
-            
-            cat >> .env << 'EOF'
+            DB_PASSWORD=$(echo '${{ secrets.DB_PASSWORD }}' | base64 -d)
             frontOrigin=${{ secrets.FRONT_ORIGIN }}
             baseUrl=${{ secrets.BASE_URL }}
             EOF
