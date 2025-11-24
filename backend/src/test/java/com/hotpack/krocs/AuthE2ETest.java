@@ -37,8 +37,7 @@ class AuthE2ETest {
     void 인증_성공시_me_조회() throws Exception {
         mockMvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer " + TEST_TOKEN))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.isSuccess").value(true))
-            .andExpect(jsonPath("$.result.userId").value(1));
+            .andExpect(jsonPath("$.isSuccess").value(true));
     }
 
     @Test

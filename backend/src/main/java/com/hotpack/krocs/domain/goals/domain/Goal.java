@@ -119,9 +119,18 @@ public class Goal extends BaseTimeEntity {
     }
 
     public void delete() {
-        if (this.status == Status.ACTIVE && this.subGoals != null) {
-            this.status = Status.INACTIVE;
+        if (this.status != Status.ACTIVE) {
+            return;
+        }
+
+        this.status = Status.INACTIVE;
+
+        if (this.subGoals != null) {
             this.subGoals.forEach(SubGoal::delete);
+        }
+
+        if (this.retrospectives != null) {
+            this.retrospectives.forEach(Retrospective::delete);
         }
     }
 

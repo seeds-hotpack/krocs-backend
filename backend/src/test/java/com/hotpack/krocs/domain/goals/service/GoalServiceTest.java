@@ -29,10 +29,13 @@ import com.hotpack.krocs.domain.goals.exception.SubGoalException;
 import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
+import com.hotpack.krocs.domain.retrospectives.domain.Retrospective;
+import com.hotpack.krocs.domain.retrospectives.domain.RetrospectiveOutcome;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.domain.user.domain.enums.AccountType;
 import com.hotpack.krocs.domain.user.facade.UserRepositoryFacade;
 import com.hotpack.krocs.global.common.entity.Priority;
+import com.hotpack.krocs.global.common.entity.Status;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -520,6 +523,54 @@ class GoalServiceTest {
             .doesNotThrowAnyException();
 
         verify(goalRepositoryFacade).existsActiveGoalById(goalId);
+    }
+
+    @Test
+    @DisplayName("목표 삭제 시 연관 회고 비활성화")
+    void deleteGoal_DeactivateRetrospectives() {
+        // given
+        Long goalId = 1L;
+        Long userId = 1L;
+
+        List<Retrospective> retrospectives = new ArrayList<>();
+        Goal goalWithRetrospectives = Goal.builder()
+            .goalId(goalId)
+            .title("회고 포함 목표")
+            .priority(Priority.MEDIUM)
+            .user(user)
+            .subGoals(new ArrayList<>())
+            .retrospectives(retrospectives)
+            .build();
+
+        Retrospective retro1 = Retrospective.builder()
+            .retrospectiveId(101L)
+            .user(user)
+            .goal(goalWithRetrospectives)
+            .outcome(RetrospectiveOutcome.COMPLETE_SUCCESS)
+            .build();
+
+        Retrospective retro2 = Retrospective.builder()
+            .retrospectiveId(102L)
+            .user(user)
+            .goal(goalWithRetrospectives)
+            .outcome(RetrospectiveOutcome.COMPLETE_FAILURE)
+            .build();
+
+        retrospectives.add(retro1);
+        retrospectives.add(retro2);
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(user);
+        when(goalRepositoryFacade.existsActiveGoalById(goalId)).thenReturn(true);
+        when(goalRepositoryFacade.findActiveGoalByUserAndGoalId(user, goalId)).thenReturn(
+            goalWithRetrospectives);
+
+        // when
+        goalService.deleteGoal(userId, goalId);
+
+        // then
+        assertThat(goalWithRetrospectives.getStatus()).isEqualTo(Status.INACTIVE);
+        assertThat(retro1.getStatus()).isEqualTo(Status.INACTIVE);
+        assertThat(retro2.getStatus()).isEqualTo(Status.INACTIVE);
     }
 
     @Test
