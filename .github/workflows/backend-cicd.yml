@@ -101,6 +101,18 @@ jobs:
           echo "✅ Image pushed to Docker Hub successfully!"
           echo "📍 Image URI: $DOCKER_HUB_USERNAME/$DOCKER_HUB_REPOSITORY:latest"
 
+      # 8-0. Runner IP 확인 (디버그용)
+      - name: 🔍 Check GitHub Actions Runner IP
+        run: |
+          echo "=== Current Runner IP ==="
+          curl -s https://api.ipify.org
+          echo ""
+          echo "=== Test SSH Connection ==="
+          ssh -vvv -o ConnectTimeout=10 -o StrictHostKeyChecking=no \
+            -i <(echo "${{ secrets.GCP_VM_PRIVATE_KEY }}") \
+            ${{ secrets.GCP_VM_USERNAME }}@${{ secrets.GCP_VM_HOST }} \
+            exit 2>&1 | head -100 || true
+
       # 8-1. 배포 파일들을 GCP VM으로 복사
       - name: 📁 Copy deployment files to GCP VM
         uses: appleboy/scp-action@v0.1.7
@@ -111,6 +123,8 @@ jobs:
           source: "deploy/*"
           target: "/home/${{ secrets.GCP_VM_USERNAME }}/krocs-backend/"
           strip_components: 1
+          timeout: 60s
+          debug: true
 
       # 8. GCP VM 배포 (Docker Compose + Docker Hub + Nginx + HTTPS)
       - name: 🚀 Deploy to GCP VM with Docker Compose and HTTPS
