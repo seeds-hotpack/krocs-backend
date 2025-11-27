@@ -43,6 +43,7 @@ services:
       - SPRINGDOC_SWAGGER_UI_SERVERS_0_DESCRIPTION=Production Server
       - frontOrigin=${frontOrigin}
       - baseUrl=${baseUrl}
+      - JAVA_OPTS=-Xms256m -Xmx384m
     depends_on:
       redis:
         condition: service_healthy
