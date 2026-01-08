@@ -104,7 +104,7 @@ server {
 
     location /health {
         access_log off;
-        proxy_pass http://krocs-backend:8080/actuator/health;
+        proxy_pass http://krocs-backend:8080/health;
     }
 }
 EOF
