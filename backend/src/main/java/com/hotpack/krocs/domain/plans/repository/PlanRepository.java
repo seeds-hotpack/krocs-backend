@@ -2,6 +2,8 @@ package com.hotpack.krocs.domain.plans.repository;
 
 import com.hotpack.krocs.domain.plans.domain.Plan;
 import com.hotpack.krocs.global.common.entity.Status;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +13,16 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PlanRepository extends JpaRepository<Plan, Long> {
+
+    @Query("SELECT p FROM Plan p WHERE p.user.userId = :userId " +
+           "AND ((p.allDay = true AND FUNCTION('DATE', p.startDateTime) <= :date AND FUNCTION('DATE', p.endDateTime) >= :date) " +
+           "OR (p.allDay = false AND FUNCTION('DATE', p.startDateTime) = :date)) " +
+           "AND p.status = :status")
+    List<Plan> findPlansByDateAndStatus(
+        @Param("date") LocalDate date,
+        @Param("userId") Long userId,
+        @Param("status") Status status
+    );
 
     @Query("SELECT p FROM Plan p WHERE p.user.userId = :userId AND p.startDateTime <= :endOfDay AND p.endDateTime >= :startOfDay AND p.status = :status")
     List<Plan> findPlansByDateRangeAndStatus(
