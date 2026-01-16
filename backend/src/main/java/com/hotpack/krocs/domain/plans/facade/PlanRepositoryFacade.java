@@ -37,6 +37,10 @@ public class PlanRepositoryFacade {
         return planRepository.findPlansByDateRangeAndStatus(startOfDay, endOfDay, userId,
             Status.ACTIVE);
     }
+    
+    public List<Plan> findActivePlansByDate(LocalDate date, Long userId) {
+        return planRepository.findPlansByDateAndStatus(date, userId, Status.ACTIVE);
+    }
 
     @Transactional
     public void deleteActivePlanByPlanId(Long planId, Long userId) {

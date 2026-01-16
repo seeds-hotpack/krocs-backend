@@ -70,11 +70,7 @@ public class PlanServiceImpl implements PlanService {
                 date = LocalDate.now();
             }
 
-            LocalDateTime startOfDay = date.atStartOfDay();
-            LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
-
-            List<Plan> plans = planRepositoryFacade.findActivePlansByDateRange(startOfDay, endOfDay,
-                userId);
+            List<Plan> plans = planRepositoryFacade.findActivePlansByDate(date, userId);
             List<PlanResponseDTO> planResponseDTOs = planConverter.toListPlanResponseDTO(plans);
 
             return PlanListResponseDTO.builder()
