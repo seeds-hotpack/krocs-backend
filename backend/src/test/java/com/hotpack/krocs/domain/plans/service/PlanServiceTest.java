@@ -328,8 +328,7 @@ public class PlanServiceTest {
         Long userId = 1L;
         LocalDate date = LocalDate.of(2025, 8, 1);
 
-        when(planRepositoryFacade.findActivePlansByDateRange(any(LocalDateTime.class),
-            any(LocalDateTime.class), eq(userId))).thenReturn(validPlanList);
+        when(planRepositoryFacade.findActivePlansByDate(eq(date), eq(userId))).thenReturn(validPlanList);
         when(planConverter.toListPlanResponseDTO(validPlanList)).thenReturn(validPlanResponseList);
 
         // when
@@ -364,8 +363,7 @@ public class PlanServiceTest {
         List<PlanResponseDTO> emptyResponseList = Collections.emptyList();
         LocalDate date = LocalDate.of(2025, 8, 1);
 
-        when(planRepositoryFacade.findActivePlansByDateRange(any(LocalDateTime.class),
-            any(LocalDateTime.class), eq(userId)))
+        when(planRepositoryFacade.findActivePlansByDate(eq(date), eq(userId)))
             .thenReturn(emptyPlanList);
         when(planConverter.toListPlanResponseDTO(emptyPlanList)).thenReturn(emptyResponseList);
 
@@ -386,16 +384,14 @@ public class PlanServiceTest {
         Long userId = 1L;
         LocalDate date = LocalDate.of(2025, 8, 1);
 
-        when(planRepositoryFacade.findActivePlansByDateRange(any(LocalDateTime.class),
-            any(LocalDateTime.class), eq(userId))).thenThrow(
-            new RuntimeException("데이터베이스 오류"));
+        when(planRepositoryFacade.findActivePlansByDate(eq(date), eq(userId)))
+            .thenThrow(new RuntimeException("데이터베이스 오류"));
 
         // when & then
         assertThatThrownBy(() -> planService.getPlans(date, userId))
             .isInstanceOf(PlanException.class)
             .hasFieldOrPropertyWithValue("planExceptionType", PlanExceptionType.PLAN_FOUND_FAILED);
-        verify(planRepositoryFacade).findActivePlansByDateRange(any(LocalDateTime.class),
-            any(LocalDateTime.class), eq(userId));
+        verify(planRepositoryFacade).findActivePlansByDate(eq(date), eq(userId));
         verify(planConverter, never()).toListPlanResponseDTO(any());
     }
 
@@ -406,8 +402,7 @@ public class PlanServiceTest {
         Long userId = 1L;
         LocalDate date = LocalDate.of(2025, 8, 1);
 
-        when(planRepositoryFacade.findActivePlansByDateRange(any(LocalDateTime.class),
-            any(LocalDateTime.class), eq(userId)))
+        when(planRepositoryFacade.findActivePlansByDate(eq(date), eq(userId)))
             .thenReturn(validPlanList);
         when(planConverter.toListPlanResponseDTO(validPlanList)).thenThrow(
             new RuntimeException("변환 오류"));
