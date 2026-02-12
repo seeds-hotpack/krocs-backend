@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -21,6 +23,7 @@ import com.hotpack.krocs.domain.goals.dto.request.SubGoalCreateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.SubGoalRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
+import com.hotpack.krocs.domain.goals.dto.response.MonthlyGoalCountResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.SubGoalResponseDTO;
 import com.hotpack.krocs.domain.goals.exception.GoalException;
@@ -29,6 +32,7 @@ import com.hotpack.krocs.domain.goals.exception.SubGoalException;
 import com.hotpack.krocs.domain.goals.exception.SubGoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
 import com.hotpack.krocs.domain.goals.facade.SubGoalRepositoryFacade;
+import com.hotpack.krocs.domain.goals.repository.DailyGoalCountProjection;
 import com.hotpack.krocs.domain.retrospectives.domain.Retrospective;
 import com.hotpack.krocs.domain.retrospectives.domain.RetrospectiveOutcome;
 import com.hotpack.krocs.domain.user.domain.User;
@@ -107,6 +111,20 @@ class GoalServiceTest {
             .priority(Priority.MEDIUM)
             .isCompleted(false)
             .build();
+    }
+
+    private DailyGoalCountProjection createDailyGoalCountProjection(LocalDate date, Integer goalCount) {
+        return new DailyGoalCountProjection() {
+            @Override
+            public LocalDate getDate() {
+                return date;
+            }
+
+            @Override
+            public Integer getGoalCount() {
+                return goalCount;
+            }
+        };
     }
 
     @BeforeEach
@@ -1153,6 +1171,80 @@ class GoalServiceTest {
         // Repository 호출 검증
         verify(goalRepositoryFacade).findGoalsWithFilters(userId, keyword, searchDate);
         verify(goalConverter).toGoalSearchRequestDTO(searchDate, keyword, status);
+    }
+
+    @Test
+    @DisplayName("월별 날짜별 목표 개수 조회 성공")
+    void getMonthlyGoalCounts_Success() {
+        // given
+        Long userId = 1L;
+        int year = 2025;
+        int month = 9;
+
+        List<DailyGoalCountProjection> dailyCounts = Arrays.asList(
+            createDailyGoalCountProjection(LocalDate.of(2025, 9, 1), 2),
+            createDailyGoalCountProjection(LocalDate.of(2025, 9, 2), 2),
+            createDailyGoalCountProjection(LocalDate.of(2025, 9, 3), 1),
+            createDailyGoalCountProjection(LocalDate.of(2025, 9, 30), 1)
+        );
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(user);
+        when(goalRepositoryFacade.findActiveDailyGoalCountsByMonth(year, month, userId)).thenReturn(
+            dailyCounts);
+
+        // when
+        MonthlyGoalCountResponseDTO result = goalService.getMonthlyGoalCounts(year, month, userId);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getYear()).isEqualTo(year);
+        assertThat(result.getMonth()).isEqualTo(month);
+        assertThat(result.getDailyGoals()).hasSize(4);
+
+        assertThat(result.getDailyGoals().stream()
+            .filter(daily -> daily.getDate().equals(LocalDate.of(2025, 9, 1)))
+            .findFirst()
+            .orElseThrow()
+            .getGoalCount()).isEqualTo(2);
+
+        assertThat(result.getDailyGoals().stream()
+            .filter(daily -> daily.getDate().equals(LocalDate.of(2025, 9, 3)))
+            .findFirst()
+            .orElseThrow()
+            .getGoalCount()).isEqualTo(1);
+
+        assertThat(result.getDailyGoals().stream()
+            .filter(daily -> daily.getDate().equals(LocalDate.of(2025, 9, 30)))
+            .findFirst()
+            .orElseThrow()
+            .getGoalCount()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("월별 날짜별 목표 개수 조회 실패 - 사용자 없음")
+    void getMonthlyGoalCounts_Fail_UserNotFound() {
+        // given
+        Long userId = 1L;
+        int year = 2025;
+        int month = 9;
+
+        when(userRepositoryFacade.findActiveUserByUserId(userId)).thenReturn(null);
+
+        // when & then
+        assertThatThrownBy(() -> goalService.getMonthlyGoalCounts(year, month, userId))
+            .isInstanceOf(GoalException.class)
+            .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_USER_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("월별 날짜별 목표 개수 조회 실패 - 유효하지 않은 월")
+    void getMonthlyGoalCounts_Fail_InvalidMonth() {
+        // when & then
+        assertThatThrownBy(() -> goalService.getMonthlyGoalCounts(2025, 13, 1L))
+            .isInstanceOf(GoalException.class)
+            .hasFieldOrPropertyWithValue("goalExceptionType", GoalExceptionType.GOAL_INVALID_MONTH);
+
+        verify(goalRepositoryFacade, never()).findActiveDailyGoalCountsByMonth(anyInt(), anyInt(), anyLong());
     }
 
     @Test

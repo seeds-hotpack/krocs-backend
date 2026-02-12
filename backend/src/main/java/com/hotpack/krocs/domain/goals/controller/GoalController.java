@@ -3,6 +3,7 @@ package com.hotpack.krocs.domain.goals.controller;
 import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
+import com.hotpack.krocs.domain.goals.dto.response.MonthlyGoalCountResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
 import com.hotpack.krocs.domain.goals.exception.GoalException;
 import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
@@ -69,6 +70,23 @@ public class GoalController {
     ) {
         try {
             List<GoalResponseDTO> result = goalService.getGoalsByUser(userId, searchDate, keyword, status);
+            return ApiResponse.success(result);
+        } catch (GoalException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new GoalException(GoalExceptionType.GOAL_FOUND_FAILED);
+        }
+    }
+
+    @Operation(summary = "월별 목표 개수 조회", description = "특정 년월의 날짜별 목표 개수를 조회합니다.")
+    @GetMapping("/monthly/count")
+    public ApiResponse<MonthlyGoalCountResponseDTO> getMonthlyGoalCounts(
+            @Login Long userId,
+            @RequestParam @Parameter(description = "년도", example = "2025") Integer year,
+            @RequestParam @Parameter(description = "월", example = "9") Integer month
+    ) {
+        try {
+            MonthlyGoalCountResponseDTO result = goalService.getMonthlyGoalCounts(year, month, userId);
             return ApiResponse.success(result);
         } catch (GoalException e) {
             throw e;

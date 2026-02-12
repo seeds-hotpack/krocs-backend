@@ -46,4 +46,18 @@ public class GoalValidator {
             throw new GoalException(GoalExceptionType.INVALID_GOAL_DATE_RANGE);
         }
     }
+
+    public void validateMonthlyGoalRequest(Integer year, Integer month) {
+        if (year == null || month == null) {
+            throw new GoalException(GoalExceptionType.GOAL_INVALID_REQUEST);
+        }
+
+        if (year < 2000 || year > 3000) {
+            throw new GoalException(GoalExceptionType.GOAL_INVALID_YEAR);
+        }
+
+        if (month < 1 || month > 12) {
+            throw new GoalException(GoalExceptionType.GOAL_INVALID_MONTH);
+        }
+    }
 }
