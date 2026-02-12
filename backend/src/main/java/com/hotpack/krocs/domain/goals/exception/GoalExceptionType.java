@@ -22,7 +22,10 @@ public enum GoalExceptionType implements BaseCode {
     GOAL_TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "GOAL400", "목표 제목이 너무 깁니다."),
     GOAL_INVALID_PRIORITY(HttpStatus.BAD_REQUEST, "GOAL400", "유효하지 않은 우선순위입니다."),
     GOAL_DURATION_TOO_LONG(HttpStatus.BAD_REQUEST, "GOAL400", "목표 기간이 너무 깁니다."),
-    GOAL_INVALID_GOAL_ID(HttpStatus.BAD_REQUEST, "GOAL400", "유효하지 않은 목표 ID입니다.");
+    GOAL_INVALID_GOAL_ID(HttpStatus.BAD_REQUEST, "GOAL400", "유효하지 않은 목표 ID입니다."),
+    GOAL_INVALID_REQUEST(HttpStatus.BAD_REQUEST, "GOAL400", "요청 형식이 잘못되었습니다."),
+    GOAL_INVALID_YEAR(HttpStatus.BAD_REQUEST, "GOAL400", "유효하지 않은 년도입니다."),
+    GOAL_INVALID_MONTH(HttpStatus.BAD_REQUEST, "GOAL400", "유효하지 않은 월입니다.");
 
     private final HttpStatus httpStatus;
     private final String code;

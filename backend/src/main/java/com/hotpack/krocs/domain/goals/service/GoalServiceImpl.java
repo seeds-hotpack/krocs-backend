@@ -5,8 +5,10 @@ import com.hotpack.krocs.domain.goals.domain.Goal;
 import com.hotpack.krocs.domain.goals.dto.request.GoalCreateRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.GoalSearchRequestDTO;
 import com.hotpack.krocs.domain.goals.dto.request.GoalUpdateRequestDTO;
+import com.hotpack.krocs.domain.goals.dto.response.DailyGoalCountDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalCreateResponseDTO;
 import com.hotpack.krocs.domain.goals.dto.response.GoalResponseDTO;
+import com.hotpack.krocs.domain.goals.dto.response.MonthlyGoalCountResponseDTO;
 import com.hotpack.krocs.domain.goals.exception.GoalException;
 import com.hotpack.krocs.domain.goals.exception.GoalExceptionType;
 import com.hotpack.krocs.domain.goals.facade.GoalRepositoryFacade;
@@ -99,6 +101,38 @@ public class GoalServiceImpl implements GoalService {
             throw e;
         } catch (Exception e) {
             log.error("대목표 전체 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            throw new GoalException(GoalExceptionType.GOAL_FOUND_FAILED);
+        }
+    }
+
+    @Override
+    public MonthlyGoalCountResponseDTO getMonthlyGoalCounts(int year, int month, Long userId) {
+        try {
+            goalValidator.validateMonthlyGoalRequest(year, month);
+
+            User user = userRepositoryFacade.findActiveUserByUserId(userId);
+            if (user == null) {
+                throw new GoalException(GoalExceptionType.GOAL_USER_NOT_FOUND);
+            }
+
+            List<DailyGoalCountDTO> dailyGoalCounts = goalRepositoryFacade.findActiveDailyGoalCountsByMonth(
+                            year, month, userId
+                    ).stream()
+                    .map(row -> DailyGoalCountDTO.builder()
+                            .date(row.getDate())
+                            .goalCount(row.getGoalCount())
+                            .build())
+                    .collect(Collectors.toList());
+
+            return MonthlyGoalCountResponseDTO.builder()
+                    .year(year)
+                    .month(month)
+                    .dailyGoals(dailyGoalCounts)
+                    .build();
+        } catch (GoalException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("월별 목표 개수 조회 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
             throw new GoalException(GoalExceptionType.GOAL_FOUND_FAILED);
         }
     }

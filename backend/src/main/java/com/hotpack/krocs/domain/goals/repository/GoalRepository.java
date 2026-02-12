@@ -37,6 +37,24 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
             @Param("searchDate") LocalDate searchDate
     );
 
+    @Query(value = """
+            SELECT d::date AS date, COUNT(g.goal_id)::int AS goalCount
+            FROM generate_series(CAST(:startOfMonth AS date), CAST(:endOfMonth AS date), interval '1 day') d
+            LEFT JOIN goals g
+              ON g.user_id = :userId
+             AND g.status = :status
+             AND (g.start_date IS NULL OR g.start_date <= d::date)
+             AND (g.end_date IS NULL OR g.end_date >= d::date)
+            GROUP BY d
+            ORDER BY d
+            """, nativeQuery = true)
+    List<DailyGoalCountProjection> findDailyGoalCountsByMonth(
+            @Param("startOfMonth") LocalDate startOfMonth,
+            @Param("endOfMonth") LocalDate endOfMonth,
+            @Param("userId") Long userId,
+            @Param("status") String status
+    );
+
     boolean existsGoalByGoalIdAndStatus(Long goalId, Status status);
 
     boolean existsGoalByTitleAndStatus(String title, Status status);

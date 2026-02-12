@@ -1,6 +1,7 @@
 package com.hotpack.krocs.domain.goals.facade;
 
 import com.hotpack.krocs.domain.goals.domain.Goal;
+import com.hotpack.krocs.domain.goals.repository.DailyGoalCountProjection;
 import com.hotpack.krocs.domain.goals.repository.GoalRepository;
 import com.hotpack.krocs.domain.user.domain.User;
 import com.hotpack.krocs.global.common.entity.Status;
@@ -34,6 +35,15 @@ public class GoalRepositoryFacade {
 
     public List<Goal> findGoalsWithFilters(Long userId, String keyword, LocalDate searchDate) {
         return goalRepository.findGoalsWithFilters(userId, keyword, searchDate);
+    }
+
+    public List<DailyGoalCountProjection> findActiveDailyGoalCountsByMonth(int year, int month, Long userId) {
+        LocalDate startOfMonth = LocalDate.of(year, month, 1);
+        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+
+        return goalRepository.findDailyGoalCountsByMonth(
+                startOfMonth, endOfMonth, userId, Status.ACTIVE.name()
+        );
     }
 
     public Goal findActiveGoalByUserAndGoalId(User user, Long goalId) {
